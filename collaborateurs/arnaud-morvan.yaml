@@ -1,0 +1,212 @@
+# =====================================================================
+# FICHE COLLABORATEUR — Arnaud Morvan (SOURCE UNIQUE)
+# =====================================================================
+identite:
+  prenom: Arnaud
+  nom: Morvan
+  poste: Développeur – Ingénieur Logiciel
+  categorie_poste: developpeur
+  departement: Geospatial
+  annee_debut_carriere: 2004
+  localisation: Grenoble, France
+  disponibilite: ""
+  langues:
+    - { langue: Français, niveau: Langue maternelle }
+    - { langue: Anglais, niveau: Intermédiaire / technique }
+
+profil: >
+  Développeur expérimenté et intégrateur d'outils SIG, Arnaud développe des solutions
+  WebSIG open source permettant aux clients de mieux comprendre et gérer leurs données
+  géographiques. Contributeur actif à QGIS (plugins, desktop, serveur), GeoMapFish et
+  c2cgeoform. Forte expertise sur les métiers des collectivités (cadastre, urbanisme,
+  réseaux AEP, éclairage public). Formateur reconnu sur QGIS, Python QGIS et MapServer.
+
+profils_cibles: {}
+
+competences:
+  - categorie: Langages
+    domaines: [developpement]
+    items: [Python, JavaScript, TypeScript, C++, Java, PHP]
+  - categorie: Frontend
+    domaines: [developpement]
+    items: [Vue.js, Pinia, Vite, Vitest, Tailwind CSS, OpenLayers, AngularJS]
+  - categorie: Backend
+    domaines: [developpement]
+    items: [FastAPI, Pyramid, SQLAlchemy, GeoPandas, LangChain, LangGraph]
+  - categorie: Bases de données
+    domaines: [developpement]
+    items: [PostgreSQL, PostGIS, SQLite, SpatiaLite, MySQL]
+  - categorie: Système & DevOps
+    domaines: [infrastructure]
+    items: [Linux, Docker, Kubernetes, Elasticsearch]
+  - categorie: SIG & Géomatique
+    domaines: [geospatial]
+    items: [QGIS, QGIS Server, GeoServer, MapServer, GeoNetwork, OpenLayers, GDAL, MerginMaps, FME, Protocoles OGC]
+
+certifications: []
+
+projets:
+  - id: dge-chatbot
+    role: Développeur
+    client: DGE (Direction Générale des Entreprises)
+    periode: 2025
+    contexte: >
+      Développement d'un agent conversationnel basé sur un catalogue de métadonnées
+      et un CMS, permettant d'interroger les données en langage naturel.
+    competences: [Docker, Python, FastAPI, LangChain, LangGraph, Vue.js, Vuetify, Elasticsearch, GeoNetwork]
+    realisations:
+      - Conception et développement de l'architecture de l'agent conversationnel.
+      - Intégration avec GeoNetwork pour l'indexation et la recherche dans le catalogue.
+    domaines: [geospatial, IA]
+    secteur: public
+    poids: 3
+
+  - id: worldbank-thinkhazard-2025
+    role: Architecte – Développeur
+    client: Banque Mondiale (WorldBank)
+    periode: 2025
+    contexte: >
+      Évolutions du portail mondial ThinkHazard! sur les risques naturels.
+    competences: [Docker, Kubernetes, Python, Pyramid, GeoPandas, Puppeteer]
+    realisations:
+      - Évolutions fonctionnelles et maintenance du portail ThinkHazard!
+    domaines: [geospatial, risques naturels]
+    secteur: public
+    poids: 2
+
+  - id: sia-archeo
+    role: Développeur
+    client: Centre Départemental d'Archéologie / CG62
+    periode: 2023 – 2025
+    contexte: >
+      Développement d'une nouvelle version du système d'information archéologique
+      pour la gestion des données de fouilles.
+    competences: [Docker, Python, Pyramid, SQLAlchemy, Marshmallow, Vue.js, Vuetify]
+    realisations:
+      - Refonte complète de l'application SIA en architecture moderne Vue.js + API Python.
+    domaines: [geospatial, archeologie]
+    secteur: public
+    poids: 2
+
+  - id: swisstopo-chatbot
+    role: Développeur
+    client: Swisstopo
+    periode: 2024
+    contexte: >
+      Projet R&D de chatbot conversationnel pour l'interrogation d'un catalogue
+      de métadonnées géographiques.
+    competences: [Docker, Python, FastAPI, LangChain, LangGraph, Vue.js, Elasticsearch, GeoNetwork]
+    realisations:
+      - Développement du chatbot R&D basé sur LangChain/LangGraph et GeoNetwork.
+    domaines: [geospatial, IA]
+    secteur: public
+    poids: 2
+
+  - id: schapi-qgis-plugins
+    role: Consultant – Développeur principal
+    client: SCHAPI (Service Central d'Hydrométéorologie et d'Appui à la Prévision des Inondations)
+    periode: 2020 – aujourd'hui
+    contexte: >
+      Analyse et migration de plugins QGIS pour la prévention des crues, avec
+      développement de nouvelles fonctionnalités.
+    competences: [Python, QGIS, PyQt]
+    realisations:
+      - Migration et analyse des plugins QGIS existants vers les nouvelles versions.
+      - Développement de nouvelles fonctionnalités de prévision hydrologique.
+    domaines: [geospatial, eau]
+    secteur: public
+    poids: 3
+
+  - id: edf-precourlis
+    role: Consultant – Développeur principal
+    client: EDF
+    periode: 2019 – aujourd'hui
+    contexte: >
+      Plugin QGIS de modélisation des couches sédimentaires (fond des cours d'eau)
+      pour les calculs hydrauliques.
+    competences: [Python, QGIS, PyQt]
+    realisations:
+      - Réécriture du plugin pour QGIS 3.
+      - Développement de nouvelles fonctionnalités de modélisation hydraulique.
+    domaines: [geospatial, eau, energie]
+    secteur: privé
+    poids: 3
+
+  - id: getitfixed
+    role: Développeur principal
+    client: Collectivités (usage interne)
+    periode: 2019 – 2022
+    contexte: >
+      Application web cartographique pour la remontée et le suivi de problèmes
+      terrain par les citoyens et agents.
+    competences: [Python, Pyramid, Docker, OpenLayers]
+    realisations:
+      - Développement et maintenance de l'application GetItFixed.
+    domaines: [geospatial]
+    secteur: public
+    poids: 2
+
+  - id: geomapfish
+    role: Développeur
+    client: Camptocamp / Clients multiples
+    periode: 2013 – aujourd'hui
+    contexte: >
+      Framework WebSIG open source GeoMapFish, utilisé par de nombreuses
+      collectivités et administrations.
+    competences: [MapServer, QGIS Server, OpenLayers, Angular, Docker, Pyramid, SQLAlchemy]
+    realisations:
+      - Développement et maintenance du framework GeoMapFish.
+      - Déploiements pour des clients collectivités.
+    domaines: [geospatial, open source]
+    secteur: public
+    poids: 3
+
+  - id: c2cgeoform
+    role: Développeur principal
+    client: Camptocamp / open source
+    periode: 2015 – aujourd'hui
+    contexte: >
+      Framework open source pour la création de formulaires en ligne avec
+      composante géographique.
+    competences: [Python, Pyramid, Docker, OpenLayers]
+    realisations:
+      - Développement et maintenance du framework c2cgeoform.
+    domaines: [geospatial, open source]
+    secteur: privé
+    poids: 2
+
+  - id: medde-qgis
+    role: Développeur contributeur
+    client: Ministère de l'Écologie, du Développement Durable et de l'Énergie (MEDDE)
+    periode: 2014 – 2017
+    contexte: >
+      Développements et patches dans QGIS pour le compte du MEDDE, dont le plugin
+      SpreadsheetLayers et des ajouts fonctionnels à QGIS Processing.
+    competences: [Python, QGIS, PyQt]
+    realisations:
+      - Développement du plugin QGIS SpreadsheetLayers (import ODS/XLS/XLSX).
+      - Ajout d'un type de paramètre "prédicat géométrique" dans QGIS Processing.
+      - Création de l'algorithme "Refactor Fields" pour le reformatage des tables attributaires.
+    domaines: [geospatial, open source]
+    secteur: public
+    poids: 3
+
+  - id: aeroports-lyon
+    role: Developpeur principal
+    client: Aéroports de Lyon
+    periode: 2015 – aujourd'hui
+    contexte: >
+      Portail SIG avec interface mobile pour relevés GPS et signalement d'incidents,
+      ainsi qu'un plugin QGIS de gestion des étages.
+    competences: [GeoMapFish, OpenLayers, QGIS Server]
+    realisations:
+      - Développement du portail SIG et des interfaces mobiles.
+      - Plugin QGIS desktop pour la gestion des étages des terminaux.
+    domaines: [geospatial, transport]
+    secteur: privé
+    poids: 2
+
+parcours:
+  - { periode: 2013 – aujourd'hui, poste: Développeur – Ingénieur Logiciel, employeur: Camptocamp }
+  - { periode: 2013, poste: Consultant SIG, employeur: Axe Conseils }
+  - { periode: 2004 – 2012, poste: Développeur principal / Technical Leader, employeur: Abscisse-Géomatique }

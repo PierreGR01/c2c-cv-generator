@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Generator — Camptocamp</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #FF680A;
+      --orange-light: #FFF0E8;
+      --grey: #7A7F82;
+      --grey-light: #EEEFEF;
+      --ink: #1A1A1A;
+      --white: #FFFFFF;
+      --radius: 4px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #F5F5F5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: var(--white);
+      border-bottom: 2px solid var(--orange);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+    header .logo { font-size: 13px; font-weight: 700; line-height: 1.1; }
+    header .logo span { color: var(--orange); display: block; }
+    header h1 { font-size: 16px; font-weight: 600; color: var(--grey); }
+    header .sep { width: 1px; height: 24px; background: var(--grey-light); }
+
+    /* Layout deux colonnes */
+    main {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px 48px;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .error-banner {
+      grid-column: 1 / -1;
+      background: #FEF2F2;
+      border: 1px solid #EF4444;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: #991B1B;
+      font-size: 13px;
+      display: none;
+    }
+
+    /* Colonne gauche : staff */
+    #col-staff {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    /* Colonne droite : AO + options + bouton + résultats */
+    #col-right {
+      grid-column: 2;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--grey-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      flex: 1;
+    }
+    .card-header .badge {
+      background: var(--orange);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .card-header .tag-opt {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--grey);
+      background: var(--grey-light);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .card-body { padding: 16px 20px; }
+
+    /* Collaborateurs */
+    .collab-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .collab-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: background 0.12s;
+      user-select: none;
+      border-radius: var(--radius);
+    }
+    .collab-item:hover { background: var(--orange-light); }
+    .collab-item.selected { background: var(--orange-light); }
+    .collab-item.selected .collab-name { color: var(--orange); }
+    .collab-item input[type="checkbox"] {
+      accent-color: var(--orange);
+      width: 14px; height: 14px;
+      flex-shrink: 0;
+    }
+    .collab-item .avatar {
+      width: 24px; height: 24px;
+      background: var(--grey-light);
+      color: var(--grey);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.12s, color 0.12s;
+    }
+    .collab-item.selected .avatar,
+    .collab-item:hover .avatar {
+      background: var(--orange);
+      color: white;
+    }
+    .collab-item .collab-name {
+      font-size: 13px;
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .loading-placeholder {
+      color: var(--grey);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    /* Groupes de catégorie foldables */
+    .cat-group { border-bottom: 1px solid var(--grey-light); }
+    .cat-group:last-child { border-bottom: none; }
+
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.12s;
+    }
+    .cat-header:hover { background: #FAFAFA; }
+
+    .cat-arrow {
+      font-size: 10px;
+      color: var(--grey);
+      transition: transform 0.2s;
+      width: 12px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .cat-group.collapsed .cat-arrow { transform: rotate(-90deg); }
+
+    .cat-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--grey);
+      flex: 1;
+    }
+    .cat-count {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--grey);
+      background: var(--grey-light);
+      padding: 1px 7px;
+      border-radius: 8px;
+    }
+    .cat-sel-link {
+      font-size: 10px;
+      color: var(--orange);
+      text-decoration: underline;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .cat-header:hover .cat-sel-link { opacity: 1; }
+
+    .cat-body {
+      overflow: hidden;
+      transition: max-height 0.2s ease;
+    }
+    .cat-group.collapsed .cat-body { display: none; }
+
+    .cat-body-inner {
+      padding: 2px 0 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Select all row */
+    .select-all-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .select-all-row a { color: var(--orange); cursor: pointer; text-decoration: underline; }
+
+    /* AO upload */
+    .ao-upload {
+      border: 2px dashed var(--grey-light);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .ao-upload:hover, .ao-upload.drag-over {
+      border-color: var(--orange);
+      background: var(--orange-light);
+    }
+    .ao-upload input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+    }
+    .ao-upload .upload-icon { font-size: 24px; margin-bottom: 6px; }
+    .ao-upload .upload-label { font-weight: 600; font-size: 13px; color: var(--ink); }
+    .ao-upload .upload-sub { color: var(--grey); font-size: 11px; margin-top: 3px; }
+    .ao-upload.has-file { border-color: var(--orange); background: var(--orange-light); border-style: solid; }
+
+    /* Badge "générique" sous le drop */
+    #ao-generic-notice {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--grey);
+      text-align: center;
+    }
+    #ao-generic-notice.active { color: #B45309; }
+
+    /* Clear AO button */
+    #btn-clear-ao {
+      display: none;
+      margin-top: 8px;
+      width: 100%;
+      padding: 5px;
+      background: none;
+      border: 1px solid var(--grey-light);
+      border-radius: var(--radius);
+      font-size: 11px;
+      color: var(--grey);
+      cursor: pointer;
+    }
+    #btn-clear-ao:hover { border-color: #EF4444; color: #EF4444; }
+
+    /* Options */
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .option-row label { font-size: 12px; color: var(--grey); font-weight: 500; }
+    .option-row select {
+      border: 1.5px solid var(--grey-light);
+      border-radius: var(--radius);
+      padding: 5px 8px;
+      font-size: 12px;
+      color: var(--ink);
+      background: white;
+    }
+    .option-row .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .option-row input[type="checkbox"] {
+      accent-color: var(--orange);
+      width: 15px; height: 15px;
+    }
+
+    /* Bouton générer */
+    #btn-generate {
+      width: 100%;
+      padding: 13px;
+      background: var(--orange);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    #btn-generate:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    #btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* Progress */
+    #progress-section { display: none; }
+    .progress-bar-wrap {
+      background: var(--grey-light);
+      border-radius: 4px;
+      height: 5px;
+      overflow: hidden;
+      margin: 10px 0 4px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--orange);
+      border-radius: 4px;
+      transition: width 0.4s;
+      width: 0%;
+    }
+    .progress-label { font-size: 12px; color: var(--grey); }
+
+    /* Résultats */
+    #results-section { display: none; }
+    .result-list { display: flex; flex-direction: column; gap: 8px; }
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--grey-light);
+    }
+    .result-item.ok { border-color: #22C55E; background: #F0FDF4; }
+    .result-item.error { border-color: #EF4444; background: #FEF2F2; }
+    .result-status { font-size: 16px; flex-shrink: 0; }
+    .result-info { flex: 1; min-width: 0; }
+    .result-name { font-weight: 700; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .result-detail { font-size: 11px; color: var(--grey); margin-top: 2px; }
+    .result-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .btn-dl {
+      padding: 5px 12px;
+      background: var(--orange);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-dl:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">camp<span>tocamp</span></div>
+  <div class="sep"></div>
+  <h1>Générateur de CV</h1>
+</header>
+
+<main>
+  <div id="error-banner" class="error-banner"></div>
+
+  <!-- ── Colonne gauche : staff ── -->
+  <div id="col-staff" class="card">
+    <div class="card-header">
+      <h2>Collaborateurs</h2>
+      <div class="badge" id="selected-count">0</div>
+    </div>
+    <div class="card-body">
+      <div class="select-all-row">
+        <a onclick="selectAll()">Tout sélectionner</a>
+        &nbsp;·&nbsp;
+        <a onclick="selectNone()">Tout désélectionner</a>
+      </div>
+      <div id="collab-grid" class="collab-grid">
+        <div class="loading-placeholder">Chargement des collaborateurs…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Colonne droite ── -->
+  <div id="col-right">
+
+    <!-- AO (optionnel) -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Appel d'offre</h2>
+        <span class="tag-opt" id="ao-tag">Optionnel</span>
+      </div>
+      <div class="card-body">
+        <div class="ao-upload" id="ao-drop">
+          <div class="upload-icon">📄</div>
+          <div class="upload-label" id="upload-label">Déposer le YAML de l'AO</div>
+          <div class="upload-sub" id="upload-sub">ou cliquer pour sélectionner</div>
+          <input type="file" id="ao-file" accept=".yaml,.yml">
+        </div>
+        <div id="ao-generic-notice">Sans AO → CV générique (tous projets par score)</div>
+        <button id="btn-clear-ao" onclick="clearAo()">✕ Retirer le fichier</button>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="card">
+      <div class="card-header"><h2>Options</h2></div>
+      <div class="card-body">
+        <div class="options-grid">
+          <div class="option-row">
+            <label for="max-projets">Projets max</label>
+            <select id="max-projets">
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="0">Tous</option>
+            </select>
+          </div>
+          <div class="option-row">
+            <label for="max-pages">Pages max</label>
+            <select id="max-pages">
+              <option value="1" selected>1 page</option>
+              <option value="2">2 pages</option>
+              <option value="0">Sans limite</option>
+            </select>
+          </div>
+          <div class="option-row">
+            <label for="inclure-parcours">Parcours professionnel</label>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="inclure-parcours" checked>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton -->
+    <button id="btn-generate" onclick="generate()" disabled>
+      Générer les CVs
+    </button>
+
+    <!-- Progress -->
+    <div id="progress-section" class="card">
+      <div class="card-body">
+        <div class="progress-label" id="progress-label">Génération en cours…</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div id="results-section" class="card">
+      <div class="card-header"><h2>Résultats</h2></div>
+      <div class="card-body">
+        <div id="results-actions" style="margin-bottom:10px; display:none">
+          <a href="#" id="btn-dl-all" class="btn-dl">⬇ Tout télécharger (ZIP)</a>
+        </div>
+        <div id="result-list" class="result-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /col-right -->
+</main>
+
+<script>
+  // Vocabulaire contrôlé des catégories (ordre d'affichage)
+  const CAT_ORDER = [
+    'developpeur', 'architecte', 'devops', 'consultant_sig',
+    'chef_projet', 'product_owner', 'designer', 'data', 'direction', '',
+  ];
+  const CAT_LABELS = {
+    developpeur:   'Développeurs',
+    architecte:    'Architectes',
+    devops:        'DevOps & Infrastructure',
+    consultant_sig:'Consultants SIG',
+    chef_projet:   'Chefs de projet',
+    product_owner: 'Product Owners',
+    designer:      'Designers',
+    data:          'Data & BI',
+    direction:     'Direction',
+    '':            'Autres',
+  };
+
+  let collaborateurs = [];
+  let aoFile = null;
+
+  // --- Charger les collaborateurs ---
+  async function loadCollaborateurs() {
+    try {
+      const res = await fetch('/api/collaborateurs');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || 'Erreur serveur');
+      }
+      collaborateurs = await res.json();
+      renderCollabGrid();
+    } catch (e) {
+      showError('Impossible de charger les collaborateurs : ' + e.message);
+      document.getElementById('collab-grid').innerHTML =
+        '<div class="loading-placeholder">Erreur de chargement.</div>';
+    }
+  }
+
+  function renderCollabGrid() {
+    const grid = document.getElementById('collab-grid');
+    if (!collaborateurs.length) {
+      grid.innerHTML = '<div class="loading-placeholder">Aucun collaborateur trouvé dans Drive.</div>';
+      return;
+    }
+
+    const groups = {};
+    collaborateurs.forEach(c => {
+      const cat = c.categorie || '';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(c);
+    });
+
+    const usedCats = [
+      ...CAT_ORDER.filter(k => groups[k]),
+      ...Object.keys(groups).filter(k => !CAT_ORDER.includes(k) && groups[k]),
+    ];
+
+    grid.innerHTML = usedCats.map(cat => {
+      const items = groups[cat];
+      const label = CAT_LABELS[cat] || cat || 'Autres';
+      const itemsHtml = items.map(c => {
+        const initials = c.display.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        return `<div class="collab-item" onclick="toggleCollab('${c.id}', this)">
+            <input type="checkbox" id="cb-${c.id}" value="${c.id}">
+            <div class="avatar">${initials}</div>
+            <div class="collab-name">${c.display}</div>
+          </div>`;
+      }).join('');
+      return `
+        <div class="cat-group" id="cat-${cat}">
+          <div class="cat-header" onclick="toggleCat('${cat}')">
+            <span class="cat-arrow">▾</span>
+            <span class="cat-title">${label}</span>
+            <span class="cat-count">${items.length}</span>
+            <span class="cat-sel-link" onclick="event.stopPropagation(); selectCat('${cat}')"
+              title="Sélectionner tout">Tout sél.</span>
+          </div>
+          <div class="cat-body"><div class="cat-body-inner collab-list">${itemsHtml}</div></div>
+        </div>`;
+    }).join('');
+
+    updateCount();
+  }
+
+  function toggleCat(cat) {
+    document.getElementById('cat-' + cat).classList.toggle('collapsed');
+  }
+
+  function selectCat(cat) {
+    const group = document.getElementById('cat-' + cat);
+    const anyUnchecked = [...group.querySelectorAll('input[type="checkbox"]')].some(cb => !cb.checked);
+    group.querySelectorAll('.collab-item').forEach(el => {
+      const cb = el.querySelector('input');
+      cb.checked = anyUnchecked;
+      el.classList.toggle('selected', anyUnchecked);
+    });
+    updateCount();
+    updateGenerateBtn();
+  }
+
+  function toggleCollab(id, el) {
+    const cb = document.getElementById('cb-' + id);
+    cb.checked = !cb.checked;
+    el.classList.toggle('selected', cb.checked);
+    updateCount();
+    updateGenerateBtn();
+  }
+
+  function selectAll() {
+    document.querySelectorAll('.collab-item').forEach(el => {
+      el.querySelector('input').checked = true;
+      el.classList.add('selected');
+    });
+    updateCount(); updateGenerateBtn();
+  }
+
+  function selectNone() {
+    document.querySelectorAll('.collab-item').forEach(el => {
+      el.querySelector('input').checked = false;
+      el.classList.remove('selected');
+    });
+    updateCount(); updateGenerateBtn();
+  }
+
+  function getSelectedIds() {
+    return [...document.querySelectorAll('.collab-item input:checked')].map(cb => cb.value);
+  }
+
+  function updateCount() {
+    document.getElementById('selected-count').textContent = getSelectedIds().length;
+  }
+
+  function updateGenerateBtn() {
+    const btn = document.getElementById('btn-generate');
+    const n = getSelectedIds().length;
+    btn.disabled = n === 0;
+    if (n === 0) {
+      btn.textContent = 'Générer les CVs';
+    } else if (aoFile) {
+      btn.textContent = `Générer ${n > 1 ? n + ' CVs ciblés' : 'le CV ciblé'}`;
+    } else {
+      btn.textContent = `Générer ${n > 1 ? n + ' CVs génériques' : 'le CV générique'}`;
+    }
+  }
+
+  // --- AO file ---
+  const aoInput = document.getElementById('ao-file');
+  aoInput.addEventListener('change', e => {
+    setAoFile(e.target.files[0] || null);
+  });
+
+  const drop = document.getElementById('ao-drop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    drop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.yaml') || file.name.endsWith('.yml'))) {
+      setAoFile(file);
+    }
+  });
+
+  function setAoFile(file) {
+    aoFile = file;
+    const dropEl = document.getElementById('ao-drop');
+    const label  = document.getElementById('upload-label');
+    const sub    = document.getElementById('upload-sub');
+    const notice = document.getElementById('ao-generic-notice');
+    const clearBtn = document.getElementById('btn-clear-ao');
+    const tag    = document.getElementById('ao-tag');
+    if (file) {
+      dropEl.classList.add('has-file');
+      label.textContent = '✓ ' + file.name;
+      sub.textContent   = '';
+      notice.textContent = '';
+      notice.classList.remove('active');
+      clearBtn.style.display = 'block';
+      tag.textContent = 'Chargé';
+      tag.style.background = 'var(--orange-light)';
+      tag.style.color = 'var(--orange)';
+    } else {
+      dropEl.classList.remove('has-file');
+      label.textContent = 'Déposer le YAML de l\'AO';
+      sub.textContent   = 'ou cliquer pour sélectionner';
+      notice.textContent = 'Sans AO → CV générique (tous projets par score)';
+      notice.classList.remove('active');
+      clearBtn.style.display = 'none';
+      tag.textContent = 'Optionnel';
+      tag.style.background = '';
+      tag.style.color = '';
+    }
+    updateGenerateBtn();
+  }
+
+  function clearAo() {
+    aoInput.value = '';
+    setAoFile(null);
+  }
+
+  // --- Générer ---
+  async function generate() {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+
+    const btn = document.getElementById('btn-generate');
+    btn.disabled = true;
+
+    const progress      = document.getElementById('progress-section');
+    const progressBar   = document.getElementById('progress-bar');
+    const progressLabel = document.getElementById('progress-label');
+    const resultsSection = document.getElementById('results-section');
+    const resultList    = document.getElementById('result-list');
+
+    progress.style.display = 'block';
+    resultsSection.style.display = 'none';
+    resultList.innerHTML = '';
+    progressBar.style.width = '20%';
+    progressBar.style.background = '';
+    const label = aoFile
+      ? `Génération de ${ids.length} CV(s) ciblé(s)…`
+      : `Génération de ${ids.length} CV(s) générique(s)…`;
+    progressLabel.textContent = label;
+    hideError();
+
+    const formData = new FormData();
+    if (aoFile) formData.append('ao_yaml', aoFile);
+    ids.forEach(id => formData.append('collaborateurs', id));
+    formData.append('max_projets', document.getElementById('max-projets').value);
+    formData.append('max_pages',   document.getElementById('max-pages').value);
+    formData.append('inclure_parcours', document.getElementById('inclure-parcours').checked ? 'true' : 'false');
+
+    progressBar.style.width = '50%';
+
+    try {
+      const res = await fetch('/api/generate', { method: 'POST', body: formData });
+      progressBar.style.width = '90%';
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Erreur inconnue' }));
+        throw new Error(err.detail || 'Erreur serveur');
+      }
+
+      const contentType = res.headers.get('content-type') || '';
+      const disposition = res.headers.get('content-disposition') || '';
+      const filename = (disposition.match(/filename="(.+?)"/) || [])[1] || 'cvs.zip';
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      progressBar.style.width = '100%';
+      progressLabel.textContent = 'Terminé !';
+      resultsSection.style.display = 'block';
+
+      if (contentType.includes('zip')) {
+        const dlAll = document.getElementById('btn-dl-all');
+        dlAll.href = url; dlAll.download = filename;
+        document.getElementById('results-actions').style.display = 'block';
+        resultList.innerHTML = `
+          <div class="result-item ok">
+            <div class="result-status">✅</div>
+            <div class="result-info">
+              <div class="result-name">${ids.length} CVs générés</div>
+              <div class="result-detail">Téléchargez le ZIP ci-dessus</div>
+            </div>
+          </div>`;
+      } else {
+        document.getElementById('results-actions').style.display = 'none';
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        const collab = collaborateurs.find(c => ids[0] === c.id);
+        resultList.innerHTML = `
+          <div class="result-item ok">
+            <div class="result-status">✅</div>
+            <div class="result-info">
+              <div class="result-name">${collab?.display || filename}</div>
+              <div class="result-detail">${filename}</div>
+            </div>
+            <div class="result-actions">
+              <a href="${url}" download="${filename}" class="btn-dl">⬇ Re-télécharger</a>
+            </div>
+          </div>`;
+      }
+
+    } catch (e) {
+      progressBar.style.width = '100%';
+      progressBar.style.background = '#EF4444';
+      progressLabel.textContent = 'Erreur';
+      showError('Erreur lors de la génération : ' + e.message);
+    } finally {
+      btn.disabled = false;
+      updateGenerateBtn();
+      setTimeout(() => {
+        progress.style.display = 'none';
+        progressBar.style.width = '0%';
+        progressBar.style.background = '';
+      }, 2000);
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-banner');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideError() {
+    document.getElementById('error-banner').style.display = 'none';
+  }
+
+  loadCollaborateurs();
+</script>
+</body>
+</html>

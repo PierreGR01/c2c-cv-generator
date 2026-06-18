@@ -1,0 +1,255 @@
+# =====================================================================
+# FICHE COLLABORATEUR — Pierre Grambert (SOURCE UNIQUE)
+# =====================================================================
+# Génération ciblée :
+#     python3 build-cv.py --master collaborateurs/pierre-grambert.yaml \
+#                         --cible aos/ao-design-ux.yaml
+# =====================================================================
+
+identite:
+  prenom: Pierre
+  nom: Grambert
+  poste: UX Designer
+  categorie_poste: designer
+  departement: Geospatial Solutions
+  annee_debut_carriere: 2014   # calcul automatique de experience_ans à la génération
+  localisation: France
+  disponibilite: Disponible
+  langues:
+    - { langue: Français, niveau: Bilingue }
+    - { langue: Anglais, niveau: Bilingue }
+
+# Profil par défaut (neutre, sans doublon avec les certifications)
+profil: >
+  Designer UX/UI senior avec plus de 10 ans d'expérience dans la conception
+  de produits numériques. Intervient sur l'ensemble du cycle de conception :
+  recherche utilisateurs, ateliers de co-conception, wireframes, maquettes et
+  prototypes interactifs. Expérience transversale sur des applications web
+  géospatiales, services publics numériques, chatbots IA et plateformes
+  contributives.
+
+profils_cibles:
+  geospatial: >
+    Designer UX/UI spécialisé dans les applications géospatiales et les portails
+    de données publiques. Plus de 10 ans de pratique de la recherche utilisateurs
+    à la production de maquettes, avec une expertise sur geOrchestra, GeoNetwork
+    et les services de l'État.
+  service-public: >
+    Designer UX/UI senior spécialisé dans les services publics numériques.
+    Maîtrise du Design System de l'État français et du Design System Oblique
+    (Confédération suisse). Pratique des ateliers de co-conception, tests
+    utilisateurs et ergonomie pour des portails à fort enjeu citoyen.
+  ia-chatbot: >
+    Designer UX/UI expérimenté dans la conception d'interfaces conversationnelles
+    et IA. Intervention rapide, benchmarking, conception itérative et prototypage
+    haute fidélité pour des projets à cycle court.
+
+competences:
+  - categorie: Design & prototypage
+    domaines: [design]
+    items: [Figma, Adobe Creative Suite, Wireframes, Maquettes, Prototypes interactifs, Illustrations, Benchmarking]
+  - categorie: Design systems
+    domaines: [design]
+    items: [Design System de l'État (DSFR), Design System Oblique (Confédération suisse)]
+  - categorie: Méthodes UX
+    domaines: [design]
+    items: [Recherche utilisateurs, Tests utilisateurs, Ateliers co-conception, Ergonomie]
+  - categorie: Domaines
+    domaines: [developpement]
+    items: [Applications géospatiales, Services publics numériques, Chatbots IA, Plateformes contributives]
+  - categorie: Gestion de projet
+    domaines: [business]
+    items: [Agile/Scrum, PSM I, Cadrage fonctionnel, Mentorat]
+
+certifications:
+  - { intitule: Professional Scrum Master PSM I, organisme: Scrum.org }
+  - { intitule: Master Design Interactif, organisme: Pôle supérieur des arts appliqués de Villefontaine, annee: 2014 }
+  - { intitule: BTS Communication visuelle multimédia, organisme: Pôle supérieur des arts appliqués de Villefontaine, annee: 2012 }
+
+# ---- Projets Camptocamp -----------------------------------------------
+#   Standard : exactement 3 réalisations par projet (trame visuelle égale)
+#   domaines : design | geospatial | infrastructure | business
+#   secteur  : public | prive
+#   poids    : 1-5
+projets:
+  - id: geonetwork-georchestra
+    role: Designer UX/UI
+    client: Communauté open source GeoNetwork / geOrchestra (secteur mixte)
+    periode: 2024 – 2025
+    contexte: >
+      Refonte UX/UI de la suite de services géographiques GeoNetwork et
+      geOrchestra : catalogue de métadonnées, portail cartographique et
+      outils d'administration.
+    competences: [Figma]
+    realisations:
+      - Étude de l'environnement existant et analyse ergonomique complète.
+      - Ateliers de co-conception avec les équipes open source internationales.
+      - Production de wireframes, maquettes et prototypes interactifs haute fidélité.
+    domaines: [design, geospatial]
+    secteur: public
+    poids: 5
+
+  - id: service-paiement-cadastre
+    role: Designer UX/UI
+    client: Services de l'État français — paiement en ligne et gestion cadastrale
+    periode: 2025
+    contexte: >
+      Étude et conception UX/UI pour deux services numériques de l'État :
+      un service de paiement en ligne et un service de gestion cadastrale.
+    competences: [Figma, Design System de l'État (DSFR)]
+    realisations:
+      - Étude de l'environnement et recherche ergonomique multi-parties prenantes.
+      - Wireframes, maquettes et prototypes conformes au DSFR.
+      - Tests utilisateurs et itérations sur les deux services en parallèle.
+    domaines: [design]
+    secteur: public
+    poids: 5
+
+  - id: bitofit-orbit
+    role: Designer UX/UI
+    client: Éditeur de solutions d'entreprise — BITOFIT Orbit / Midar (secteur privé)
+    periode: 2025
+    contexte: >
+      Conception d'une application de gestion de services de bureau :
+      parking, casiers et répertoire office.
+    competences: [Figma, Design System Oblique]
+    realisations:
+      - Production de wireframes et maquettes détaillées de l'interface.
+      - Prototypage interactif et validation des parcours utilisateurs.
+      - Application rigoureuse du Design System Oblique de la Confédération suisse.
+    domaines: [design]
+    secteur: prive
+    poids: 3
+
+  - id: hes-scotland
+    role: Designer UX/UI
+    client: Historic Environment Scotland (secteur public)
+    periode: 2024
+    contexte: >
+      Mission de cadrage UX pour la gestion du patrimoine architectural
+      écossais : définition du périmètre fonctionnel et des parcours utilisateurs.
+    competences: [Figma]
+    realisations:
+      - Étude de l'environnement existant et analyse ergonomique.
+      - Ateliers d'idéation et de cadrage fonctionnel avec les équipes métier.
+      - Production des livrables de cadrage : parcours utilisateurs et recommandations fonctionnelles.
+    domaines: [design]
+    secteur: public
+    poids: 3
+
+  - id: swisstopo-chatbot
+    role: Designer UX/UI
+    client: Swisstopo — Institut fédéral de topographie (secteur public)
+    periode: 2024
+    contexte: >
+      Conception rapide d'une interface de chatbot IA pour l'Institut fédéral
+      de topographie suisse, dans un contexte de mise en production accélérée.
+    competences: [Figma]
+    realisations:
+      - Benchmarking des solutions conversationnelles existantes.
+      - Recherche rapide et conception itérative pour tester rapidement.
+      - Prototypage haute fidélité livré en délai contraint.
+    domaines: [design]
+    secteur: public
+    poids: 4
+
+  - id: inrae-science-contributive
+    role: Designer UX/UI
+    client: INRAE — Institut national de recherche agronomique (secteur public)
+    periode: 2024
+    contexte: >
+      Conception d'une plateforme de science participative permettant aux
+      citoyens de contribuer à des programmes de recherche agronomique.
+    competences: [Figma]
+    realisations:
+      - Étude de l'environnement existant et analyse des usages.
+      - Recherche utilisateurs et ateliers de cadrage fonctionnel avec chercheurs et contributeurs.
+      - Wireframes et maquettes de la plateforme contributive.
+    domaines: [design]
+    secteur: public
+    poids: 3
+
+  - id: mel-lieux-frais
+    role: Designer UX/UI
+    client: Métropole Européenne de Lille (secteur public)
+    periode: 2024
+    contexte: >
+      Conception d'un service cartographique permettant aux habitants de
+      localiser les lieux frais sur le territoire de la métropole.
+    competences: [Figma]
+    realisations:
+      - Étude de l'environnement et benchmark des services existants.
+      - Ateliers de cadrage fonctionnel et recherche ergonomique.
+      - Wireframes et maquettes du service cartographique.
+    domaines: [design, geospatial]
+    secteur: public
+    poids: 3
+
+# ---- Expériences antérieures -------------------------------------------
+  - id: saprea
+    role: Lead UX/UI Designer
+    client: Fondation Saprea (secteur privé, Utah, USA)
+    periode: 2022 – 2023
+    contexte: >
+      Responsable design UX/UI de l'ensemble des produits et services numériques
+      d'une fondation américaine spécialisée dans le bien-être. Construction de
+      la nouvelle identité numérique et des sites Wordpress.
+    competences: [Figma, Wordpress]
+    realisations:
+      - Direction artistique et conception UX/UI de tous les produits digitaux.
+      - Construction de la nouvelle identité de marque et des sites Wordpress.
+      - Mentorat de designers juniors et promotion du Design Thinking au sein de l'organisation.
+    domaines: [design, business]
+    secteur: prive
+    poids: 3
+
+  - id: capgemini
+    role: UX/UI Designer
+    client: Capgemini — clients variés (Ministères, Airbus, Schneider)
+    periode: 2017 – 2021
+    contexte: >
+      Missions web, webapps et applications mobiles pour des grands comptes et
+      des Ministères. Mise en place de workshops créatifs et projets de
+      prospection en réalité augmentée et virtuelle.
+    competences: [Figma, Adobe Suite]
+    realisations:
+      - Conception UX/UI pour des Ministères, Airbus et Schneider Electric.
+      - Animation de workshops créatifs (idéations, brainstorms, outils).
+      - Projets de prospection AR/VR.
+    domaines: [design, business]
+    secteur: prive
+    poids: 2
+
+  - id: kairn
+    role: UX/UI Designer
+    client: Kairn Design Studio (secteur privé)
+    periode: 2018 – 2022
+    contexte: >
+      Conception et communication digitale pour le studio.
+    competences: [Figma, Adobe Suite, Squarespace]
+    realisations:
+      - Refonte du site internet de Kairn Design Studio et stratégie SEO multicanal.
+    domaines: [design, business]
+    secteur: prive
+    poids: 2
+
+  - id: haute-societe
+    role: Web/Motion Designer
+    client: La Haute Société (secteur privé)
+    periode: 2013 – 2017
+    contexte: >
+      Projets de sites web pour de grands groupes et production vidéo motion/montage.
+    competences: [Adobe Suite]
+    realisations:
+      - Création de sites web pour grands groupes (SFR, PETZL, ARAYMOND).
+      - Production vidéo motion design et montage.
+    domaines: [design, business]
+    secteur: prive
+    poids: 2
+
+parcours:
+  - { periode: "2024 – aujourd'hui", poste: UX/UI Designer senior, employeur: Camptocamp }
+  - { periode: "2022 – 2023", poste: Lead UX/UI Designer, employeur: "Saprea (Utah, USA)" }
+  - { periode: "2017 – 2021", poste: UX/UI Designer, employeur: Capgemini }
+  - { periode: "2018 – 2022", poste: UX/UI Designer, employeur: Kairn Design Studio }
+  - { periode: "2013 – 2017", poste: Web/Motion Designer, employeur: La Haute Société }

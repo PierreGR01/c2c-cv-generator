@@ -1,0 +1,15 @@
+# Credentials — ne jamais committer
+.env
+*.json
+!package.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Sorties temporaires
+sorties/
+*.pdf

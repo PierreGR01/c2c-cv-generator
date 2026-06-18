@@ -1,0 +1,286 @@
+# =====================================================================
+# FICHE COLLABORATEUR — Pierre Laulhe (SOURCE UNIQUE)
+# =====================================================================
+# Saisie depuis cv_pierre.laulhe.docx — données reportées du CV uniquement.
+# Génération ciblée :
+#     python3 build-cv.py --master collaborateurs/pierre-laulhe.yaml \
+#                         --cible aos/mon-ao.yaml
+# =====================================================================
+
+identite:
+  prenom: Pierre
+  nom: Laulhe
+  poste: Consultant SIG – Project Manager
+  categorie_poste: chef_projet
+  departement: ""              # À CONFIRMER — non précisé dans le CV
+  annee_debut_carriere: ""     # À CONFIRMER — non explicite (diplôme SIGMA 2014, agronome 2009, 1re mission datée ON-X 2016)
+  localisation: ""             # À CONFIRMER — non précisé dans le CV
+  disponibilite: ""            # À CONFIRMER — non précisé dans le CV
+  langues:
+    - { langue: Français, niveau: Langue maternelle }
+    - { langue: Anglais, niveau: Courant }
+    - { langue: Portugais, niveau: Intermédiaire }
+
+profil: >
+  Ingénieur en géomatique (SIGMA – PolyTech ENSAT) et agronome de formation
+  (AGROSUP Dijon), Chef de projet / Product Owner chez Camptocamp. Pilote
+  plusieurs projets stratégiques (ENVIRONOT, POC 3D SUEZ, système d'information
+  archéologique du Pas-de-Calais) en méthodologie SCRUM : détermination des
+  besoins clients, gestion de backlog et livraison incrémentale. Compétences
+  techniques en traitement et visualisation de données 3D, bases de données et
+  SIG.
+
+profils_cibles:
+  3d: >
+    Chef de projet spécialisé dans la visualisation et le traitement de données
+    3D (IFC, OBJ, GPKG vers 3Dtiles ; Cesium, VCMap). Pilote des POC et
+    plateformes 3D pour des collectivités et industriels (SUEZ, Rennes
+    Métropole, Historic Environment Scotland).
+  gestion-projet: >
+    Chef de projet / Product Owner certifié SCRUM, spécialisé dans la
+    détermination des besoins clients, l'animation d'ateliers de conception, la
+    gestion de backlog et la livraison incrémentale sur des projets SIG et 3D.
+
+competences:
+  - categorie: Traitement de données 3D
+    domaines: [developpement]
+    items: [IFC, OBJ, Vecteur]
+  - categorie: Visualisation 3D
+    domaines: [developpement]
+    items: [Cesium, VCMap, Mapstore]
+  - categorie: Bases de données
+    domaines: [developpement]
+    items: [PostgreSQL]
+  - categorie: SIG
+    domaines: [geospatial]
+    items: [QGIS, ArcGIS, PostGIS, pgRouting]
+  - categorie: Autres
+    domaines: [developpement]
+    items: [Docker, Blender, FME]
+  - categorie: Méthodes
+    domaines: [developpement]
+    items: [SCRUM, Gestion de backlog, Product Ownership]
+
+certifications:
+  - { intitule: Diplôme d'ingénieur en Géomatique SIGMA (PolyTech ENSAT), organisme: PolyTech ENSAT, annee: 2014 }
+  - { intitule: Diplôme d'ingénieur agronome, organisme: AGROSUP Dijon, annee: 2009 }
+  - { intitule: Certification SCRUM, organisme: "", annee: 2022 }
+  - { intitule: "Product Manager", organisme: "", annee: 2024 }
+  - { intitule: "Data manager : IFC, OBJ, GPKG vers 3Dtiles", organisme: "", annee: 2024 }
+
+projets:
+  - id: data-grand-est-chatbot
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Data Grand Est (secteur public)
+    periode: Depuis 01/2025
+    contexte: >
+      Projet Chatbot et LLM pour Data Grand Est.
+    competences: []
+    realisations:
+      - Détermination des besoins client et animation d'ateliers de conception.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Suivi et rapport d'avancement, validation des incréments, communication avec les parties prenantes.
+    domaines: [developpement, business]
+    secteur: public
+    poids: 3
+
+  - id: modelbuilder-qgis
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Communauté QGIS (secteur public)
+    periode: Depuis 01/2025
+    contexte: >
+      Refonte du Modelbuilder de QGIS pour la communauté QGIS.
+    competences: [QGIS]
+    realisations:
+      - Gestion du backlog et des développements en méthode SCRUM.
+      - Suivi et rapport d'avancement, livraison incrémentale.
+      - Gestion des changements et communication avec les parties prenantes.
+    domaines: [geospatial, developpement]
+    secteur: public
+    poids: 3
+
+  - id: hes-poc-3d
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Historic Environment Scotland (secteur public)
+    periode: Depuis 11/2024
+    contexte: >
+      POC de visualiseur 3D pour Historic Environment Scotland.
+    competences: [Cesium, VCMap]
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Suivi et rapport d'avancement, validation des incréments, communication avec les parties prenantes.
+    domaines: [geospatial]
+    secteur: public
+    poids: 3
+
+  - id: mel-lieux-frais
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Métropole Européenne de Lille – MEL (secteur public)
+    periode: 11/2024
+    contexte: >
+      Projet Lieux frais (volet design UX/UI) : recensement des lieux frais de
+      Lille Métropole.
+    competences: []
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Gestion des changements et communication avec les parties prenantes.
+    domaines: [geospatial, business]
+    secteur: public
+    poids: 2
+
+  - id: geocolab-inrae
+    role: Chef de projet / Product Owner (SCRUM)
+    client: INRAE (secteur public)
+    periode: 08/2024 – 12/2024
+    contexte: >
+      Projet GEOCOLAB INRAE (volet design UX/UI) : plateforme participative de
+      classification des sols.
+    competences: []
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Gestion des changements et communication avec les parties prenantes.
+    domaines: [geospatial, business]
+    secteur: public
+    poids: 2
+
+  - id: environot-quai-notaires
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Quai des Notaires (secteur privé)
+    periode: Depuis 05/2024
+    contexte: >
+      Projet ENVIRONOT pour Quai des Notaires.
+    competences: []
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Suivi et rapport d'avancement, validation des incréments, communication avec les parties prenantes.
+    domaines: [developpement, business]
+    secteur: prive
+    poids: 3
+
+  - id: suez-gpkg-3dtiles
+    role: Chef de projet (SCRUM)
+    client: SUEZ (secteur privé)
+    periode: 08/2024 – 12/2024
+    contexte: >
+      Automatisation de la conversion de données GPKG en 3Dtiles pour SUEZ.
+    competences: [GPKG, 3Dtiles]
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM.
+      - Suivi et rapport d'avancement, gestion des changements, communication avec les parties prenantes.
+    domaines: [geospatial, developpement]
+    secteur: prive
+    poids: 3
+
+  - id: suez-poc-3d
+    role: Chef de projet / Product Owner (SCRUM)
+    client: SUEZ (secteur privé)
+    periode: 09/2023 – 02/2024
+    contexte: >
+      POC de visualiseur 3D pour SUEZ.
+    competences: [Cesium, VCMap]
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Suivi et rapport d'avancement, validation des incréments, communication avec les parties prenantes.
+    domaines: [geospatial]
+    secteur: prive
+    poids: 3
+
+  - id: pas-de-calais-sia
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Département du Pas-de-Calais (secteur public)
+    periode: Depuis 03/2023
+    contexte: >
+      Système d'information archéologique du Pas-de-Calais.
+    competences: []
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Suivi et rapport d'avancement, validation des incréments, communication avec les parties prenantes.
+    domaines: [geospatial, developpement]
+    secteur: public
+    poids: 4
+
+  - id: rennes-metropole-3d
+    role: Chef de projet / Product Owner (SCRUM)
+    client: Rennes Métropole (secteur public)
+    periode: Depuis 02/2022
+    contexte: >
+      Plateforme de coopération 3D pour Rennes Métropole.
+    competences: [Cesium, VCMap]
+    realisations:
+      - Détermination des besoins client.
+      - Gestion du backlog et des développements en méthode SCRUM, livraison incrémentale.
+      - Suivi et rapport d'avancement, validation des incréments, communication avec les parties prenantes.
+    domaines: [geospatial]
+    secteur: public
+    poids: 4
+
+  - id: pvpp-prefecture-paris
+    role: Consultant
+    client: Préfecture de Police de Paris (secteur public)
+    periode: 02/2022 – 08/2022
+    contexte: >
+      Plan de vidéoprotection de la Préfecture de Police de Paris (PVPP).
+    competences: [PostgreSQL, QGIS]
+    realisations:
+      - Détermination des besoins client ; collecte, correction et migration de la donnée métier en base de données.
+      - Création de cartes et d'atlas de cartes ; dashboarding.
+      - Accompagnement dans la mise en place de solutions open source (PostgreSQL, QGIS).
+    domaines: [geospatial]
+    secteur: public
+    poids: 3
+
+  - id: georchestra-dreal-corse-hauteloire
+    role: Chef de projet
+    client: DREAL Corse et Haute-Loire (secteur public)
+    periode: Depuis 02/2022
+    contexte: >
+      Support et maintenance de la plateforme geOrchestra pour les DREAL Corse
+      et Haute-Loire.
+    competences: [geOrchestra]
+    realisations:
+      - Gestion du Product Backlog pour les contrats de support et maintenance.
+      - Gestion administrative liée au suivi de projet (devis, renouvellement de contrat).
+    domaines: [geospatial, business]
+    secteur: public
+    poids: 2
+
+  - id: on-x-fibre
+    role: Chef de projet conception / Consultant – Géomaticien
+    client: ON-X (secteur privé)
+    periode: 2016 – 2022
+    contexte: >
+      Chef de projet conception dans le cadre de la mise en place de la cellule
+      de conception fibre optique (Vendée, marché CREM).
+    competences: [QGIS, ArcGIS, PostgreSQL, FME, SQL, Power BI]
+    realisations:
+      - Mise en place des processus de conception.
+      - Correction et intégration de la donnée en BDD Postgres via FME.
+      - Mise en place des livrables et suivi de production.
+    domaines: [geospatial, developpement]
+    secteur: prive
+    poids: 3
+
+  - id: formation-qgis-postgresql
+    role: Formateur
+    client: Camptocamp (interne)
+    periode: 2022
+    contexte: >
+      Formations dispensées sur QGIS et PostgreSQL.
+    competences: [QGIS, pyQGIS, PostgreSQL, PostGIS]
+    realisations:
+      - Formations QGIS (introduction, avancée, pyQGIS).
+      - Formations PostgreSQL (interrogation, gestion de données, administration, PostGIS).
+    domaines: [geospatial, business]
+    secteur: prive
+    poids: 2
+
+parcours:
+  - { periode: Depuis 2022, poste: Chef de projet / Product Owner, employeur: Camptocamp }
+  - { periode: 2016 – 2022, poste: Consultant / Géomaticien – Chef de projet conception, employeur: ON-X }
