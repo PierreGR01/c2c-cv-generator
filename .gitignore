@@ -1,5 +1,4 @@
-# Credentials — ne jamais committer
-.env
+# Credentials — ne jamais committer les valeurs renseignées
 *.json
 !package.json
 

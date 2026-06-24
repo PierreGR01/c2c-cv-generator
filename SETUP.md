@@ -30,7 +30,7 @@ Clone le dépôt ou télécharge-le en ZIP depuis GitHub, puis décompresse-le o
 
 - Ouvre LastPass → Notes sécurisées → **`CV Generator – .env`**
 - Copie le contenu de la note
-- Dans le dossier `cv-generator/`, crée un fichier nommé exactement **`.env`** (avec le point devant) et colle-y le contenu
+- Dans le dossier `cv-generator/`, ouvre le fichier **`.env`** déjà présent et remplace son contenu par ce que tu viens de copier, puis enregistre
 
 > ⚠️ Ce fichier contient des clés d'accès — ne le partage jamais, ne le committe jamais.
 
