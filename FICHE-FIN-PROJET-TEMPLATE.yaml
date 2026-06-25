@@ -1,0 +1,93 @@
+# =====================================================================
+# FICHE FIN DE PROJET — Camptocamp
+# =====================================================================
+# À remplir par le chef de projet à la clôture d'un projet.
+# Envoyer ce fichier rempli à pierre.grambert@camptocamp.com
+#
+# INSTRUCTIONS :
+#   - Remplir tous les champs obligatoires (marqués *)
+#   - Pour les compétences : utiliser les libellés EXACTS du référentiel
+#     (voir compétences listées dans la section RÉFÉRENTIEL ci-dessous)
+#   - Pour une nouvelle compétence absente du référentiel : utiliser
+#     la section `competences_nouvelles`
+#   - Sauvegarder sous le nom : projet-<id-projet>.yaml
+# =====================================================================
+
+meta:
+  redige_par: prenom-nom-du-cp     # * Ex: jean-dupont
+  date_redaction: "2026-06-24"     # * Date de rédaction (YYYY-MM-DD)
+
+# ── Informations projet ──────────────────────────────────────────────
+projet:
+  id: nom-du-projet                 # * Slug unique, sans espaces ni accents
+                                    #   Ex: refonte-geoportail-bdl
+  nom: "Titre complet du projet"    # * Ex: Refonte du géoportail de la BDL
+  client: "Nom du client"           # * Ex: Bureau de la direction du logement
+  periode: "2025 – 2026"           # * Ex: "2024 – 2025" ou "mars 2025"
+  secteur: public                   # * public | prive
+  contexte: >
+    Description du projet en 3 à 5 phrases : objectif principal,
+    périmètre technique, résultat livré, impact pour le client.
+
+# ── Membres de l'équipe ──────────────────────────────────────────────
+# Répéter le bloc `- collaborateur:` pour chaque membre de l'équipe.
+membres:
+
+- collaborateur: prenom-nom         # * Slug du collaborateur (= nom du fichier YAML sans extension)
+                                    #   Ex: pierre-grambert, arnaud-morvan
+  role: "Rôle tenu sur ce projet"   # * Ex: Designer UX/UI principal
+  domaines: [design]                # * Un ou plusieurs parmi :
+                                    #   geospatial | infrastructure | developpement | design | business
+  poids: 3                          # * Importance du projet pour ce collaborateur
+                                    #   1 = projet périphérique → 5 = projet phare du CV
+  realisations:                     # * Exactement 3 réalisations concrètes
+    - "Première réalisation : verbe d'action + résultat mesurable"
+    - "Deuxième réalisation : verbe d'action + résultat mesurable"
+    - "Troisième réalisation : verbe d'action + résultat mesurable"
+  competences:
+    # * Compétences déployées par ce collaborateur sur ce projet.
+    # Utiliser les libellés EXACTS du référentiel (casse comprise).
+    # Exemples de libellés valides :
+    #   Figma, QGIS, PostGIS, GeoServer, OpenLayers, AWS, Docker,
+    #   Recherche utilisateurs, Tests utilisateurs, Chef de projet, etc.
+    - Compétence existante 1
+    - Compétence existante 2
+  competences_nouvelles:
+    # Uniquement si la compétence n'existe PAS dans le référentiel.
+    # Pierre validera l'ajout au référentiel avant intégration.
+    # Supprimer cette section si elle ne s'applique pas.
+    - nom: "Libellé exact de la nouvelle compétence"
+      categorie: "Catégorie du référentiel"  # Ex: Cartographie web, Langages, Méthodes UX…
+      domaines: [developpement]              # geospatial | infrastructure | developpement | design | business
+
+# ── Deuxième membre (dupliquer si nécessaire) ────────────────────────
+- collaborateur: prenom-nom-2
+  role: "Rôle tenu sur ce projet"
+  domaines: [developpement]
+  poids: 2
+  realisations:
+    - "Première réalisation"
+    - "Deuxième réalisation"
+    - "Troisième réalisation"
+  competences:
+    - Compétence existante 1
+
+# =====================================================================
+# RÉFÉRENTIEL COMPÉTENCES (extrait — pour référence uniquement)
+# =====================================================================
+# Cartographie web  : OpenLayers, CesiumJS, MapFish, GeoExt, Mapnik
+# Serveurs carto    : Mapserver, GeoServer, GeoNetwork, TileCache
+# SIG desktop       : QGIS, ArcSDE
+# Bases de données  : PostGIS, Oracle, SQLite
+# ETL               : FME, GeoTools, KML
+# Infrastructure    : AWS, Debian Server, Windows Server
+# Langages          : PHP, JavaScript
+# Design            : Figma, Adobe Creative Suite, Wireframes, Maquettes,
+#                     Prototypes interactifs, Illustrations, Benchmarking
+# Design Systems    : Design System de l'État (DSFR),
+#                     Design System Oblique (Confédération suisse)
+# Méthodes UX       : Recherche utilisateurs, Tests utilisateurs,
+#                     Ateliers co-conception, Ergonomie
+# Gestion / conseil : Chef de projet, Membre COPIL, Membre PSC,
+#                     Conseil MOA, Élaboration de spécifications
+# =====================================================================

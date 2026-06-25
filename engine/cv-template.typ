@@ -207,7 +207,7 @@
         columns: (1fr, auto),
         column-gutter: 10pt,
         align: (bottom + left, bottom + right),
-        text(weight: "bold", size: 9.5pt, fill: c2c-title)[#p.at("client", default: "")],
+        text(weight: "bold", size: 9.5pt, fill: c2c-title)[#p.at("client", default: "")#{ let d = p.at("designation", default: ""); if d != "" { " — " + d } }],
         text(fill: c2c-orange-dark, size: 8pt, weight: "semibold")[#periode#if periode != "" and role != "" [#h(6pt)·#h(6pt)]#role],
       )
       #if p.at("contexte", default: none) != none [

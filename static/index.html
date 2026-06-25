@@ -4,817 +4,1258 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CV Generator — Camptocamp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --orange: #FF680A;
-      --orange-light: #FFF0E8;
       --grey: #7A7F82;
       --grey-light: #EEEFEF;
       --ink: #1A1A1A;
       --white: #FFFFFF;
-      --radius: 4px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --red: #CA4B60;
+      --green: #869F82;
+      --hover: #F5F5F5;
     }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 14px;
-      color: var(--ink);
-      background: #F5F5F5;
-      min-height: 100vh;
-    }
+    body { font-family:'Inter',system-ui,sans-serif; font-size:14px; color:var(--ink); background:var(--white); min-height:100vh; }
 
     /* Header */
-    header {
-      background: var(--white);
-      border-bottom: 2px solid var(--orange);
-      padding: 0 32px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: var(--shadow);
-    }
-    header .logo { font-size: 13px; font-weight: 700; line-height: 1.1; }
-    header .logo span { color: var(--orange); display: block; }
-    header h1 { font-size: 16px; font-weight: 600; color: var(--grey); }
-    header .sep { width: 1px; height: 24px; background: var(--grey-light); }
+    header { background:var(--white); border-bottom:2px solid var(--orange); padding:0 32px; height:52px; display:flex; align-items:center; gap:0; position:sticky; top:0; z-index:100; }
+    .logo { font-size:13px; font-weight:900; letter-spacing:-0.3px; margin-right:32px; flex-shrink:0; }
+    .logo span { color:var(--orange); }
+    nav { display:flex; align-items:stretch; height:100%; }
+    .tab-btn { padding:0 20px; height:100%; font-size:13px; font-weight:500; color:var(--grey); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:-2px; font-family:'Inter',sans-serif; transition:color .12s; }
+    .tab-btn:hover { color:var(--ink); }
+    .tab-btn.active { color:var(--orange); border-bottom-color:var(--orange); font-weight:600; }
 
-    /* Layout deux colonnes */
-    main {
-      max-width: 1100px;
-      margin: 32px auto;
-      padding: 0 16px 48px;
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      grid-template-rows: auto 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-
-    .error-banner {
-      grid-column: 1 / -1;
-      background: #FEF2F2;
-      border: 1px solid #EF4444;
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      color: #991B1B;
-      font-size: 13px;
-      display: none;
-    }
-
-    /* Colonne gauche : staff */
-    #col-staff {
-      grid-column: 1;
-      grid-row: 2;
-    }
-
-    /* Colonne droite : AO + options + bouton + résultats */
-    #col-right {
-      grid-column: 2;
-      grid-row: 2;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    /* Tab sections */
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
 
     /* Cards */
-    .card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .card-header {
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--grey-light);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .card-header h2 {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ink);
-      flex: 1;
-    }
-    .card-header .badge {
-      background: var(--orange);
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
-      min-width: 20px;
-      text-align: center;
-    }
-    .card-header .tag-opt {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--grey);
-      background: var(--grey-light);
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-    .card-body { padding: 16px 20px; }
+    .card { background:var(--white); border:1px solid var(--grey-light); overflow:hidden; }
+    .card-header { padding:12px 20px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:10px; }
+    .card-header h2 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); flex:1; }
+    .card-header .badge { background:var(--orange); color:white; font-size:11px; font-weight:700; padding:2px 8px; min-width:20px; text-align:center; }
+    .card-header .tag-opt { font-size:11px; font-weight:600; color:var(--grey); background:var(--grey-light); padding:2px 8px; }
+    .card-body { padding:16px 20px; }
 
-    /* Collaborateurs */
-    .collab-list {
-      display: flex;
-      flex-direction: column;
-    }
-    .collab-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 12px;
-      cursor: pointer;
-      transition: background 0.12s;
-      user-select: none;
-      border-radius: var(--radius);
-    }
-    .collab-item:hover { background: var(--orange-light); }
-    .collab-item.selected { background: var(--orange-light); }
-    .collab-item.selected .collab-name { color: var(--orange); }
-    .collab-item input[type="checkbox"] {
-      accent-color: var(--orange);
-      width: 14px; height: 14px;
-      flex-shrink: 0;
-    }
-    .collab-item .avatar {
-      width: 24px; height: 24px;
-      background: var(--grey-light);
-      color: var(--grey);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      font-weight: 700;
-      flex-shrink: 0;
-      transition: background 0.12s, color 0.12s;
-    }
-    .collab-item.selected .avatar,
-    .collab-item:hover .avatar {
-      background: var(--orange);
-      color: white;
-    }
-    .collab-item .collab-name {
-      font-size: 13px;
-      font-weight: 500;
-      flex: 1;
-    }
+    /* Buttons */
+    .btn { padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; transition:opacity .15s; }
+    .btn-primary { background:var(--orange); color:#fff; }
+    .btn-primary:hover:not(:disabled) { opacity:.88; }
+    .btn-primary:disabled { opacity:.35; cursor:not-allowed; }
+    .btn-ghost { background:transparent; color:var(--ink); border:1px solid var(--grey-light); }
+    .btn-ghost:hover { background:var(--hover); }
+    .btn-full { width:100%; justify-content:center; }
+    .btn-sm { padding:5px 10px; font-size:12px; }
 
-    .loading-placeholder {
-      color: var(--grey);
-      font-style: italic;
-      padding: 8px 0;
+    /* Form controls */
+    input[type="text"], input[type="search"], textarea, select {
+      width:100%; border:1px solid var(--grey-light); padding:8px 11px; font-size:13px; color:var(--ink); background:var(--white); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s;
     }
+    input[type="text"]:focus, input[type="search"]:focus, textarea:focus, select:focus { border-color:var(--orange); }
+    textarea { resize:vertical; line-height:1.55; }
+    label.field-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); margin-bottom:5px; }
+    .field-hint { font-size:11px; color:var(--grey); margin-top:4px; }
+    .field-error { font-size:11px; color:var(--red); margin-top:4px; display:none; }
+    .field-error.visible { display:block; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .form-field { margin-bottom:14px; }
+    .form-field:last-child { margin-bottom:0; }
 
-    /* Groupes de catégorie foldables */
-    .cat-group { border-bottom: 1px solid var(--grey-light); }
-    .cat-group:last-child { border-bottom: none; }
+    /* Spinner */
+    .spinner { width:14px; height:14px; border:2px solid var(--grey-light); border-top-color:var(--orange); border-radius:50%; animation:spin .6s linear infinite; display:inline-block; vertical-align:middle; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
-    .cat-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 12px;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.12s;
-    }
-    .cat-header:hover { background: #FAFAFA; }
+    /* ───────────────────────────────────────────────
+       ONGLET 1 — GÉNÉRER CVs (unchanged layout)
+    ─────────────────────────────────────────────── */
+    #section-cv main { max-width:1100px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start; }
+    .error-banner { grid-column:1/-1; background:#FEF0F2; border:1px solid var(--red); padding:12px 16px; color:var(--red); font-size:13px; display:none; }
+    #col-staff { grid-column:1; grid-row:2; }
+    #col-right { grid-column:2; grid-row:2; display:flex; flex-direction:column; gap:16px; }
+    .collab-list { display:flex; flex-direction:column; }
+    .collab-item { display:flex; align-items:center; gap:10px; padding:7px 12px; cursor:pointer; transition:background .12s; user-select:none; }
+    .collab-item:hover { background:var(--hover); }
+    .collab-item.selected { background:var(--hover); border-left:2px solid var(--orange); }
+    .collab-item.selected .collab-name { color:var(--orange); font-weight:600; }
+    .collab-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
+    .collab-item .avatar { width:24px; height:24px; background:var(--grey-light); color:var(--grey); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; transition:background .12s; }
+    .collab-item.selected .avatar, .collab-item:hover .avatar { background:var(--orange); color:white; }
+    .collab-item .collab-name { font-size:13px; font-weight:500; flex:1; }
+    .loading-placeholder { color:var(--grey); font-style:italic; padding:8px 0; }
+    .cat-group { border-bottom:1px solid var(--grey-light); }
+    .cat-group:last-child { border-bottom:none; }
+    .cat-header { display:flex; align-items:center; gap:8px; padding:9px 12px; cursor:pointer; user-select:none; transition:background .12s; }
+    .cat-header:hover { background:var(--hover); }
+    .cat-arrow { font-size:10px; color:var(--grey); transition:transform .2s; width:12px; text-align:center; flex-shrink:0; }
+    .cat-group.collapsed .cat-arrow { transform:rotate(-90deg); }
+    .cat-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); flex:1; }
+    .cat-count { font-size:10px; font-weight:700; color:var(--grey); background:var(--grey-light); padding:1px 7px; }
+    .cat-sel-link { font-size:10px; color:var(--orange); text-decoration:underline; cursor:pointer; opacity:0; transition:opacity .15s; }
+    .cat-header:hover .cat-sel-link { opacity:1; }
+    .cat-group.collapsed .cat-body { display:none; }
+    .cat-body-inner { padding:2px 0 6px; display:grid; grid-template-columns:1fr 1fr; }
+    .select-all-row { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:12px; }
+    .select-all-row a { color:var(--orange); cursor:pointer; text-decoration:underline; }
+    /* ── Filtres AO ── */
+    .filter-field { margin-bottom:14px; }
+    .filter-field:last-child { margin-bottom:0; }
+    .filter-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); margin-bottom:6px; }
+    .filter-radio { display:flex; gap:16px; margin-top:2px; }
+    .filter-radio label { display:flex; align-items:center; gap:6px; font-size:12.5px; cursor:pointer; }
+    .filter-radio input[type="radio"] { accent-color:var(--orange); width:13px; height:13px; }
+    .filter-select { width:100%; border:1px solid var(--grey-light); padding:7px 10px; font-size:13px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; }
+    .filter-select:focus { border-color:var(--orange); }
 
-    .cat-arrow {
-      font-size: 10px;
-      color: var(--grey);
-      transition: transform 0.2s;
-      width: 12px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .cat-group.collapsed .cat-arrow { transform: rotate(-90deg); }
+    /* Multi-select dropdown */
+    .ms-wrap { position:relative; }
+    .ms-search { width:100%; border:1px solid var(--grey-light); padding:7px 10px 7px 30px; font-size:12.5px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s; }
+    .ms-search:focus { border-color:var(--orange); }
+    .ms-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--grey); pointer-events:none; }
+    .ms-dropdown { border:1px solid var(--grey-light); border-top:none; max-height:220px; overflow-y:auto; display:none; background:var(--white); }
+    .ms-dropdown.open { display:block; }
+    .ms-group-header { padding:5px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); background:#F5F5F5; border-bottom:1px solid var(--grey-light); position:sticky; top:0; }
+    .ms-item { display:flex; align-items:center; gap:8px; padding:5px 10px; cursor:pointer; font-size:12.5px; transition:background .1s; }
+    .ms-item:hover { background:var(--hover); }
+    .ms-item input[type="checkbox"] { accent-color:var(--orange); width:13px; height:13px; flex-shrink:0; }
+    .ms-item.hidden { display:none; }
+    .ms-empty { padding:10px; font-size:12px; color:var(--grey); font-style:italic; }
+    .ms-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; min-height:0; }
+    .ms-chip { display:flex; align-items:center; gap:4px; padding:3px 8px; background:var(--hover); border:1px solid var(--grey-light); font-size:11px; font-weight:500; }
+    .ms-chip button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:12px; line-height:1; padding:0 1px; }
+    .ms-chip button:hover { color:var(--red); }
 
-    .cat-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--grey);
-      flex: 1;
-    }
-    .cat-count {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--grey);
-      background: var(--grey-light);
-      padding: 1px 7px;
-      border-radius: 8px;
-    }
-    .cat-sel-link {
-      font-size: 10px;
-      color: var(--orange);
-      text-decoration: underline;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-    .cat-header:hover .cat-sel-link { opacity: 1; }
+    #ao-generic-notice { margin-top:8px; font-size:11px; color:var(--grey); text-align:center; }
+    #btn-clear-filters { width:100%; padding:6px; background:none; border:1px solid var(--grey-light); font-size:11px; color:var(--grey); cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; display:none; }
+    #btn-clear-filters:hover { border-color:var(--red); color:var(--red); }
+    .options-grid { display:flex; flex-direction:column; gap:10px; }
+    .option-row { display:flex; align-items:center; justify-content:space-between; }
+    .option-row label { font-size:12px; color:var(--grey); font-weight:500; }
+    .option-row select { width:auto; border:1.5px solid var(--grey-light); padding:5px 8px; font-size:12px; }
+    .option-row input[type="checkbox"] { accent-color:var(--orange); width:15px; height:15px; }
+    #btn-generate { width:100%; padding:13px; background:var(--orange); color:white; border:none; font-size:14px; font-weight:700; cursor:pointer; transition:opacity .15s; font-family:'Inter',sans-serif; }
+    #btn-generate:hover:not(:disabled) { opacity:.88; }
+    #btn-generate:disabled { opacity:.35; cursor:not-allowed; }
+    #progress-section { display:none; }
+    .progress-bar-wrap { background:var(--grey-light); height:4px; overflow:hidden; margin:10px 0 4px; }
+    .progress-bar { height:100%; background:var(--orange); transition:width .4s; width:0%; }
+    .progress-label { font-size:12px; color:var(--grey); }
+    #results-section { display:none; }
+    .result-list { display:flex; flex-direction:column; gap:8px; }
+    .result-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--grey-light); }
+    .result-item.ok { border-color:var(--green); background:#F3F7F3; }
+    .result-item.error { border-color:var(--red); background:#FEF0F2; }
+    .result-info { flex:1; min-width:0; }
+    .result-name { font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .result-detail { font-size:11px; color:var(--grey); margin-top:2px; }
+    .result-actions { display:flex; gap:6px; flex-shrink:0; }
+    .btn-dl { padding:5px 12px; background:var(--orange); color:white; border:none; font-size:11px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; font-family:'Inter',sans-serif; }
+    .btn-dl:hover { opacity:.88; }
 
-    .cat-body {
-      overflow: hidden;
-      transition: max-height 0.2s ease;
-    }
-    .cat-group.collapsed .cat-body { display: none; }
+    /* ───────────────────────────────────────────────
+       ONGLET 2 — FICHE FIN DE PROJET (formulaire CP)
+    ─────────────────────────────────────────────── */
+    #section-fiche { background:var(--hover); }
+    .fiche-layout { max-width:1000px; margin:0 auto; padding:28px 16px 60px; display:flex; flex-direction:column; gap:20px; }
 
-    .cat-body-inner {
-      padding: 2px 0 6px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
+    /* Sections numérotées */
+    .fiche-section { background:var(--white); border:1px solid var(--grey-light); }
+    .fiche-section-header { padding:14px 20px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:12px; }
+    .fiche-section-num { width:24px; height:24px; background:var(--orange); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .fiche-section-title { font-size:13px; font-weight:700; flex:1; }
+    .fiche-section-body { padding:20px; }
 
-    /* Select all row */
-    .select-all-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 12px;
-    }
-    .select-all-row a { color: var(--orange); cursor: pointer; text-decoration: underline; }
+    /* Radio secteur */
+    .radio-group { display:flex; gap:20px; }
+    .radio-group label { display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer; }
+    .radio-group input[type="radio"] { accent-color:var(--orange); width:15px; height:15px; }
 
-    /* AO upload */
-    .ao-upload {
-      border: 2px dashed var(--grey-light);
-      border-radius: var(--radius);
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      position: relative;
-    }
-    .ao-upload:hover, .ao-upload.drag-over {
-      border-color: var(--orange);
-      background: var(--orange-light);
-    }
-    .ao-upload input[type="file"] {
-      position: absolute; inset: 0;
-      opacity: 0; cursor: pointer;
-    }
-    .ao-upload .upload-icon { font-size: 24px; margin-bottom: 6px; }
-    .ao-upload .upload-label { font-weight: 600; font-size: 13px; color: var(--ink); }
-    .ao-upload .upload-sub { color: var(--grey); font-size: 11px; margin-top: 3px; }
-    .ao-upload.has-file { border-color: var(--orange); background: var(--orange-light); border-style: solid; }
+    /* Grille collaborateurs dans tab fiche */
+    .fiche-collab-search { margin-bottom:12px; }
+    .fiche-collab-grid { border:1px solid var(--grey-light); max-height:320px; overflow-y:auto; }
+    .fiche-collab-item { display:flex; align-items:center; gap:10px; padding:8px 14px; cursor:pointer; transition:background .1s; user-select:none; border-bottom:1px solid var(--grey-light); }
+    .fiche-collab-item:last-child { border-bottom:none; }
+    .fiche-collab-item:hover { background:var(--hover); }
+    .fiche-collab-item.selected { background:var(--hover); border-left:3px solid var(--orange); }
+    .fiche-collab-item.selected .fca-name { color:var(--orange); font-weight:600; }
+    .fiche-collab-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
+    .fca-avatar { width:28px; height:28px; background:var(--grey-light); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--grey); flex-shrink:0; }
+    .fiche-collab-item.selected .fca-avatar { background:var(--orange); color:white; }
+    .fca-info { flex:1; min-width:0; }
+    .fca-name { font-size:13px; font-weight:500; }
+    .fca-role { font-size:11px; color:var(--grey); }
+    .no-results { padding:14px; color:var(--grey); font-size:13px; font-style:italic; }
 
-    /* Badge "générique" sous le drop */
-    #ao-generic-notice {
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--grey);
-      text-align: center;
-    }
-    #ao-generic-notice.active { color: #B45309; }
+    /* Sections par membre */
+    #fiche-membres-forms { display:flex; flex-direction:column; gap:14px; }
+    .membre-form-card { background:var(--white); border:1px solid var(--grey-light); }
+    .membre-form-header { background:var(--hover); padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--grey-light); }
+    .membre-form-avatar { width:32px; height:32px; background:var(--orange); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+    .membre-form-name { font-weight:700; font-size:14px; flex:1; }
+    .membre-form-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
 
-    /* Clear AO button */
-    #btn-clear-ao {
-      display: none;
-      margin-top: 8px;
-      width: 100%;
-      padding: 5px;
-      background: none;
-      border: 1px solid var(--grey-light);
-      border-radius: var(--radius);
-      font-size: 11px;
-      color: var(--grey);
-      cursor: pointer;
-    }
-    #btn-clear-ao:hover { border-color: #EF4444; color: #EF4444; }
+    /* Domaines checkboxes */
+    .domaines-grid { display:flex; flex-wrap:wrap; gap:8px; }
+    .domaine-chip { display:flex; align-items:center; gap:6px; padding:5px 12px; border:1px solid var(--grey-light); cursor:pointer; font-size:12px; font-weight:500; user-select:none; transition:all .12s; }
+    .domaine-chip input[type="checkbox"] { accent-color:var(--orange); width:13px; height:13px; }
+    .domaine-chip.checked { border-color:var(--orange); background:#FFF8F5; color:var(--orange); }
 
-    /* Options */
-    .options-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .option-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .option-row label { font-size: 12px; color: var(--grey); font-weight: 500; }
-    .option-row select {
-      border: 1.5px solid var(--grey-light);
-      border-radius: var(--radius);
-      padding: 5px 8px;
-      font-size: 12px;
-      color: var(--ink);
-      background: white;
-    }
-    .option-row .toggle-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .option-row input[type="checkbox"] {
-      accent-color: var(--orange);
-      width: 15px; height: 15px;
-    }
+    /* Poids */
+    .poids-select { width:auto; min-width:200px; }
 
-    /* Bouton générer */
-    #btn-generate {
-      width: 100%;
-      padding: 13px;
-      background: var(--orange);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    #btn-generate:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-    #btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    /* Réalisations */
+    .realisations-list { display:flex; flex-direction:column; gap:8px; }
+    .realisation-row { display:flex; align-items:center; gap:8px; }
+    .realisation-num { font-size:12px; font-weight:700; color:var(--grey); width:16px; flex-shrink:0; }
 
-    /* Progress */
-    #progress-section { display: none; }
-    .progress-bar-wrap {
-      background: var(--grey-light);
-      border-radius: 4px;
-      height: 5px;
-      overflow: hidden;
-      margin: 10px 0 4px;
-    }
-    .progress-bar {
-      height: 100%;
-      background: var(--orange);
-      border-radius: 4px;
-      transition: width 0.4s;
-      width: 0%;
-    }
-    .progress-label { font-size: 12px; color: var(--grey); }
+    /* Compétences */
+    .comp-search-wrap { position:relative; margin-bottom:12px; }
+    .comp-search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--grey); pointer-events:none; }
+    .comp-search { padding-left:32px !important; }
+    .comp-families { border:1px solid var(--grey-light); max-height:360px; overflow-y:auto; }
+    /* Méta-catégorie (niveau 1) */
+    .comp-meta { border-bottom:1px solid var(--grey-light); }
+    .comp-meta:last-child { border-bottom:none; }
+    .comp-meta-header { display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; user-select:none; background:#E8E9E9; border-bottom:1px solid var(--grey-light); transition:background .1s; }
+    .comp-meta-header:hover { background:#DDDEDE; }
+    .comp-meta-arrow { font-size:10px; color:var(--orange); transition:transform .2s; }
+    .comp-meta.collapsed .comp-meta-arrow { transform:rotate(-90deg); }
+    .comp-meta.collapsed .comp-meta-body { display:none; }
+    .comp-meta-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); flex:1; }
+    .comp-meta-count { font-size:10px; color:var(--grey); background:var(--white); padding:1px 6px; border:1px solid var(--grey-light); }
+    /* Famille (niveau 2) */
+    .comp-family { border-bottom:1px solid var(--grey-light); }
+    .comp-family:last-child { border-bottom:none; }
+    .comp-family-header { display:flex; align-items:center; gap:8px; padding:7px 12px 7px 20px; cursor:pointer; user-select:none; background:var(--hover); transition:background .1s; }
+    .comp-family-header:hover { background:#EBEBEB; }
+    .comp-family-arrow { font-size:10px; color:var(--grey); transition:transform .2s; }
+    .comp-family.collapsed .comp-family-arrow { transform:rotate(-90deg); }
+    .comp-family.collapsed .comp-family-items { display:none; }
+    .comp-family-label { font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--grey); flex:1; }
+    .comp-family-count { font-size:10px; color:var(--grey); background:var(--grey-light); padding:1px 6px; }
+    .comp-family-items { padding:4px 0; display:flex; flex-wrap:wrap; }
+    .comp-item-label { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 28px; cursor:pointer; font-size:12px; transition:background .1s; min-width:180px; }
+    .comp-item-label:hover { background:var(--hover); }
+    .comp-item-label input { accent-color:var(--orange); width:13px; height:13px; flex-shrink:0; }
+    .comp-item-label.hidden { display:none; }
+    .comp-family.all-hidden { display:none; }
+    .comp-meta.all-hidden { display:none; }
 
-    /* Résultats */
-    #results-section { display: none; }
-    .result-list { display: flex; flex-direction: column; gap: 8px; }
-    .result-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      border: 1.5px solid var(--grey-light);
+    /* Chips compétences sélectionnées */
+    .comp-chips-selected { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:20px; }
+    .comp-chip-selected { display:flex; align-items:center; gap:5px; padding:4px 10px; background:var(--hover); border:1px solid var(--grey-light); font-size:11px; font-weight:500; }
+    .comp-chip-selected button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:13px; line-height:1; padding:0; }
+    .comp-chip-selected button:hover { color:var(--red); }
+
+    /* Nouvelles compétences */
+    .new-comp-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .new-comp-row { display:grid; grid-template-columns:1fr 2fr auto; gap:8px; align-items:end; }
+    .new-comp-row .form-field { margin-bottom:0; }
+    .btn-remove { padding:8px 10px; background:none; border:1px solid var(--grey-light); color:var(--grey); cursor:pointer; font-size:13px; font-family:'Inter',sans-serif; }
+    .btn-remove:hover { border-color:var(--red); color:var(--red); }
+
+    /* Zone d'erreur + bouton générer */
+    .fiche-errors { background:#FEF0F2; border:1px solid var(--red); padding:12px 16px; color:var(--red); font-size:13px; display:none; }
+    .fiche-errors ul { padding-left:18px; }
+    .fiche-errors ul li { margin-bottom:3px; }
+    #btn-generate-fiche { width:100%; padding:15px; background:var(--orange); color:white; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .15s; }
+    #btn-generate-fiche:hover:not(:disabled) { opacity:.88; }
+    #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
+    .fiche-success { background:#F3F7F3; border:1px solid var(--green); padding:14px 18px; display:none; font-size:13px; color:var(--green); }
+
+    @media(max-width:768px) {
+      #section-cv main { grid-template-columns:1fr; }
+      .form-row { grid-template-columns:1fr; }
+      .new-comp-row { grid-template-columns:1fr 1fr; }
     }
-    .result-item.ok { border-color: #22C55E; background: #F0FDF4; }
-    .result-item.error { border-color: #EF4444; background: #FEF2F2; }
-    .result-status { font-size: 16px; flex-shrink: 0; }
-    .result-info { flex: 1; min-width: 0; }
-    .result-name { font-weight: 700; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .result-detail { font-size: 11px; color: var(--grey); margin-top: 2px; }
-    .result-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .btn-dl {
-      padding: 5px 12px;
-      background: var(--orange);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-dl:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo">camp<span>tocamp</span></div>
-  <div class="sep"></div>
-  <h1>Générateur de CV</h1>
+  <nav>
+    <button class="tab-btn active" id="tab-cv" onclick="switchTab('cv')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Générer des CVs
+    </button>
+    <button class="tab-btn" id="tab-fiche" onclick="switchTab('fiche')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Fiche fin de projet
+    </button>
+  </nav>
 </header>
 
+<!-- ══════════════════════════════════════════════════════
+     ONGLET 1 — GÉNÉRER DES CVs
+══════════════════════════════════════════════════════ -->
+<div id="section-cv" class="tab-section active">
 <main>
   <div id="error-banner" class="error-banner"></div>
-
-  <!-- ── Colonne gauche : staff ── -->
   <div id="col-staff" class="card">
-    <div class="card-header">
-      <h2>Collaborateurs</h2>
-      <div class="badge" id="selected-count">0</div>
-    </div>
+    <div class="card-header"><h2>Collaborateurs</h2><div class="badge" id="selected-count">0</div></div>
     <div class="card-body">
       <div class="select-all-row">
-        <a onclick="selectAll()">Tout sélectionner</a>
-        &nbsp;·&nbsp;
-        <a onclick="selectNone()">Tout désélectionner</a>
+        <a onclick="selectAll()">Tout sélectionner</a> &nbsp;·&nbsp; <a onclick="selectNone()">Tout désélectionner</a>
       </div>
-      <div id="collab-grid" class="collab-grid">
-        <div class="loading-placeholder">Chargement des collaborateurs…</div>
-      </div>
+      <div id="collab-grid"><div class="loading-placeholder">Chargement…</div></div>
     </div>
   </div>
-
-  <!-- ── Colonne droite ── -->
   <div id="col-right">
-
-    <!-- AO (optionnel) -->
     <div class="card">
-      <div class="card-header">
-        <h2>Appel d'offre</h2>
-        <span class="tag-opt" id="ao-tag">Optionnel</span>
-      </div>
+      <div class="card-header"><h2>Ciblage AO</h2><span class="tag-opt" id="ao-tag">Optionnel</span></div>
       <div class="card-body">
-        <div class="ao-upload" id="ao-drop">
-          <div class="upload-icon">📄</div>
-          <div class="upload-label" id="upload-label">Déposer le YAML de l'AO</div>
-          <div class="upload-sub" id="upload-sub">ou cliquer pour sélectionner</div>
-          <input type="file" id="ao-file" accept=".yaml,.yml">
+
+        <!-- Année min -->
+        <div class="filter-field">
+          <label class="filter-label">Projets à partir de</label>
+          <select class="filter-select" id="f-annee-min" onchange="onFilterChange()">
+            <option value="0">Toutes années</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </select>
         </div>
-        <div id="ao-generic-notice">Sans AO → CV générique (tous projets par score)</div>
-        <button id="btn-clear-ao" onclick="clearAo()">✕ Retirer le fichier</button>
+
+        <!-- Secteur -->
+        <div class="filter-field">
+          <label class="filter-label">Secteur</label>
+          <div class="filter-radio">
+            <label><input type="radio" name="f-secteur" value="" checked onchange="onFilterChange()"> Tous</label>
+            <label><input type="radio" name="f-secteur" value="public" onchange="onFilterChange()"> Public</label>
+            <label><input type="radio" name="f-secteur" value="prive" onchange="onFilterChange()"> Privé</label>
+          </div>
+        </div>
+
+        <!-- Domaines -->
+        <div class="filter-field">
+          <label class="filter-label">Domaines</label>
+          <div class="ms-wrap" id="ms-domaines-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-domaines-search" placeholder="Rechercher un domaine…" oninput="filterMsItems('domaines',this.value)" onfocus="openMsDropdown('domaines')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-domaines-dropdown"></div>
+            <div class="ms-chips" id="ms-domaines-chips"></div>
+          </div>
+        </div>
+
+        <!-- Compétences -->
+        <div class="filter-field">
+          <label class="filter-label">Compétences clés</label>
+          <div class="ms-wrap" id="ms-comps-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-comps-search" placeholder="Rechercher une compétence…" oninput="filterMsItems('comps',this.value)" onfocus="openMsDropdown('comps')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-comps-dropdown"></div>
+            <div class="ms-chips" id="ms-comps-chips"></div>
+          </div>
+        </div>
+
+        <div id="ao-generic-notice">Sans filtre → CV générique (tri par récence)</div>
+        <button id="btn-clear-filters" onclick="clearFilters()">✕ Réinitialiser les filtres</button>
       </div>
     </div>
-
-    <!-- Options -->
     <div class="card">
       <div class="card-header"><h2>Options</h2></div>
       <div class="card-body">
         <div class="options-grid">
-          <div class="option-row">
-            <label for="max-projets">Projets max</label>
-            <select id="max-projets">
-              <option value="3">3</option>
-              <option value="4" selected>4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="0">Tous</option>
-            </select>
-          </div>
-          <div class="option-row">
-            <label for="max-pages">Pages max</label>
-            <select id="max-pages">
-              <option value="1" selected>1 page</option>
-              <option value="2">2 pages</option>
-              <option value="0">Sans limite</option>
-            </select>
-          </div>
-          <div class="option-row">
-            <label for="inclure-parcours">Parcours professionnel</label>
-            <div class="toggle-wrap">
-              <input type="checkbox" id="inclure-parcours" checked>
-            </div>
-          </div>
+          <div class="option-row"><label for="max-projets">Projets max</label>
+            <select id="max-projets"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="0">Tous</option></select></div>
+          <div class="option-row"><label for="max-pages">Pages max</label>
+            <select id="max-pages"><option value="1" selected>1 page</option><option value="2">2 pages</option><option value="0">Sans limite</option></select></div>
+          <div class="option-row"><label for="inclure-parcours">Parcours professionnel</label>
+            <div><input type="checkbox" id="inclure-parcours" checked style="accent-color:var(--orange);width:15px;height:15px;"></div></div>
         </div>
       </div>
     </div>
-
-    <!-- Bouton -->
-    <button id="btn-generate" onclick="generate()" disabled>
-      Générer les CVs
-    </button>
-
-    <!-- Progress -->
+    <button id="btn-generate" onclick="generate()" disabled>Générer les CVs</button>
     <div id="progress-section" class="card">
       <div class="card-body">
         <div class="progress-label" id="progress-label">Génération en cours…</div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar" id="progress-bar"></div>
-        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
       </div>
     </div>
-
-    <!-- Résultats -->
     <div id="results-section" class="card">
       <div class="card-header"><h2>Résultats</h2></div>
       <div class="card-body">
-        <div id="results-actions" style="margin-bottom:10px; display:none">
-          <a href="#" id="btn-dl-all" class="btn-dl">⬇ Tout télécharger (ZIP)</a>
-        </div>
+        <div id="results-actions" style="margin-bottom:10px;display:none"><a href="#" id="btn-dl-all" class="btn-dl">⬇ Tout télécharger (ZIP)</a></div>
         <div id="result-list" class="result-list"></div>
       </div>
     </div>
-
-  </div><!-- /col-right -->
+  </div>
 </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ONGLET 2 — FICHE FIN DE PROJET (formulaire CP)
+══════════════════════════════════════════════════════ -->
+<div id="section-fiche" class="tab-section">
+<div class="fiche-layout">
+
+  <!-- 1. Informations projet -->
+  <div class="fiche-section">
+    <div class="fiche-section-header">
+      <div class="fiche-section-num">1</div>
+      <div class="fiche-section-title">Informations projet</div>
+    </div>
+    <div class="fiche-section-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label class="field-label" for="fp-nom">Désignation du projet *</label>
+          <input type="text" id="fp-nom" placeholder="Plateforme d'ingestion et de gestion des données">
+          <div class="field-error" id="err-fp-nom">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-client">Client *</label>
+          <input type="text" id="fp-client" placeholder="Bureau de la Direction du Logement">
+          <div class="field-error" id="err-fp-client">Champ obligatoire</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="field-label" for="fp-periode">Période *</label>
+          <input type="text" id="fp-periode" placeholder="2024 – 2025">
+          <div class="field-error" id="err-fp-periode">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label">Secteur *</label>
+          <div class="radio-group" style="margin-top:8px;">
+            <label><input type="radio" name="fp-secteur" value="public" checked> Public</label>
+            <label><input type="radio" name="fp-secteur" value="prive"> Privé</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="fp-contexte">Contexte du projet *</label>
+        <textarea id="fp-contexte" rows="4" placeholder="Décrivez le projet en 3 à 5 phrases : objectif principal, périmètre technique, résultat livré, impact pour le client."></textarea>
+        <div class="field-error" id="err-fp-contexte">Champ obligatoire (minimum 30 caractères)</div>
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="fp-redige-par">Votre nom (chef de projet)</label>
+        <input type="text" id="fp-redige-par" placeholder="Prénom Nom">
+        <div class="field-hint">Optionnel — sera inclus dans les métadonnées de la fiche</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Membres de l'équipe -->
+  <div class="fiche-section">
+    <div class="fiche-section-header">
+      <div class="fiche-section-num">2</div>
+      <div class="fiche-section-title">Membres de l'équipe impliqués</div>
+      <span id="fiche-members-badge" class="badge" style="display:none;">0</span>
+    </div>
+    <div class="fiche-section-body">
+      <div class="form-field fiche-collab-search">
+        <input type="search" id="fiche-collab-search" placeholder="🔍  Rechercher un collaborateur…" oninput="filterFicheCollabs(this.value)">
+      </div>
+      <div id="fiche-collab-grid" class="fiche-collab-grid">
+        <div class="no-results">Chargement des collaborateurs…</div>
+      </div>
+      <div class="field-error" id="err-members" style="margin-top:8px;">Sélectionner au moins un membre de l'équipe</div>
+    </div>
+  </div>
+
+  <!-- 3. Détails par membre (dynamique) -->
+  <div id="fiche-membres-section" style="display:none;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="height:2px;flex:1;background:var(--grey-light);"></div>
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--grey);">Détails par membre</span>
+      <div style="height:2px;flex:1;background:var(--grey-light);"></div>
+    </div>
+    <div id="fiche-membres-forms"></div>
+  </div>
+
+  <!-- Erreurs de validation -->
+  <div id="fiche-errors" class="fiche-errors">
+    <strong>Corrections requises :</strong>
+    <ul id="fiche-errors-list"></ul>
+  </div>
+
+  <!-- Bouton générer -->
+  <button id="btn-generate-fiche" onclick="generateFiche()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Générer et télécharger la fiche YAML
+  </button>
+
+  <div id="fiche-success" class="fiche-success">
+    ✓ Fiche générée ! Envoyer le fichier téléchargé à <strong>pierre.grambert@camptocamp.com</strong>
+  </div>
+
+</div><!-- /fiche-layout -->
+</div>
 
 <script>
-  // Vocabulaire contrôlé des catégories (ordre d'affichage)
-  const CAT_ORDER = [
-    'developpeur', 'architecte', 'devops', 'consultant_sig',
-    'chef_projet', 'product_owner', 'designer', 'data', 'direction', '',
-  ];
-  const CAT_LABELS = {
-    developpeur:   'Développeurs',
-    architecte:    'Architectes',
-    devops:        'DevOps & Infrastructure',
-    consultant_sig:'Consultants SIG',
-    chef_projet:   'Chefs de projet',
-    product_owner: 'Product Owners',
-    designer:      'Designers',
-    data:          'Data & BI',
-    direction:     'Direction',
-    '':            'Autres',
-  };
+// ══════════════════════════════════════════════════════
+// Navigation
+// ══════════════════════════════════════════════════════
+function switchTab(tab) {
+  ['cv','fiche'].forEach(t => {
+    document.getElementById('section-'+t).classList.toggle('active', t===tab);
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab==='fiche' && !ficheDataLoaded) loadFicheData();
+}
 
-  let collaborateurs = [];
-  let aoFile = null;
+// ══════════════════════════════════════════════════════
+// ONGLET 1 — GÉNÉRER CVs
+// ══════════════════════════════════════════════════════
+const CAT_ORDER = ['developpeur','architecte','devops','consultant_sig','chef_projet','product_owner','designer','data','direction',''];
+const CAT_LABELS = {developpeur:'Développeurs',architecte:'Architectes',devops:'DevOps & Infrastructure',consultant_sig:'Consultants SIG',chef_projet:'Chefs de projet',product_owner:'Product Owners',designer:'Designers',data:'Data & BI',direction:'Direction','':'Autres'};
+// Normalise une valeur libre de categorie_poste vers une clé de CAT_ORDER
+function normaliserCategorie(raw) {
+  const v = (raw||'').toLowerCase().trim();
+  if (!v) return '';
+  if (v.includes('design') || v.includes('ux') || v.includes('ui')) return 'designer';
+  if (v.includes('devops') || v.includes('infra') || v.includes('ops')) return 'devops';
+  if (v.includes('dev') || v.includes('développ') || v.includes('develop')) return 'developpeur';
+  if (v.includes('archi')) return 'architecte';
+  if (v.includes('sig') || v.includes('carto') || v.includes('géo') || v.includes('geo')) return 'consultant_sig';
+  if (v.includes('chef') || v.includes('projet') || v.includes('manager')) return 'chef_projet';
+  if (v.includes('product') || v.includes('owner') || v.includes('po')) return 'product_owner';
+  if (v.includes('data') || v.includes('bi') || v.includes('analyst')) return 'data';
+  if (v.includes('direct') || v.includes('lead')) return 'direction';
+  // Correspondance exacte en fallback
+  if (CAT_ORDER.includes(v)) return v;
+  return v; // inconnu → sera affiché tel quel
+}
+let collaborateurs = [];
+// Données des multi-selects filtres AO
+let msDomaines = [];   // [{id, label, group}]
+let msComps = [];      // [{key, label, meta, items:[str]}] → aplatit en [{label, group}]
+let msDomainesSelected = new Set();
+let msCompsSelected = new Set();
 
-  // --- Charger les collaborateurs ---
-  async function loadCollaborateurs() {
-    try {
-      const res = await fetch('/api/collaborateurs');
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || 'Erreur serveur');
-      }
-      collaborateurs = await res.json();
-      renderCollabGrid();
-    } catch (e) {
-      showError('Impossible de charger les collaborateurs : ' + e.message);
-      document.getElementById('collab-grid').innerHTML =
-        '<div class="loading-placeholder">Erreur de chargement.</div>';
-    }
+async function loadCollaborateurs() {
+  try {
+    const res = await fetch('/api/collaborateurs');
+    if (!res.ok) throw new Error((await res.json()).detail || 'Erreur');
+    collaborateurs = await res.json();
+    renderCollabGrid();
+  } catch(e) {
+    showError('Impossible de charger les collaborateurs : '+e.message);
+    document.getElementById('collab-grid').innerHTML='<div class="loading-placeholder">Erreur.</div>';
   }
+}
 
-  function renderCollabGrid() {
-    const grid = document.getElementById('collab-grid');
-    if (!collaborateurs.length) {
-      grid.innerHTML = '<div class="loading-placeholder">Aucun collaborateur trouvé dans Drive.</div>';
-      return;
-    }
-
-    const groups = {};
-    collaborateurs.forEach(c => {
-      const cat = c.categorie || '';
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(c);
+async function loadFiltres() {
+  try {
+    const [filtresRes, compsRes] = await Promise.all([
+      fetch('/api/filtres').then(r=>r.json()).catch(()=>({domaines:[]})),
+      fetch('/api/competences').then(r=>r.json()).catch(()=>[]),
+    ]);
+    msDomaines = filtresRes.domaines || [];
+    // Aplatit les compétences : [{label, group}]
+    msComps = [];
+    (compsRes || []).forEach(fam => {
+      (fam.items || []).forEach(item => msComps.push({label: item, group: fam.meta + ' / ' + fam.label}));
     });
+    renderMsDropdown('domaines');
+    renderMsDropdown('comps');
+  } catch(e) {
+    console.warn('Filtres non chargés:', e);
+  }
+}
 
-    const usedCats = [
-      ...CAT_ORDER.filter(k => groups[k]),
-      ...Object.keys(groups).filter(k => !CAT_ORDER.includes(k) && groups[k]),
-    ];
-
-    grid.innerHTML = usedCats.map(cat => {
-      const items = groups[cat];
-      const label = CAT_LABELS[cat] || cat || 'Autres';
-      const itemsHtml = items.map(c => {
-        const initials = c.display.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-        return `<div class="collab-item" onclick="toggleCollab('${c.id}', this)">
+function renderCollabGrid() {
+  const grid=document.getElementById('collab-grid');
+  if(!collaborateurs.length){grid.innerHTML='<div class="loading-placeholder">Aucun collaborateur.</div>';return;}
+  const groups={};
+  collaborateurs.forEach(c=>{const k=normaliserCategorie(c.categorie);(groups[k]=groups[k]||[]).push(c);});
+  const cats=[...CAT_ORDER.filter(k=>groups[k]),...Object.keys(groups).filter(k=>!CAT_ORDER.includes(k)&&groups[k])];
+  grid.innerHTML=cats.map(cat=>{
+    const items=groups[cat];
+    const label=CAT_LABELS[cat]||cat||'Autres';
+    return`<div class="cat-group" id="cat-${cat}">
+      <div class="cat-header" onclick="toggleCat('${cat}')">
+        <span class="cat-arrow">▾</span><span class="cat-title">${label}</span>
+        <span class="cat-count">${items.length}</span>
+        <span class="cat-sel-link" onclick="event.stopPropagation();selectCat('${cat}')">Tout sél.</span>
+      </div>
+      <div class="cat-body"><div class="cat-body-inner collab-list">
+        ${items.map(c=>{const ini=c.display.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+          return`<div class="collab-item" onclick="toggleCollab('${c.id}',this)">
             <input type="checkbox" id="cb-${c.id}" value="${c.id}">
-            <div class="avatar">${initials}</div>
-            <div class="collab-name">${c.display}</div>
-          </div>`;
-      }).join('');
-      return `
-        <div class="cat-group" id="cat-${cat}">
-          <div class="cat-header" onclick="toggleCat('${cat}')">
-            <span class="cat-arrow">▾</span>
-            <span class="cat-title">${label}</span>
-            <span class="cat-count">${items.length}</span>
-            <span class="cat-sel-link" onclick="event.stopPropagation(); selectCat('${cat}')"
-              title="Sélectionner tout">Tout sél.</span>
-          </div>
-          <div class="cat-body"><div class="cat-body-inner collab-list">${itemsHtml}</div></div>
-        </div>`;
-    }).join('');
+            <div class="avatar">${ini}</div><div class="collab-name">${c.display}</div></div>`;}).join('')}
+      </div></div></div>`;
+  }).join('');
+  updateCount();
+}
 
-    updateCount();
-  }
+function toggleCat(cat){document.getElementById('cat-'+cat).classList.toggle('collapsed');}
+function selectCat(cat){const g=document.getElementById('cat-'+cat);const any=[...g.querySelectorAll('input[type="checkbox"]')].some(cb=>!cb.checked);g.querySelectorAll('.collab-item').forEach(el=>{el.querySelector('input').checked=any;el.classList.toggle('selected',any);});updateCount();updateGenerateBtn();}
+function toggleCollab(id,el){const cb=document.getElementById('cb-'+id);cb.checked=!cb.checked;el.classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();}
+function selectAll(){document.querySelectorAll('.collab-item').forEach(el=>{el.querySelector('input').checked=true;el.classList.add('selected');});updateCount();updateGenerateBtn();}
+function selectNone(){document.querySelectorAll('.collab-item').forEach(el=>{el.querySelector('input').checked=false;el.classList.remove('selected');});updateCount();updateGenerateBtn();}
+function getSelectedIds(){return[...document.querySelectorAll('.collab-item input:checked')].map(cb=>cb.value);}
+function updateCount(){document.getElementById('selected-count').textContent=getSelectedIds().length;}
+function updateGenerateBtn(){const btn=document.getElementById('btn-generate');const n=getSelectedIds().length;const cible=hasFilters();btn.disabled=n===0;btn.textContent=n===0?'Générer les CVs':cible?`Générer ${n>1?n+' CVs ciblés':'le CV ciblé'}`:`Générer ${n>1?n+' CVs génériques':'le CV générique'}`;}
 
-  function toggleCat(cat) {
-    document.getElementById('cat-' + cat).classList.toggle('collapsed');
-  }
+// ── Multi-select filtres AO ───────────────────────────────────────────────
+function renderMsDropdown(type) {
+  const isD = type === 'domaines';
+  const items = isD ? msDomaines : msComps;
+  const selected = isD ? msDomainesSelected : msCompsSelected;
+  const el = document.getElementById(`ms-${type}-dropdown`);
+  if (!items.length) { el.innerHTML = '<div class="ms-empty">Chargement…</div>'; return; }
 
-  function selectCat(cat) {
-    const group = document.getElementById('cat-' + cat);
-    const anyUnchecked = [...group.querySelectorAll('input[type="checkbox"]')].some(cb => !cb.checked);
-    group.querySelectorAll('.collab-item').forEach(el => {
-      const cb = el.querySelector('input');
-      cb.checked = anyUnchecked;
-      el.classList.toggle('selected', anyUnchecked);
-    });
-    updateCount();
-    updateGenerateBtn();
-  }
-
-  function toggleCollab(id, el) {
-    const cb = document.getElementById('cb-' + id);
-    cb.checked = !cb.checked;
-    el.classList.toggle('selected', cb.checked);
-    updateCount();
-    updateGenerateBtn();
-  }
-
-  function selectAll() {
-    document.querySelectorAll('.collab-item').forEach(el => {
-      el.querySelector('input').checked = true;
-      el.classList.add('selected');
-    });
-    updateCount(); updateGenerateBtn();
-  }
-
-  function selectNone() {
-    document.querySelectorAll('.collab-item').forEach(el => {
-      el.querySelector('input').checked = false;
-      el.classList.remove('selected');
-    });
-    updateCount(); updateGenerateBtn();
-  }
-
-  function getSelectedIds() {
-    return [...document.querySelectorAll('.collab-item input:checked')].map(cb => cb.value);
-  }
-
-  function updateCount() {
-    document.getElementById('selected-count').textContent = getSelectedIds().length;
-  }
-
-  function updateGenerateBtn() {
-    const btn = document.getElementById('btn-generate');
-    const n = getSelectedIds().length;
-    btn.disabled = n === 0;
-    if (n === 0) {
-      btn.textContent = 'Générer les CVs';
-    } else if (aoFile) {
-      btn.textContent = `Générer ${n > 1 ? n + ' CVs ciblés' : 'le CV ciblé'}`;
-    } else {
-      btn.textContent = `Générer ${n > 1 ? n + ' CVs génériques' : 'le CV générique'}`;
-    }
-  }
-
-  // --- AO file ---
-  const aoInput = document.getElementById('ao-file');
-  aoInput.addEventListener('change', e => {
-    setAoFile(e.target.files[0] || null);
+  const groups = {};
+  items.forEach(it => {
+    const g = it.group || 'Autres';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(it);
   });
 
-  const drop = document.getElementById('ao-drop');
-  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
-  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
-  drop.addEventListener('drop', e => {
-    e.preventDefault();
-    drop.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file && (file.name.endsWith('.yaml') || file.name.endsWith('.yml'))) {
-      setAoFile(file);
+  el.innerHTML = Object.entries(groups).map(([g, its]) =>
+    `<div class="ms-group-header">${esc(g)}</div>` +
+    its.map(it => {
+      const val = isD ? it.id : it.label;
+      const chk = selected.has(val) ? 'checked' : '';
+      return `<label class="ms-item" data-val="${esc(val)}">
+        <input type="checkbox" ${chk} onchange="toggleMs('${type}','${escJs(val)}',this)">
+        ${esc(it.label)}
+      </label>`;
+    }).join('')
+  ).join('');
+}
+
+function filterMsItems(type, q) {
+  const el = document.getElementById(`ms-${type}-dropdown`);
+  el.classList.add('open');
+  const lq = q.toLowerCase();
+  let anyVisible = false;
+  el.querySelectorAll('.ms-item').forEach(item => {
+    const matches = !lq || item.dataset.val.toLowerCase().includes(lq) || item.textContent.toLowerCase().includes(lq);
+    item.classList.toggle('hidden', !matches);
+    if (matches) anyVisible = true;
+  });
+  const empty = el.querySelector('.ms-empty');
+  if (empty) { empty.style.display = anyVisible ? 'none' : 'block'; }
+  else if (!anyVisible) {
+    el.insertAdjacentHTML('beforeend', '<div class="ms-empty">Aucun résultat</div>');
+  }
+}
+
+function openMsDropdown(type) {
+  document.getElementById(`ms-${type}-dropdown`).classList.add('open');
+}
+
+function toggleMs(type, val, cb) {
+  const selected = type === 'domaines' ? msDomainesSelected : msCompsSelected;
+  if (cb.checked) selected.add(val); else selected.delete(val);
+  renderMsChips(type);
+  onFilterChange();
+}
+
+function renderMsChips(type) {
+  const isD = type === 'domaines';
+  const selected = isD ? msDomainesSelected : msCompsSelected;
+  const items = isD ? msDomaines : msComps;
+  const el = document.getElementById(`ms-${type}-chips`);
+  el.innerHTML = [...selected].map(val => {
+    const found = isD ? items.find(i=>i.id===val) : items.find(i=>i.label===val);
+    const label = found ? (isD ? found.label : found.label) : val;
+    return `<div class="ms-chip">
+      <span>${esc(label)}</span>
+      <button onclick="removeMs('${type}','${escJs(val)}')" title="Retirer">×</button>
+    </div>`;
+  }).join('');
+}
+
+function removeMs(type, val) {
+  const selected = type === 'domaines' ? msDomainesSelected : msCompsSelected;
+  selected.delete(val);
+  // Décocher la checkbox dans le dropdown
+  const cb = document.querySelector(`#ms-${type}-dropdown input[type="checkbox"]`);
+  const all = document.querySelectorAll(`#ms-${type}-dropdown .ms-item`);
+  all.forEach(item => { if (item.dataset.val === val) item.querySelector('input').checked = false; });
+  renderMsChips(type);
+  onFilterChange();
+}
+
+function hasFilters() {
+  return msDomainesSelected.size > 0 || msCompsSelected.size > 0
+    || document.getElementById('f-annee-min').value !== '0'
+    || (document.querySelector('input[name="f-secteur"]:checked')?.value || '') !== '';
+}
+
+function onFilterChange() {
+  const active = hasFilters();
+  document.getElementById('ao-tag').textContent = active ? 'Actif' : 'Optionnel';
+  document.getElementById('ao-generic-notice').style.display = active ? 'none' : 'block';
+  document.getElementById('btn-clear-filters').style.display = active ? 'block' : 'none';
+  updateGenerateBtn();
+}
+
+function clearFilters() {
+  document.getElementById('f-annee-min').value = '0';
+  document.querySelectorAll('input[name="f-secteur"]')[0].checked = true;
+  msDomainesSelected.clear();
+  msCompsSelected.clear();
+  renderMsDropdown('domaines');
+  renderMsDropdown('comps');
+  renderMsChips('domaines');
+  renderMsChips('comps');
+  onFilterChange();
+}
+
+// Fermer les dropdowns en cliquant ailleurs
+document.addEventListener('click', e => {
+  ['domaines','comps'].forEach(type => {
+    const wrap = document.getElementById(`ms-${type}-wrap`);
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById(`ms-${type}-dropdown`).classList.remove('open');
+    }
+  });
+});
+
+async function generate(){
+  const ids=getSelectedIds();if(!ids.length)return;
+  const btn=document.getElementById('btn-generate');btn.disabled=true;
+  const prog=document.getElementById('progress-section'),bar=document.getElementById('progress-bar'),lbl=document.getElementById('progress-label'),res=document.getElementById('results-section'),rl=document.getElementById('result-list');
+  prog.style.display='block';res.style.display='none';rl.innerHTML='';bar.style.width='20%';bar.style.background='';
+  const isCible = hasFilters();
+  lbl.textContent=isCible?`Génération de ${ids.length} CV(s) ciblé(s)…`:`Génération de ${ids.length} CV(s) générique(s)…`;
+  hideError();
+  const fd=new FormData();
+  ids.forEach(id=>fd.append('collaborateurs',id));
+  fd.append('max_projets',document.getElementById('max-projets').value);
+  fd.append('max_pages',document.getElementById('max-pages').value);
+  fd.append('inclure_parcours',document.getElementById('inclure-parcours').checked?'true':'false');
+  fd.append('annee_min',document.getElementById('f-annee-min').value||'0');
+  fd.append('secteur',document.querySelector('input[name="f-secteur"]:checked')?.value||'');
+  [...msDomainesSelected].forEach(d=>fd.append('domaines',d));
+  [...msCompsSelected].forEach(c=>fd.append('competences',c));
+  bar.style.width='50%';
+  try{
+    const r=await fetch('/api/generate',{method:'POST',body:fd});bar.style.width='90%';
+    if(!r.ok){const e=await r.json().catch(()=>({detail:'Erreur inconnue'}));throw new Error(e.detail);}
+    const ct=r.headers.get('content-type')||'',disp=r.headers.get('content-disposition')||'';
+    const fn=(disp.match(/filename="(.+?)"/)||[])[1]||'cvs.zip';
+    const blob=await r.blob(),url=URL.createObjectURL(blob);
+    bar.style.width='100%';lbl.textContent='Terminé !';res.style.display='block';
+    if(ct.includes('zip')){const dl=document.getElementById('btn-dl-all');dl.href=url;dl.download=fn;document.getElementById('results-actions').style.display='block';rl.innerHTML=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${ids.length} CVs générés</div><div class="result-detail">Téléchargez le ZIP ci-dessus</div></div></div>`;}
+    else{document.getElementById('results-actions').style.display='none';const a=document.createElement('a');a.href=url;a.download=fn;a.click();const c=collaborateurs.find(c=>ids[0]===c.id);rl.innerHTML=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${c?.display||fn}</div></div><div class="result-actions"><a href="${url}" download="${fn}" class="btn-dl">⬇ Re-télécharger</a></div></div>`;}
+  }catch(e){bar.style.width='100%';bar.style.background='var(--red)';lbl.textContent='Erreur';showError('Erreur : '+e.message);}
+  finally{btn.disabled=false;updateGenerateBtn();setTimeout(()=>{prog.style.display='none';bar.style.width='0%';bar.style.background='';},2000);}
+}
+function showError(msg){const el=document.getElementById('error-banner');el.textContent=msg;el.style.display='block';}
+function hideError(){document.getElementById('error-banner').style.display='none';}
+
+// ══════════════════════════════════════════════════════
+// ONGLET 2 — FICHE FIN DE PROJET (formulaire CP)
+// ══════════════════════════════════════════════════════
+let ficheDataLoaded = false;
+let ficheCollabs = [];        // from /api/collaborateurs (same data)
+let ficheCompetences = [];    // from /api/competences
+let ficheSelectedIds = new Set(); // selected collab IDs for fiche
+
+const DOMAINES = [
+  {value:'geospatial',   label:'Géospatial'},
+  {value:'infrastructure', label:'Infrastructure'},
+  {value:'developpement', label:'Développement'},
+  {value:'design',       label:'Design'},
+  {value:'business',     label:'Business'},
+];
+const POIDS_OPTIONS = [
+  {value:1, label:'1 — Projet secondaire'},
+  {value:2, label:'2 — Rôle limité'},
+  {value:3, label:'3 — Projet standard'},
+  {value:4, label:'4 — Rôle important'},
+  {value:5, label:'5 — Projet phare'},
+];
+
+async function loadFicheData() {
+  ficheDataLoaded = true;
+  ficheCollabs = collaborateurs.length ? collaborateurs : await fetch('/api/collaborateurs').then(r=>r.json()).catch(()=>[]);
+  ficheCompetences = await fetch('/api/competences').then(r=>r.json()).catch(()=>[]);
+  renderFicheCollabGrid(ficheCollabs);
+}
+
+function renderFicheCollabGrid(list) {
+  const grid = document.getElementById('fiche-collab-grid');
+  if (!list.length) { grid.innerHTML = '<div class="no-results">Aucun collaborateur trouvé.</div>'; return; }
+  grid.innerHTML = list.map(c => {
+    const ini = c.display.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const sel = ficheSelectedIds.has(c.id);
+    return `<div class="fiche-collab-item${sel?' selected':''}" data-id="${c.id}" data-slug="${c.name}" data-display="${esc(c.display)}" data-poste="${esc(c.categorie||'')}" onclick="toggleFicheCollab('${c.id}',this)">
+      <input type="checkbox" ${sel?'checked':''} onclick="event.stopPropagation();toggleFicheCollab('${c.id}',this.closest('.fiche-collab-item'))">
+      <div class="fca-avatar">${ini}</div>
+      <div class="fca-info">
+        <div class="fca-name">${esc(c.display)}</div>
+        <div class="fca-role">${esc(c.categorie||'')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterFicheCollabs(q) {
+  const lq = q.toLowerCase();
+  const filtered = ficheCollabs.filter(c => c.display.toLowerCase().includes(lq) || (c.categorie||'').toLowerCase().includes(lq));
+  renderFicheCollabGrid(filtered);
+}
+
+function toggleFicheCollab(id, el) {
+  const cb = el.querySelector('input[type="checkbox"]');
+  const wasSelected = ficheSelectedIds.has(id);
+  if (wasSelected) {
+    ficheSelectedIds.delete(id);
+    el.classList.remove('selected');
+    cb.checked = false;
+    removeMemberForm(id);
+  } else {
+    ficheSelectedIds.add(id);
+    el.classList.add('selected');
+    cb.checked = true;
+    const collab = ficheCollabs.find(c=>c.id===id);
+    if (collab) addMemberForm(collab);
+  }
+  updateFicheMembersBadge();
+}
+
+function updateFicheMembersBadge() {
+  const badge = document.getElementById('fiche-members-badge');
+  const n = ficheSelectedIds.size;
+  badge.textContent = n;
+  badge.style.display = n ? 'flex' : 'none';
+  document.getElementById('fiche-membres-section').style.display = n ? 'block' : 'none';
+}
+
+function addMemberForm(collab) {
+  const container = document.getElementById('fiche-membres-forms');
+  const id = collab.id;
+  const slug = collab.name;
+  const ini = collab.display.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  const div = document.createElement('div');
+  div.className = 'membre-form-card';
+  div.id = 'mform-' + id;
+  div.innerHTML = `
+    <div class="membre-form-header">
+      <div class="membre-form-avatar">${ini}</div>
+      <div class="membre-form-name">${esc(collab.display)}</div>
+      <span style="font-size:11px;color:var(--grey);">${esc(collab.categorie||'')}</span>
+    </div>
+    <div class="membre-form-body">
+
+      <div class="form-row">
+        <div class="form-field">
+          <label class="field-label">Rôle sur ce projet *</label>
+          <input type="text" id="mf-${id}-role" placeholder="Ex : Développeur backend principal">
+          <div class="field-error" id="err-mf-${id}-role">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label">Importance du projet *</label>
+          <select id="mf-${id}-poids" class="poids-select">
+            ${POIDS_OPTIONS.map(o=>`<option value="${o.value}"${o.value===3?' selected':''}>${o.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Domaines *</label>
+        <div class="domaines-grid" id="mf-${id}-domaines">
+          ${DOMAINES.map(d=>`
+            <label class="domaine-chip" id="mf-${id}-dom-${d.value}">
+              <input type="checkbox" value="${d.value}" onchange="updateDomaineChip('${id}','${d.value}',this)">
+              ${d.label}
+            </label>`).join('')}
+        </div>
+        <div class="field-error" id="err-mf-${id}-domaines">Sélectionner au moins un domaine</div>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Réalisations (3 minimum) *</label>
+        <div class="realisations-list" id="mf-${id}-realisations">
+          ${[1,2,3].map(n=>`
+            <div class="realisation-row">
+              <span class="realisation-num">${n}.</span>
+              <input type="text" id="mf-${id}-real-${n}" placeholder="Verbe d'action + résultat concret et mesurable">
+            </div>`).join('')}
+        </div>
+        <div class="field-error" id="err-mf-${id}-realisations">Renseigner au moins 3 réalisations</div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="addRealisation('${id}')">+ Ajouter une réalisation</button>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Compétences mobilisées *</label>
+        <div class="comp-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="comp-search" id="mf-${id}-comp-search" placeholder="Filtrer les compétences…" oninput="filterComps('${id}',this.value)">
+        </div>
+        <div class="comp-families" id="mf-${id}-comp-families">
+          ${renderCompFamilies(id)}
+        </div>
+        <div class="field-error" id="err-mf-${id}-comps">Sélectionner au moins une compétence</div>
+        <div class="comp-chips-selected" id="mf-${id}-chips"></div>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label" style="margin-bottom:8px;">Nouvelles compétences (hors référentiel)</label>
+        <div class="field-hint" style="margin-bottom:10px;">Si une compétence est absente de la liste ci-dessus, ajoutez-la ici.</div>
+        <div class="new-comp-list" id="mf-${id}-new-comps"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="addNewComp('${id}')">+ Ajouter une compétence hors référentiel</button>
+      </div>
+
+    </div>`;
+  container.appendChild(div);
+}
+
+function removeMemberForm(id) {
+  const el = document.getElementById('mform-' + id);
+  if (el) el.remove();
+}
+
+// Mapping de repli si l'API ne retourne pas le champ meta
+const FAMILY_META_JS = {
+  // Carto & SIG
+  cartographie_web:'Carto & SIG', serveurs_carto:'Carto & SIG',
+  sig_desktop:'Carto & SIG', catalogues_metadonnees:'Carto & SIG',
+  // Développeurs
+  langages:'Développeurs', bases_de_donnees:'Développeurs', etl_donnees:'Développeurs',
+  frameworks_backend:'Développeurs', frameworks_frontend:'Développeurs',
+  ia_ml:'Développeurs', mobile:'Développeurs', tests:'Développeurs',
+  outils_dev:'Développeurs', cms:'Développeurs', '3d_visualisation':'Développeurs',
+  // DevOps & Infrastructure
+  infrastructure:'DevOps & Infrastructure',
+  monitoring_bi:'DevOps & Infrastructure', reseau_telecom_securite:'DevOps & Infrastructure',
+  // Designers & UX
+  design_systems:'Designers & UX', design_ui:'Designers & UX', design_ux:'Designers & UX',
+  // Chefs de projet & Conseil
+  gestion_conseil:'Chefs de projet & Conseil', erp_odoo:'Chefs de projet & Conseil',
+};
+const META_ORDER_JS = ['Carto & SIG','Développeurs','DevOps & Infrastructure','Designers & UX','Chefs de projet & Conseil'];
+
+function renderCompFamilies(memberId) {
+  if (!ficheCompetences.length) return '<div style="padding:12px;color:var(--grey);font-size:12px;">Chargement des compétences…</div>';
+
+  // Grouper les familles par méta-catégorie (API ou fallback JS)
+  const metaGroups = {};
+  ficheCompetences.forEach(f => {
+    const meta = f.meta || FAMILY_META_JS[f.key] || 'Autres';
+    if (!metaGroups[meta]) metaGroups[meta] = [];
+    metaGroups[meta].push(f);
+  });
+
+  // Trier les métas selon l'ordre défini
+  const sortedMetas = [
+    ...META_ORDER_JS.filter(m => metaGroups[m]),
+    ...Object.keys(metaGroups).filter(m => !META_ORDER_JS.includes(m)),
+  ];
+
+  return sortedMetas.map(meta => { const families = metaGroups[meta];
+    const totalItems = families.reduce((n, f) => n + f.items.length, 0);
+    const familiesHtml = families.map(f => `
+      <div class="comp-family" id="mf-${memberId}-fam-${f.key}">
+        <div class="comp-family-header" onclick="toggleCompFamily('${memberId}','${f.key}')">
+          <span class="comp-family-arrow">▾</span>
+          <span class="comp-family-label">${esc(f.label)}</span>
+          <span class="comp-family-count">${f.items.length}</span>
+        </div>
+        <div class="comp-family-items">
+          ${f.items.map(item=>`
+            <label class="comp-item-label" id="mf-${memberId}-ci-${CSS.escape(item)}">
+              <input type="checkbox" value="${esc(item)}" data-member="${memberId}" onchange="onCompChange('${memberId}','${esc(item)}',this)">
+              ${esc(item)}
+            </label>`).join('')}
+        </div>
+      </div>`).join('');
+
+    const metaId = slugId(meta);
+    return `<div class="comp-meta collapsed" id="mf-${memberId}-meta-${metaId}">
+      <div class="comp-meta-header" onclick="toggleCompMeta('${memberId}','${metaId}')">
+        <span class="comp-meta-arrow">▾</span>
+        <span class="comp-meta-label">${esc(meta)}</span>
+        <span class="comp-meta-count">${totalItems}</span>
+      </div>
+      <div class="comp-meta-body">${familiesHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function slugId(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g,''); }
+
+function toggleCompMeta(memberId, metaId) {
+  document.getElementById(`mf-${memberId}-meta-${metaId}`).classList.toggle('collapsed');
+}
+
+function toggleCompFamily(memberId, familyKey) {
+  document.getElementById(`mf-${memberId}-fam-${familyKey}`).classList.toggle('collapsed');
+}
+
+function filterComps(memberId, query) {
+  const q = query.toLowerCase();
+  const famContainer = document.getElementById(`mf-${memberId}-comp-families`);
+  famContainer.querySelectorAll('.comp-family').forEach(fam => {
+    let anyVisible = false;
+    fam.querySelectorAll('.comp-item-label').forEach(label => {
+      const text = label.textContent.trim().toLowerCase();
+      const matches = !q || text.includes(q);
+      label.classList.toggle('hidden', !matches);
+      if (matches) anyVisible = true;
+    });
+    fam.classList.toggle('all-hidden', !anyVisible);
+    if (q && anyVisible) fam.classList.remove('collapsed');
+  });
+  // Ouvrir / fermer les métas selon résultats
+  famContainer.querySelectorAll('.comp-meta').forEach(meta => {
+    const anyFamVisible = [...meta.querySelectorAll('.comp-family')].some(f => !f.classList.contains('all-hidden'));
+    meta.classList.toggle('all-hidden', !anyFamVisible);
+    if (q && anyFamVisible) meta.classList.remove('collapsed');
+  });
+}
+
+function onCompChange(memberId, compName, cb) {
+  updateCompChips(memberId);
+}
+
+function updateCompChips(memberId) {
+  const famContainer = document.getElementById(`mf-${memberId}-comp-families`);
+  const checked = [...famContainer.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value);
+  const chipsEl = document.getElementById(`mf-${memberId}-chips`);
+  chipsEl.innerHTML = checked.map(c => `
+    <div class="comp-chip-selected">
+      <span>${esc(c)}</span>
+      <button onclick="removeComp('${memberId}','${esc(c)}')" title="Retirer">×</button>
+    </div>`).join('');
+}
+
+function removeComp(memberId, compName) {
+  const famContainer = document.getElementById(`mf-${memberId}-comp-families`);
+  const cb = famContainer.querySelector(`input[value="${CSS.escape(compName)}"]`);
+  if (cb) { cb.checked = false; updateCompChips(memberId); }
+}
+
+function updateDomaineChip(memberId, value, cb) {
+  document.getElementById(`mf-${memberId}-dom-${value}`).classList.toggle('checked', cb.checked);
+}
+
+function addRealisation(memberId) {
+  const list = document.getElementById(`mf-${memberId}-realisations`);
+  const n = list.querySelectorAll('.realisation-row').length + 1;
+  const row = document.createElement('div');
+  row.className = 'realisation-row';
+  row.innerHTML = `<span class="realisation-num">${n}.</span>
+    <input type="text" id="mf-${memberId}-real-${n}" placeholder="Verbe d'action + résultat concret">
+    <button class="btn-remove" onclick="this.closest('.realisation-row').remove(); renumberRealisations('${memberId}')">×</button>`;
+  list.appendChild(row);
+}
+
+function renumberRealisations(memberId) {
+  const rows = document.querySelectorAll(`#mf-${memberId}-realisations .realisation-row`);
+  rows.forEach((row, i) => { const num = row.querySelector('.realisation-num'); if(num) num.textContent=(i+1)+'.'; });
+}
+
+let newCompCount = {};
+function addNewComp(memberId) {
+  newCompCount[memberId] = (newCompCount[memberId]||0) + 1;
+  const n = newCompCount[memberId];
+  const list = document.getElementById(`mf-${memberId}-new-comps`);
+  const row = document.createElement('div');
+  row.className = 'new-comp-row';
+  row.id = `new-comp-${memberId}-${n}`;
+
+  // Select groupé par méta-catégorie depuis le référentiel chargé
+  const metaOrder = ['Carto & SIG','Développeurs','DevOps & Infrastructure','Designers & UX','Chefs de projet & Conseil'];
+  const metaGroups = {};
+  ficheCompetences.forEach(f => {
+    const meta = f.meta || FAMILY_META_JS[f.key] || 'Autres';
+    if (!metaGroups[meta]) metaGroups[meta] = [];
+    metaGroups[meta].push(f);
+  });
+  let optionsHtml = '<option value="">— Choisir une section —</option>';
+  metaOrder.forEach(meta => {
+    if (!metaGroups[meta]?.length) return;
+    optionsHtml += `<optgroup label="${meta}">`;
+    metaGroups[meta].forEach(f => { optionsHtml += `<option value="${f.key}">${f.label}</option>`; });
+    optionsHtml += '</optgroup>';
+  });
+
+  row.innerHTML = `
+    <div class="form-field">
+      <label class="field-label">Libellé *</label>
+      <input type="text" id="nc-${memberId}-${n}-nom" placeholder="Ex : Prompt Engineering">
+    </div>
+    <div class="form-field">
+      <label class="field-label">Section *</label>
+      <select id="nc-${memberId}-${n}-section">${optionsHtml}</select>
+    </div>
+    <button class="btn-remove" onclick="this.closest('.new-comp-row').remove()" title="Supprimer">×</button>`;
+  list.appendChild(row);
+}
+
+// ── Génération YAML ──────────────────────────────────────────────────
+
+function generateFiche() {
+  const errors = validateFicheForm();
+  const errDiv = document.getElementById('fiche-errors');
+  const errList = document.getElementById('fiche-errors-list');
+  if (errors.length) {
+    errDiv.style.display = 'block';
+    errList.innerHTML = errors.map(e=>`<li>${e}</li>`).join('');
+    errDiv.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  errDiv.style.display = 'none';
+
+  const yaml = buildFicheYAML();
+  const slug = slugify(document.getElementById('fp-nom').value);
+  const filename = 'fiche-fin-projet--' + slug + '.yaml';
+  downloadText(yaml, filename);
+
+  document.getElementById('fiche-success').style.display = 'block';
+  document.getElementById('fiche-success').scrollIntoView({behavior:'smooth'});
+}
+
+function validateFicheForm() {
+  const errors = [];
+  const clearErr = id => document.getElementById(id).classList.remove('visible');
+  const showErr  = id => document.getElementById(id).classList.add('visible');
+
+  const nom = document.getElementById('fp-nom').value.trim();
+  clearErr('err-fp-nom'); if(!nom){showErr('err-fp-nom');errors.push('Nom du projet manquant');}
+  const client = document.getElementById('fp-client').value.trim();
+  clearErr('err-fp-client'); if(!client){showErr('err-fp-client');errors.push('Client manquant');}
+  const periode = document.getElementById('fp-periode').value.trim();
+  clearErr('err-fp-periode'); if(!periode){showErr('err-fp-periode');errors.push('Période manquante');}
+  const contexte = document.getElementById('fp-contexte').value.trim();
+  clearErr('err-fp-contexte'); if(contexte.length<30){showErr('err-fp-contexte');errors.push('Contexte trop court (minimum 30 caractères)');}
+
+  clearErr('err-members');
+  if(!ficheSelectedIds.size){showErr('err-members');errors.push('Sélectionner au moins un membre de l\'équipe');}
+
+  ficheSelectedIds.forEach(id => {
+    const collab = ficheCollabs.find(c=>c.id===id);
+    const name = collab?.display || id;
+
+    const role = document.getElementById(`mf-${id}-role`)?.value.trim();
+    const errRoleId = `err-mf-${id}-role`;
+    document.getElementById(errRoleId)?.classList.remove('visible');
+    if(!role){document.getElementById(errRoleId)?.classList.add('visible');errors.push(`${name} : rôle manquant`);}
+
+    const domChecked = [...(document.querySelectorAll(`#mf-${id}-domaines input:checked`))];
+    const errDomId = `err-mf-${id}-domaines`;
+    document.getElementById(errDomId)?.classList.remove('visible');
+    if(!domChecked.length){document.getElementById(errDomId)?.classList.add('visible');errors.push(`${name} : sélectionner au moins un domaine`);}
+
+    const reals = getRealIsations(id);
+    const errRealId = `err-mf-${id}-realisations`;
+    document.getElementById(errRealId)?.classList.remove('visible');
+    if(reals.length<3){document.getElementById(errRealId)?.classList.add('visible');errors.push(`${name} : 3 réalisations minimum`);}
+
+    const comps = getSelectedComps(id);
+    const newComps = getNewComps(id);
+    const errCompId = `err-mf-${id}-comps`;
+    document.getElementById(errCompId)?.classList.remove('visible');
+    if(!comps.length&&!newComps.length){document.getElementById(errCompId)?.classList.add('visible');errors.push(`${name} : sélectionner au moins une compétence`);}
+  });
+
+  return errors;
+}
+
+function buildFicheYAML() {
+  const today = new Date().toISOString().split('T')[0];
+  const nom = document.getElementById('fp-nom').value.trim();
+  const client = document.getElementById('fp-client').value.trim();
+  const periode = document.getElementById('fp-periode').value.trim();
+  const secteur = document.querySelector('input[name="fp-secteur"]:checked')?.value || 'public';
+  const contexte = document.getElementById('fp-contexte').value.trim();
+  const redige_par = document.getElementById('fp-redige-par').value.trim();
+  const projId = slugify(nom);
+
+  let yaml = `# Fiche fin de projet — Camptocamp
+# Générée le ${today}
+# Envoyer à pierre.grambert@camptocamp.com
+
+meta:
+  redige_par: ${yamlStr(redige_par || '')}
+  date_redaction: "${today}"
+
+projet:
+  id: ${projId}
+  designation: ${yamlStr(nom)}
+  client: ${yamlStr(client)}
+  periode: ${yamlStr(periode)}
+  secteur: ${secteur}
+  contexte: >
+    ${contexte.replace(/\n/g, '\n    ')}
+
+membres:\n`;
+
+  ficheSelectedIds.forEach(id => {
+    const collab = ficheCollabs.find(c=>c.id===id);
+    const role = document.getElementById(`mf-${id}-role`)?.value.trim() || '';
+    const poids = document.getElementById(`mf-${id}-poids`)?.value || '3';
+    const domaines = [...document.querySelectorAll(`#mf-${id}-domaines input:checked`)].map(cb=>cb.value);
+    const reals = getRealIsations(id);
+    const comps = getSelectedComps(id);
+    const newComps = getNewComps(id);
+
+    yaml += `- collaborateur: ${collab?.name || id}
+  role: ${yamlStr(role)}
+  domaines: [${domaines.join(', ')}]
+  poids: ${poids}
+  realisations:\n`;
+    reals.forEach(r => { yaml += `    - ${yamlStr(r)}\n`; });
+    yaml += `  competences:\n`;
+    comps.forEach(c => { yaml += `    - ${yamlStr(c)}\n`; });
+    if (newComps.length) {
+      yaml += `  competences_nouvelles:\n`;
+      newComps.forEach(nc => {
+        yaml += `    - nom: ${yamlStr(nc.nom)}\n      section: ${yamlStr(nc.section)}\n`;
+      });
     }
   });
 
-  function setAoFile(file) {
-    aoFile = file;
-    const dropEl = document.getElementById('ao-drop');
-    const label  = document.getElementById('upload-label');
-    const sub    = document.getElementById('upload-sub');
-    const notice = document.getElementById('ao-generic-notice');
-    const clearBtn = document.getElementById('btn-clear-ao');
-    const tag    = document.getElementById('ao-tag');
-    if (file) {
-      dropEl.classList.add('has-file');
-      label.textContent = '✓ ' + file.name;
-      sub.textContent   = '';
-      notice.textContent = '';
-      notice.classList.remove('active');
-      clearBtn.style.display = 'block';
-      tag.textContent = 'Chargé';
-      tag.style.background = 'var(--orange-light)';
-      tag.style.color = 'var(--orange)';
-    } else {
-      dropEl.classList.remove('has-file');
-      label.textContent = 'Déposer le YAML de l\'AO';
-      sub.textContent   = 'ou cliquer pour sélectionner';
-      notice.textContent = 'Sans AO → CV générique (tous projets par score)';
-      notice.classList.remove('active');
-      clearBtn.style.display = 'none';
-      tag.textContent = 'Optionnel';
-      tag.style.background = '';
-      tag.style.color = '';
-    }
-    updateGenerateBtn();
-  }
+  return yaml;
+}
 
-  function clearAo() {
-    aoInput.value = '';
-    setAoFile(null);
-  }
+function getRealIsations(memberId) {
+  return [...document.querySelectorAll(`#mf-${memberId}-realisations input[type="text"]`)]
+    .map(i=>i.value.trim()).filter(Boolean);
+}
 
-  // --- Générer ---
-  async function generate() {
-    const ids = getSelectedIds();
-    if (!ids.length) return;
+function getSelectedComps(memberId) {
+  return [...(document.querySelectorAll(`#mf-${memberId}-comp-families input:checked`) || [])]
+    .map(cb=>cb.value);
+}
 
-    const btn = document.getElementById('btn-generate');
-    btn.disabled = true;
+function getNewComps(memberId) {
+  const list = document.getElementById(`mf-${memberId}-new-comps`);
+  if (!list) return [];
+  return [...list.querySelectorAll('.new-comp-row')].map(row => {
+    const n = row.id.split('-').pop();
+    const sectionKey = document.getElementById(`nc-${memberId}-${n}-section`)?.value || '';
+    const sectionFamily = ficheCompetences.find(f => f.key === sectionKey);
+    return {
+      nom: document.getElementById(`nc-${memberId}-${n}-nom`)?.value.trim() || '',
+      section: sectionKey,
+      section_label: sectionFamily?.label || sectionKey,
+    };
+  }).filter(nc => nc.nom && nc.section);
+}
 
-    const progress      = document.getElementById('progress-section');
-    const progressBar   = document.getElementById('progress-bar');
-    const progressLabel = document.getElementById('progress-label');
-    const resultsSection = document.getElementById('results-section');
-    const resultList    = document.getElementById('result-list');
+// ── Utilitaires ──────────────────────────────────────────────────────
 
-    progress.style.display = 'block';
-    resultsSection.style.display = 'none';
-    resultList.innerHTML = '';
-    progressBar.style.width = '20%';
-    progressBar.style.background = '';
-    const label = aoFile
-      ? `Génération de ${ids.length} CV(s) ciblé(s)…`
-      : `Génération de ${ids.length} CV(s) générique(s)…`;
-    progressLabel.textContent = label;
-    hideError();
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escJs(s){if(!s)return'';return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function yamlStr(s){if(s===null||s===undefined)return'""';s=String(s);if(!s)return'""';if(/[:#,\[\]{}|>&*!'"@%`]/.test(s)||s.startsWith(' ')||s.endsWith(' ')||s.includes('\n'))return'"'+s.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')+'"';return s;}
+function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function downloadText(text, filename){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/yaml'}));a.download=filename;a.click();}
 
-    const formData = new FormData();
-    if (aoFile) formData.append('ao_yaml', aoFile);
-    ids.forEach(id => formData.append('collaborateurs', id));
-    formData.append('max_projets', document.getElementById('max-projets').value);
-    formData.append('max_pages',   document.getElementById('max-pages').value);
-    formData.append('inclure_parcours', document.getElementById('inclure-parcours').checked ? 'true' : 'false');
-
-    progressBar.style.width = '50%';
-
-    try {
-      const res = await fetch('/api/generate', { method: 'POST', body: formData });
-      progressBar.style.width = '90%';
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: 'Erreur inconnue' }));
-        throw new Error(err.detail || 'Erreur serveur');
-      }
-
-      const contentType = res.headers.get('content-type') || '';
-      const disposition = res.headers.get('content-disposition') || '';
-      const filename = (disposition.match(/filename="(.+?)"/) || [])[1] || 'cvs.zip';
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      progressBar.style.width = '100%';
-      progressLabel.textContent = 'Terminé !';
-      resultsSection.style.display = 'block';
-
-      if (contentType.includes('zip')) {
-        const dlAll = document.getElementById('btn-dl-all');
-        dlAll.href = url; dlAll.download = filename;
-        document.getElementById('results-actions').style.display = 'block';
-        resultList.innerHTML = `
-          <div class="result-item ok">
-            <div class="result-status">✅</div>
-            <div class="result-info">
-              <div class="result-name">${ids.length} CVs générés</div>
-              <div class="result-detail">Téléchargez le ZIP ci-dessus</div>
-            </div>
-          </div>`;
-      } else {
-        document.getElementById('results-actions').style.display = 'none';
-        const a = document.createElement('a');
-        a.href = url; a.download = filename; a.click();
-        const collab = collaborateurs.find(c => ids[0] === c.id);
-        resultList.innerHTML = `
-          <div class="result-item ok">
-            <div class="result-status">✅</div>
-            <div class="result-info">
-              <div class="result-name">${collab?.display || filename}</div>
-              <div class="result-detail">${filename}</div>
-            </div>
-            <div class="result-actions">
-              <a href="${url}" download="${filename}" class="btn-dl">⬇ Re-télécharger</a>
-            </div>
-          </div>`;
-      }
-
-    } catch (e) {
-      progressBar.style.width = '100%';
-      progressBar.style.background = '#EF4444';
-      progressLabel.textContent = 'Erreur';
-      showError('Erreur lors de la génération : ' + e.message);
-    } finally {
-      btn.disabled = false;
-      updateGenerateBtn();
-      setTimeout(() => {
-        progress.style.display = 'none';
-        progressBar.style.width = '0%';
-        progressBar.style.background = '';
-      }, 2000);
-    }
-  }
-
-  function showError(msg) {
-    const el = document.getElementById('error-banner');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
-  function hideError() {
-    document.getElementById('error-banner').style.display = 'none';
-  }
-
-  loadCollaborateurs();
+// ── Init ──────────────────────────────────────────────────────────────
+loadCollaborateurs();
+loadFiltres();
 </script>
 </body>
 </html>

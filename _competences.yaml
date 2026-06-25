@@ -1,0 +1,908 @@
+# =============================================================================
+# VOCABULAIRE CONTRÔLÉ DES COMPÉTENCES — Camptocamp (SOURCE UNIQUE)
+# =============================================================================
+# RÈGLE : les champs `competences:` des projets et `items:` des catégories
+# ne peuvent employer QUE des libellés présents ici, écrits À L'IDENTIQUE.
+# POUR AJOUTER : l'ajouter ici d'abord (sous la bonne famille), puis dans les fiches.
+# =============================================================================
+
+# Bibliothèques et frameworks cartographiques web
+cartographie_web:
+  - Addok
+  - BAN
+  - Baremaps
+  - Cartoweb
+  - CesiumJS
+  - d-inkmap
+  - Deck.GL
+  - Descartes
+  - GeoExt
+  - GeoGig
+  - GeoEngine
+  - GeoMapFish
+  - GeoNetwork-UI
+  - GeoNode
+  - geostyler
+  - H3
+  - HERE
+  - inkmap
+  - Leaflet
+  - Locator
+  - Mapbox
+  - Mapbox GL
+  - MapFish
+  - MapFish Print
+  - MapLibre
+  - Mapnik
+  - MapStore
+  - mviewer
+  - Ngeo
+  - Nominatim
+  - ol-Cesium
+  - ol-ext
+  - OpenLayers
+  - OpenStreetMap
+  - OpenTripPlanner
+  - Overture Maps
+  - PMTiles
+  - QWC2
+  - TileServer-gl
+  - Tippecanoe
+  - Turf.js
+  - VCMap
+  - Vector Tiles
+  - ZooProject
+
+# Serveurs cartographiques et services tuiles
+serveurs_carto:
+  - G3W Suite
+  - Geofence
+  - GeoNetwork
+  - GeoServer
+  - GeoServer ACL
+  - GeoServer Cloud
+  - GeoWebCache
+  - MapCache
+  - Mapguide Opensource
+  - MapProxy
+  - Mapscript
+  - Mapserver
+  - Martin
+  - QGIS Server
+  - Tegola
+  - TileCache
+  - TileCloud
+  - TileCloud-chain
+
+# SIG bureau, plugins QGIS et bindings
+sig_desktop:
+  - ArcGIS
+  - ArcObject
+  - ArcSDE
+  - ENVI IDL
+  - ESRI
+  - Geoform
+  - GRASS GIS
+  - MapInfo
+  - Mergin Maps
+  - OTB
+  - Plugin QGIS
+  - PyQGIS
+  - PyQt
+  - QGIS
+  - QML
+  - Qt
+  - Qt Designer
+  - QtCreator
+  - uDig
+
+# Catalogues, métadonnées, standards OGC et open data
+catalogues_metadonnees:
+  - CKAN
+  - CSW
+  - EDIGéo
+  - geocat.ch
+  - GeoJSON
+  - geOrchestra
+  - Géosource
+  - IDG
+  - IDS
+  - IFC
+  - IGN
+  - Infrastructure de données spatiales
+  - INSPIRE
+  - Métadonnées OGC
+  - OGC standards
+  - OpenData
+  - Shapefile
+  - SLD
+  - UTFGrid
+  - WFS
+  - WMS
+  - WMTS
+  - WPS
+
+# Bases de données relationnelles, NoSQL, ORMs
+bases_de_donnees:
+  - Alembic
+  - Arrow
+  - ClickHouse
+  - CouchDB
+  - Doctrine
+  - DuckDB
+  - ElasticSearch
+  - GeoAlchemy
+  - Hibernate
+  - JDBC
+  - JPA
+  - MariaDB
+  - MongoDB
+  - MS Access
+  - MySQL
+  - Neo4j
+  - NoSQL
+  - Normalisation
+  - Oracle
+  - Oracle Spatial
+  - pgRouting
+  - pgvector
+  - PL/SQL
+  - PostGIS
+  - PostgreSQL
+  - Redis
+  - Sequelize
+  - SpatiaLite
+  - SQL
+  - SQL Server
+  - SQLAlchemy
+  - SQLite
+  - Standardisation BDD relationnelles
+  - Sybase
+  - TypeORM
+
+# ETL, formats et transformation de données
+etl_donnees:
+  - 3D Tiles
+  - Airflow
+  - Dagster
+  - ETL
+  - Fiona
+  - FME
+  - GDAL/OGR
+  - GeoPandas
+  - GeoTools
+  - GPKG
+  - GPX
+  - ImageIO-Ext
+  - JSON
+  - Kettle
+  - KML
+  - Logstash
+  - Matplotlib
+  - Numpy
+  - Pandas
+  - Parquet
+  - PIL/Pillow
+  - SciPy
+  - Shapely
+  - SOAP
+  - SpatialDataIntegrator
+  - Spark
+  - Talend
+  - Web-services
+  - XML
+  - XSL
+  - XSLT
+
+# Langages de programmation
+langages:
+  - .NET
+  - Bash
+  - C
+  - C#
+  - C++
+  - Crystal
+  - Fortran
+  - Go
+  - Groovy
+  - Java
+  - JavaScript
+  - Matlab
+  - MPI
+  - Multi-threading
+  - Objective-C
+  - OpenMP
+  - Perl
+  - PHP
+  - PowerShell
+  - programmation fonctionnelle
+  - programmation orientée objet
+  - Python
+  - R
+  - Ruby
+  - Ruby on Rails
+  - Scala
+  - Shell
+  - Tcl
+  - TypeScript
+  - VBA
+  - Visual Basic
+
+# Frameworks backend (Python, Node, Java…)
+frameworks_backend:
+  - Akka
+  - Colander
+  - CORBA
+  - Deform
+  - Django
+  - Express.js
+  - FastAPI
+  - Flask
+  - Hapi
+  - Java Wicket Framework
+  - JBoss
+  - JMS
+  - JSF
+  - Laravel
+  - Mako
+  - Marshmallow
+  - NestJS
+  - Node.js
+  - Play Framework
+  - Pylons
+  - Pyramid
+  - Spray.io
+  - Spring
+  - Spring Boot
+  - Spring Cloud
+  - Struts
+  - Swing
+  - Symfony
+  - Tomcat
+  - Wicket
+  - Yii2
+  - Zend Framework
+
+# Frameworks et libs front-end
+frameworks_frontend:
+  - AJAX
+  - Akita
+  - Angular
+  - AngularJS
+  - Backbone.js
+  - Bootstrap
+  - Canvas
+  - CSS
+  - D3
+  - Dojo
+  - ExtJS
+  - Google Closure Compiler
+  - Google Closure Library
+  - HTML
+  - i18next
+  - jQuery
+  - Less
+  - Lit
+  - Lit Elements
+  - Marionette
+  - Moment.js
+  - NgRx
+  - Nuxt
+  - Nx
+  - Parcel
+  - Pinia
+  - PrimeVue
+  - React
+  - Redux
+  - RxJS
+  - Sass
+  - Scriptaculous
+  - Solid
+  - SSE
+  - Storybook
+  - Svelte
+  - TailwindCSS
+  - Vite
+  - Vitepress
+  - Vue.js
+  - Vuetify
+  - Web Components
+  - WebSocket
+  - Webpack
+
+# Tests et qualité logicielle
+tests:
+  - Chai
+  - Cypress
+  - Fuzzing
+  - Gatling
+  - Jasmine
+  - Jest
+  - Junit
+  - k6
+  - Mocha
+  - Pair programming
+  - PHPUnit
+  - Puppeteer
+  - pytest
+  - rspec
+  - TDD
+  - Tests de charge
+  - Tests fonctionnels
+  - Tests unitaires
+  - Vitest
+
+# Outils développeur (IDE, VCS, build, standards API, collaboration)
+outils_dev:
+  - Architecture logicielle
+  - Bazaar
+  - Clean Architecture
+  - code review
+  - Design patterns
+  - Discourse
+  - Eclipse IDE
+  - GitHub
+  - GitLab
+  - Gogs
+  - Google Docs
+  - ITESOFT.FreeMind
+  - LaTeX
+  - Makefile
+  - Maven
+  - Microservices
+  - MS Office
+  - MS SharePoint
+  - npm
+  - OpenAPI
+  - OpenOffice
+  - Papyrus
+  - Redmine
+  - REST API
+  - SCM
+  - SVN
+  - Thunderbird
+  - Trac
+  - UML
+  - Visual Studio
+  - Visual Studio Code
+
+# Infrastructure, cloud, OS et DevOps/CI-CD
+infrastructure:
+  - Ansible
+  - Apache
+  - ArgoCD
+  - Augeas
+  - AWS
+  - Azure
+  - CentOS
+  - Ceph
+  - CI/CD
+  - Cloud Native
+  - CloudSigma
+  - Corosync
+  - Debian
+  - Dex
+  - DigitalOcean
+  - Docker
+  - DRBD
+  - Exoscale
+  - Fedora
+  - FreeBSD
+  - FreeIPA
+  - Gandi
+  - Gentoo
+  - GitLab CI
+  - GlusterFS
+  - GNU/Linux
+  - Google Cloud
+  - Heartbeat
+  - Helm
+  - Hetzner
+  - IIS
+  - Jenkins
+  - k3s
+  - Kafka
+  - Keepalived
+  - Kubernetes
+  - Kustomize
+  - KVM
+  - Linode
+  - LXC
+  - macOS
+  - Mcollective
+  - Nginx
+  - Nomad
+  - OpenShift
+  - OpenStack
+  - OpenVZ
+  - Oracle Cloud
+  - OVH
+  - Pacemaker
+  - Packer
+  - Podman
+  - Prometheus
+  - Puppet
+  - PXE
+  - Rackspace
+  - Rancher
+  - RedHat
+  - Samba
+  - Scaleway
+  - Slackware
+  - Suse
+  - Telegraf
+  - Terraform
+  - Traefik
+  - Travis CI
+  - TripleO
+  - Ubuntu
+  - Vagrant
+  - Varnish
+  - VirtualBox
+  - VMware
+  - VMware Tanzu
+  - Vultr
+  - Windows
+  - Windows Server
+  - Xen
+  - Zeppelin
+
+# Réseau, télécom et sécurité
+reseau_telecom_securite:
+  - Administration réseau
+  - Antispam
+  - Architecture réseau
+  - Asterisk
+  - Asterisk AGI
+  - Asterisk PBX
+  - Bluetooth Low Energy
+  - CAS
+  - Cisco IOS
+  - Concepts de sécurité
+  - Cryptographie
+  - CTF
+  - Cybersécurité
+  - DELL SonicWALL
+  - DHCP
+  - DNS
+  - Firewall
+  - Forensique
+  - Hardening
+  - IPSec
+  - IPTables
+  - ISO 27001
+  - Jabber
+  - Kamailio
+  - OAuth
+  - OpenLDAP
+  - OpenVAS
+  - OpenWRT
+  - OSI
+  - Pentest
+  - Reverse de binaire
+  - Snort
+  - Sophos
+  - SSH
+  - SSL-VPN
+  - TCP/IP
+  - WiFi
+  - WiFi Ruckus
+  - Zitadel
+
+# Monitoring, observabilité et BI
+monitoring_bi:
+  - AlertManager
+  - CollectD
+  - Crystal Reports
+  - ELK
+  - FluentD
+  - Grafana
+  - Graphite
+  - Icinga
+  - Kibana
+  - Logcheck
+  - Loki
+  - Metabase
+  - MRTG
+  - Nagios
+  - Netdata
+  - Power BI
+  - PRTG
+  - Reporting
+  - Riemann
+  - RRDtool
+  - Superset
+  - Syslog
+  - Zabbix
+  - Zenoss
+
+# IA, LLM, machine learning et computer vision
+ia_ml:
+  - Architecture multi-agents
+  - Arize Phoenix
+  - Chatbots IA
+  - Claude Code
+  - GraphRAG
+  - IA générative
+  - LangChain
+  - LangGraph
+  - LLM
+  - MCP
+  - MCP servers
+  - OpenCV
+  - Orchestration d'agents
+  - RAG
+  - Scikit-Image
+  - Traitement de signal
+  - vibe coding
+
+# ERP, Odoo et connecteurs
+erp_odoo:
+  - ERP Intégration et développement
+  - EverwinSX
+  - Gestion de stock
+  - Magento
+  - Magento Connector
+  - Microsoft Dynamics AX
+  - MRP
+  - OCA
+  - Odoo
+  - Ooor
+  - OpenERP
+  - OpenObject
+  - ProConcept ERP
+
+# Visualisation 3D et graphisme temps réel
+3d_visualisation:
+  - 2D/3D Infographies
+  - Babylon.js
+  - Blender
+  - Giro3D
+  - GLSL
+  - ITK
+  - OBJ
+  - OpenGL
+  - potree
+  - Processing
+  - Qt3D
+  - Simulink
+  - Three.js
+  - Unity
+  - WebGL
+
+# Développement mobile
+mobile:
+  - Android
+  - Application mobile
+  - Cross-plateforme
+  - Ionic 5
+  - iOS
+
+# Recherche et méthodes UX
+design_ux:
+  - Ateliers co-conception
+  - Benchmarking
+  - Conduite d'interview
+  - Ergonomie
+  - Recherche utilisateurs
+  - Tests utilisateurs
+  - UX audit
+  - User journey and information architecture
+  - Wireframes
+
+# Design UI — visuels, outils et pratiques
+design_ui:
+  - Charte graphique
+  - Direction artistique
+  - Figma
+  - Iconographie
+  - Maquettes
+  - Prototypes interactifs
+  - Responsive design
+  - Système de grilles
+  - Typographie
+
+# Design systems
+design_systems:
+  - Accessibilité WCAG
+  - Atomic Design
+  - Bibliothèque de composants
+  - Composants réutilisables
+  - Design System de l'État (DSFR)
+  - Design System Oblique (Confédération suisse)
+  - Design tokens
+  - Documentation de composants
+  - Gouvernance design system
+  - Style guide
+  - Variables Figma
+
+# CMS et plateformes web éditoriales
+cms:
+  - CMS personnalisé
+  - Drupal 7
+  - Joomla
+  - Squarespace
+  - Typo3
+  - Wordpress
+
+# Gestion de projet, conseil et management
+gestion_conseil:
+  - Accueil collaborateurs
+  - Administration RH
+  - Agile
+  - Analyse de besoin
+  - Analyse des offres
+  - Analyse et cadrage
+  - Assistance à la maîtrise d'ouvrage
+  - Avant-ventes
+  - Business Unit Management
+  - Cadrage fonctionnel
+  - Cahiers des charges
+  - Chef de projet
+  - Comptabilité
+  - Comptabilité immobilière
+  - Conseil
+  - Conseil MOA
+  - Coordination
+  - Développement commercial
+  - Direction de programme
+  - Direction technique
+  - Élaboration de spécifications
+  - Évaluation des risques
+  - Facturation
+  - Feuilles de temps
+  - Finance et comptabilité
+  - Finances
+  - Gestion d'équipe
+  - Gestion de backlog
+  - Gestion de budget
+  - Gestion de projet
+  - Gestion des ressources humaines
+  - Gestion des risques
+  - Gestion des salaires
+  - Hermes 5
+  - Infrastructure Management
+  - Jira
+  - Kanban
+  - Management de projets IT
+  - Management de proximité
+  - Membre COPIL
+  - Membre PSC
+  - Mentorat
+  - Plan de Management de Programme
+  - Planification des ressources
+  - Planification et pilotage de projets
+  - Présences
+  - Product Owner
+  - Qualité
+  - Recrutement
+  - Rédaction cahier des charges
+  - Rédaction de spécifications fonctionnelles et techniques
+  - release management
+  - Responsable d'agence
+  - SAFe
+  - Salaires/RH
+  - Scrum
+  - Scrum Master
+  - Spécifications fonctionnelles et techniques
+  - Suivi d'apprentis
+  - Suivi financier
+  - Team Leader
+  - XP
+
+# ---- DOMAINES ---------------------------------------------------------------
+# Référentiel des domaines utilisés dans les champs `domaines:` des projets.
+# Utilisé par le générateur de CVs pour les filtres de ciblage AO.
+domaines:
+  principaux:
+    - id: geospatial
+      label: "Géospatial"
+      aliases: [geospatial, gis]
+    - id: developpement
+      label: "Développement"
+      aliases: [developpement, "développement"]
+    - id: infrastructure
+      label: "Infrastructure"
+      aliases: [infrastructure, "systèmes"]
+    - id: erp
+      label: "ERP / Odoo"
+      aliases: [erp]
+    - id: business
+      label: "Business & Conseil"
+      aliases: [business]
+    - id: design
+      label: "Design & UX"
+      aliases: [design]
+  sous_domaines:
+    - id: 3d
+      label: "3D / Visualisation 3D"
+      aliases: [3d, 3D]
+    - id: administration
+      label: "Administration"
+      aliases: [administration]
+    - id: agriculture
+      label: "Agriculture"
+      aliases: [agriculture]
+    - id: archeologie
+      label: "Archéologie"
+      aliases: [archeologie]
+    - id: backend
+      label: "Backend"
+      aliases: [backend]
+    - id: cadastre
+      label: "Cadastre"
+      aliases: [cadastre]
+    - id: cartographie
+      label: "Cartographie"
+      aliases: [cartographie, cartographie-web]
+    - id: cloud
+      label: "Cloud"
+      aliases: [cloud]
+    - id: conseil
+      label: "Conseil"
+      aliases: [conseil]
+    - id: crm
+      label: "CRM"
+      aliases: [crm]
+    - id: defense
+      label: "Défense"
+      aliases: [defense]
+    - id: devops
+      label: "DevOps"
+      aliases: [devops, DevOps]
+    - id: drone
+      label: "Drone / UAV"
+      aliases: [drone]
+    - id: e-commerce
+      label: "E-commerce"
+      aliases: [e-commerce]
+    - id: eau
+      label: "Eau"
+      aliases: [eau]
+    - id: embedded
+      label: "Embarqué / IoT"
+      aliases: [embedded, iot]
+    - id: energie
+      label: "Énergie"
+      aliases: [energie]
+    - id: environnement
+      label: "Environnement"
+      aliases: [environnement]
+    - id: finance
+      label: "Finance"
+      aliases: [finance]
+    - id: formation
+      label: "Formation"
+      aliases: [formation]
+    - id: geoportail
+      label: "Géoportail"
+      aliases: [geoportail, "géoportail"]
+    - id: gestion-projet
+      label: "Gestion de projet"
+      aliases: [gestion-projet, "gestion interne"]
+    - id: gouvernance
+      label: "Gouvernance open source"
+      aliases: [gouvernance]
+    - id: halieutique
+      label: "Halieutique"
+      aliases: [halieutique]
+    - id: humanitaire
+      label: "Humanitaire"
+      aliases: [humanitaire]
+    - id: hydrologie
+      label: "Hydrologie"
+      aliases: [hydrologie]
+    - id: ia
+      label: "IA / Machine learning"
+      aliases: [ia]
+    - id: immobilier
+      label: "Immobilier"
+      aliases: [immobilier]
+    - id: impression
+      label: "Impression / Carto papier"
+      aliases: [impression]
+    - id: logistique
+      label: "Logistique"
+      aliases: [logistique]
+    - id: management
+      label: "Management"
+      aliases: [management]
+    - id: metadonnees
+      label: "Métadonnées / Catalogues"
+      aliases: [metadonnees, metadata]
+    - id: meteorologie
+      label: "Météorologie"
+      aliases: [meteorologie]
+    - id: migration
+      label: "Migration"
+      aliases: [migration]
+    - id: mobile
+      label: "Mobile"
+      aliases: [mobile]
+    - id: modelisation-urbaine
+      label: "Modélisation urbaine"
+      aliases: [modelisation-urbaine]
+    - id: mobilite
+      label: "Mobilité"
+      aliases: ["mobilité"]
+    - id: networking
+      label: "Réseau / Télécoms"
+      aliases: [networking]
+    - id: neurosciences
+      label: "Neurosciences"
+      aliases: [neurosciences]
+    - id: ocean
+      label: "Océan / Milieu marin"
+      aliases: [ocean]
+    - id: open-data
+      label: "Open data"
+      aliases: ["open data", opendata]
+    - id: open-source
+      label: "Open source"
+      aliases: ["open source"]
+    - id: patrimoine
+      label: "Patrimoine"
+      aliases: [patrimoine]
+    - id: product-ownership
+      label: "Product ownership"
+      aliases: [product-ownership]
+    - id: qgis
+      label: "QGIS"
+      aliases: [qgis]
+    - id: rd
+      label: "R&D"
+      aliases: [rd]
+    - id: recherche
+      label: "Recherche"
+      aliases: [recherche]
+    - id: rh
+      label: "RH"
+      aliases: [rh]
+    - id: risques-naturels
+      label: "Risques naturels"
+      aliases: ["risques naturels", risques-naturels]
+    - id: routing
+      label: "Routage / Navigation"
+      aliases: [routing]
+    - id: secours
+      label: "Secours"
+      aliases: [secours]
+    - id: securite
+      label: "Sécurité informatique"
+      aliases: [securite]
+    - id: securite-civile
+      label: "Sécurité civile"
+      aliases: [securite-civile]
+    - id: statistiques
+      label: "Statistiques"
+      aliases: [statistiques]
+    - id: teledetection
+      label: "Télédétection"
+      aliases: [teledetection]
+    - id: tourisme
+      label: "Tourisme"
+      aliases: [tourisme]
+    - id: traitement-image
+      label: "Traitement d'image"
+      aliases: [traitement-image]
+    - id: traitement-signal
+      label: "Traitement du signal"
+      aliases: [traitement-signal]
+    - id: transport
+      label: "Transport"
+      aliases: [transport]
+    - id: urbanisme
+      label: "Urbanisme"
+      aliases: [urbanisme]
+    - id: urgences
+      label: "Urgences"
+      aliases: [urgences]
+    - id: visualisation
+      label: "Visualisation de données"
+      aliases: [visualisation]
+    - id: web
+      label: "Web"
+      aliases: [web]
+    - id: websig
+      label: "WebSIG"
+      aliases: [websig]

@@ -12,3 +12,6 @@ venv/
 # Sorties temporaires
 sorties/
 *.pdf
+
+# Variables d'environnement locales (secrets)
+.env

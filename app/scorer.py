@@ -3,30 +3,80 @@ Moteur de scoring et projection AO → données CV.
 Porté depuis build-cv.py du skill c2c-cv-generator.
 """
 import datetime
+import re
+import unicodedata
+
+
+# ---------------------------------------------------------------------------
+# Normalisation des domaines
+# ---------------------------------------------------------------------------
+
+def _norm_domain(d: str) -> str:
+    """Normalise un label de domaine pour comparaison insensible aux accents/casse/séparateurs.
+
+    Exemples :
+        "Géospatial"     → "geospatial"
+        "open source"    → "open-source"
+        "risques naturels" → "risques-naturels"
+        "développement"  → "developpement"
+    """
+    d = d.lower().strip()
+    # Supprimer les accents (NFD + strip combining chars)
+    d = ''.join(c for c in unicodedata.normalize('NFD', d)
+                if unicodedata.category(c) != 'Mn')
+    # Normaliser les séparateurs (espaces, underscores → tirets)
+    d = re.sub(r'[\s_]+', '-', d)
+    return d
 
 
 # ---------------------------------------------------------------------------
 # Scoring projet
 # ---------------------------------------------------------------------------
 
+def _annee_projet(projet: dict) -> int | None:
+    """Extrait l'année la plus récente du champ 'periode' (ex: '2024', '2023-2025', 'Jan 2026')."""
+    periode = str(projet.get("periode", "") or "")
+    annees = re.findall(r'\b(20\d{2}|19\d{2})\b', periode)
+    return max(int(a) for a in annees) if annees else None
+
+
 def score_projet(projet: dict, cible: dict) -> float:
     s = projet.get("poids", 1)
-    dom_ao = {d.lower() for d in cible.get("domaines", [])}
-    dom_p = {d.lower() for d in projet.get("domaines", [])}
+
+    # Récence : bonus fort et dégressif pour que les projets récents
+    # apparaissent toujours en priorité sur 1 page
+    # age 0→+10, 1→+7, 2→+5, 3→+3, 4→+1, 5+→+0
+    annee = _annee_projet(projet)
+    if annee:
+        age = max(0, datetime.date.today().year - annee)
+        recency_bonus = [10, 7, 5, 3, 1, 0]
+        s += recency_bonus[min(age, 5)]
+
+    # Domaines : comparaison normalisée (insensible accents/casse/séparateurs)
+    dom_ao = {_norm_domain(d) for d in cible.get("domaines", [])}
+    dom_p = {_norm_domain(d) for d in projet.get("domaines", [])}
     s += 3 * len(dom_ao & dom_p)
+
     tech_ao = {t.lower() for t in cible.get("technologies_cles", cible.get("technologies", []))}
     # supporte le nouveau champ "competences" (renommage de "technologies")
     tech_p = {t.lower() for t in projet.get("competences", projet.get("technologies", []))}
     s += 2 * len(tech_ao & tech_p)
+
     if cible.get("secteur") and projet.get("secteur") == cible.get("secteur"):
         s += 2
+
     return s
 
 
 def sans_meta(p: dict) -> dict:
     # "technologies" est l'ancien nom du champ, remplacé par "competences" — on l'exclut
     # pour éviter qu'il ne soit transmis au template si les deux coexistent.
-    return {k: v for k, v in p.items() if k not in ("id", "domaines", "secteur", "poids", "technologies")}
+    result = {k: v for k, v in p.items() if k not in ("id", "domaines", "secteur", "poids", "technologies")}
+    # Normalise periode en string — YAML peut parser "2026" comme entier
+    # ce qui ferait planter la comparaison periode != "" dans le template Typst
+    if "periode" in result:
+        result["periode"] = str(result["periode"])
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -69,8 +119,12 @@ def projeter_cible(master: dict, cible: dict) -> dict:
     inclure = set(cible.get("inclure", []))
     exclure = set(cible.get("exclure", []))
     max_p = cible.get("max_projets", 4)
+    annee_min = cible.get("annee_min") or 0
 
     candidats = [p for p in projets if p.get("id") not in exclure]
+    # Filtre par année minimum (exclut les projets trop anciens)
+    if annee_min:
+        candidats = [p for p in candidats if (_annee_projet(p) or 0) >= annee_min]
     forces = [p for p in candidats if p.get("id") in inclure]
     autres = [p for p in candidats if p.get("id") not in inclure]
     autres.sort(key=lambda p: score_projet(p, cible), reverse=True)
@@ -106,10 +160,18 @@ def projeter_cible(master: dict, cible: dict) -> dict:
     return result
 
 
-def projeter_simple(master: dict, max_p: int = 4) -> dict:
-    """Projection sans cible : tri par poids décroissant."""
+def projeter_simple(master: dict, max_p: int = 4, annee_min: int = 0) -> dict:
+    """Projection sans cible : tri par récence puis poids décroissants."""
     projets = master.get("projets", [])
-    tries = sorted(projets, key=lambda p: p.get("poids", 1), reverse=True)[:max_p]
+    annee_courante = datetime.date.today().year
+    if annee_min:
+        projets = [p for p in projets if (_annee_projet(p) or 0) >= annee_min]
+    def _score_simple(p):
+        annee = _annee_projet(p) or 0
+        age = max(0, annee_courante - annee) if annee else 99
+        recency_bonus = [10, 7, 5, 3, 1, 0]
+        return (recency_bonus[min(age, 5)], p.get("poids", 1))
+    tries = sorted(projets, key=_score_simple, reverse=True)[:max_p]
 
     profil = master.get("profil", master.get("profil_general", ""))
     comps = projeter_competences(master, None)
