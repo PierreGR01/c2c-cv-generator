@@ -13,5 +13,3 @@ venv/
 sorties/
 *.pdf
 
-# Variables d'environnement locales (secrets)
-.env
