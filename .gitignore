@@ -1,0 +1,18 @@
+# Credentials — ne jamais committer les valeurs renseignées
+.env
+*.json
+!package.json
+# Token OAuth utilisateur (si stocké dans le repo via GOOGLE_OAUTH_TOKEN_FILE)
+token-*.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Sorties temporaires
+sorties/
+*.pdf
+

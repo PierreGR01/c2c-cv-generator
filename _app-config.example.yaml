@@ -1,0 +1,25 @@
+# =============================================================================
+# _app-config.yaml — configuration de rôle & notifications de C2C Tenders App
+# =============================================================================
+# Déposer ce fichier (renommé "_app-config.yaml") À LA RACINE du dossier Drive
+# (GOOGLE_DRIVE_FOLDER_ID). L'app le lit à chaud (cache 5 min).
+#
+# Le rôle "admin" est ainsi lié à une LISTE, pas à un individu codé en dur :
+# pour changer d'admin, on édite ce fichier sur le Drive — aucun changement de code.
+# =============================================================================
+
+# Comptes Google considérés comme administrateurs.
+# → voient le lien "Fiches maîtres (admin)" et l'éditeur direct.
+# (L'accès réel en écriture reste de toute façon gouverné par les ACL Drive.)
+admins:
+  - prenom.nom@camptocamp.com
+
+notifications:
+  # Envoi d'un e-mail quand un utilisateur ingère une fiche fin de projet
+  # ou modifie une fiche YAML. Le mail part du compte de l'utilisateur agissant.
+  enabled: true
+  # Destinataires. Laisser vide pour notifier automatiquement les `admins`
+  # ci-dessus. Idéalement, mettre un alias de groupe (le rôle, pas la personne) :
+  recipients: []
+  # recipients:
+  #   - cv-admins@camptocamp.com

@@ -1,0 +1,3177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C2C Tenders — Camptocamp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/neat.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF680A;
+      --grey: #7A7F82;
+      --grey-light: #F5F5F5;
+      --ink: #1A1A1A;
+      --white: #FFFFFF;
+      --red: #D7263D;
+      --green: #2E7D4F;
+      --hover: #F5F5F5;
+    }
+    body { font-family:'Inter',system-ui,sans-serif; font-size:14px; color:var(--ink); background:var(--hover); min-height:100vh; }
+
+    /* Header */
+    header { background:var(--white); border-bottom:2px solid var(--orange); padding:0 32px; height:52px; display:flex; align-items:center; gap:0; position:sticky; top:0; z-index:100; }
+    .logo { display:flex; align-items:center; margin-right:32px; flex-shrink:0; }
+    nav { display:flex; align-items:stretch; height:100%; }
+    .tab-btn { padding:0 20px; height:100%; font-size:13px; font-weight:500; color:var(--grey); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:-2px; font-family:'Inter',sans-serif; transition:color .12s; }
+    .tab-btn:hover { color:var(--ink); }
+    .tab-btn.active { color:var(--orange); border-bottom-color:var(--orange); font-weight:600; }
+
+    /* Tab sections */
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+
+    /* Cards */
+    .card { background:var(--white); border:1px solid var(--grey-light); overflow:hidden; }
+    .card-header { padding:12px 20px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:10px; }
+    .card-header h2 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); flex:1; }
+    .card-header .badge { background:var(--orange); color:white; font-size:11px; font-weight:700; padding:2px 8px; min-width:20px; text-align:center; }
+    .card-header .tag-opt { font-size:11px; font-weight:600; color:var(--grey); background:var(--grey-light); padding:2px 8px; }
+    .card-body { padding:16px 20px; }
+
+    /* Buttons */
+    .btn { padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; transition:opacity .15s; }
+    .btn:disabled { opacity:.35; cursor:not-allowed; }
+    .btn-primary { background:var(--orange); color:#fff; }
+    .btn-primary:hover:not(:disabled) { opacity:.88; }
+    .btn-ghost { background:transparent; color:var(--ink); border:1px solid var(--grey-light); }
+    .btn-ghost:hover { background:var(--hover); }
+    .btn-full { width:100%; justify-content:center; }
+    .btn-sm { padding:5px 10px; font-size:12px; }
+
+    /* Form controls */
+    input[type="text"], input[type="search"], textarea, select {
+      width:100%; border:1px solid var(--grey-light); padding:8px 11px; font-size:13px; color:var(--ink); background:var(--white); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s;
+    }
+    input[type="text"]:focus, input[type="search"]:focus, textarea:focus, select:focus { border-color:var(--orange); }
+    /* Supprime les décorations natives des champs search (loupe, croix Chrome/Safari) */
+    input[type="search"] { -webkit-appearance:none; appearance:none; }
+    input[type="search"]::-webkit-search-decoration,
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-results-button { display:none; }
+    textarea { resize:vertical; line-height:1.55; }
+    label.field-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); margin-bottom:5px; }
+    .field-hint { font-size:11px; color:var(--grey); margin-top:4px; }
+    .field-error { font-size:11px; color:var(--red); margin-top:4px; display:none; }
+    .field-error.visible { display:block; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .form-field { margin-bottom:14px; }
+    .form-field:last-child { margin-bottom:0; }
+
+    /* Spinner */
+    .spinner { width:14px; height:14px; border:2px solid var(--grey-light); border-top-color:var(--orange); animation:spin .6s linear infinite; display:inline-block; vertical-align:middle; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ───────────────────────────────────────────────
+       ONGLET 1 — GÉNÉRER CVs
+    ─────────────────────────────────────────────── */
+    #section-cv main { max-width:1446px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px 360px; gap:20px; align-items:start; }
+    .error-banner { grid-column:1/-1; background:var(--white); border:1px solid var(--red); padding:12px 16px; color:var(--red); font-size:13px; display:none; }
+    #col-staff-wrap { grid-column:1; grid-row:1; min-width:0; }
+    #col-right { grid-column:2; grid-row:1; display:flex; flex-direction:column; gap:16px; }
+    #col-actions { grid-column:3; grid-row:1; display:flex; flex-direction:column; gap:16px; }
+    .collab-list { display:flex; flex-direction:column; }
+    .collab-item { display:flex; align-items:center; gap:10px; padding:7px 12px; cursor:pointer; transition:background .12s; user-select:none; }
+    .collab-item:hover { background:var(--hover); }
+    .collab-item.selected { background:var(--hover); border-left:2px solid var(--orange); }
+    .collab-item.selected .collab-name { color:var(--orange); font-weight:600; }
+    .collab-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
+    .collab-item .avatar { width:24px; height:24px; background:var(--grey-light); color:var(--grey); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; transition:background .12s; }
+    .collab-item.selected .avatar, .collab-item:hover .avatar { background:var(--orange); color:white; }
+    .collab-item .collab-name { font-size:13px; font-weight:500; flex:1; }
+    .loading-placeholder { color:var(--grey); font-style:italic; padding:8px 0; }
+    .cat-group { border-bottom:1px solid var(--grey-light); }
+    .cat-group:last-child { border-bottom:none; }
+    .cat-header { display:flex; align-items:center; gap:8px; padding:9px 12px; cursor:pointer; user-select:none; transition:background .12s; }
+    .cat-header:hover { background:var(--hover); }
+    .cat-arrow { font-size:10px; color:var(--grey); transition:transform .2s; width:12px; text-align:center; flex-shrink:0; }
+    .cat-group.collapsed .cat-arrow { transform:rotate(-90deg); }
+    .cat-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); flex:1; }
+    .cat-count { font-size:10px; font-weight:700; color:var(--grey); background:var(--grey-light); padding:1px 7px; }
+    .cat-sel-link { font-size:10px; color:var(--orange); text-decoration:underline; cursor:pointer; opacity:0; transition:opacity .15s; }
+    .cat-header:hover .cat-sel-link { opacity:1; }
+    .cat-group.collapsed .cat-body { display:none; }
+    .cat-body-inner { padding:2px 0 6px; display:grid; grid-template-columns:1fr 1fr; }
+    .collab-tabs-row { display:flex; align-items:stretch; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--grey-light); }
+    .collab-country-tabs { display:flex; flex:1; gap:4px; }
+    .collab-country-tab { flex:1; padding:7px 4px; font-size:12px; font-weight:600; color:var(--grey); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; font-family:'Inter',sans-serif; transition:color .12s; text-align:center; }
+    .collab-country-tab:hover { color:var(--ink); }
+    .collab-country-tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+    .collab-country-tab .cct-count { color:var(--grey); font-weight:500; }
+    .collab-country-tab.active .cct-count { color:var(--orange); }
+    .collab-select-all-wrap { display:flex; align-items:center; flex-shrink:0; padding:0 2px; }
+    .collab-select-all-wrap input[type="checkbox"] { width:16px; height:16px; cursor:pointer; accent-color:var(--orange); }
+    .collab-country { display:none; }
+    .collab-country.active { display:block; }
+    /* ── Filtres AO ── */
+    .filter-field { margin-bottom:14px; }
+    .filter-field:last-child { margin-bottom:0; }
+    .filter-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); margin-bottom:6px; }
+    .filter-radio { display:flex; gap:16px; margin-top:2px; }
+    .filter-radio label { display:flex; align-items:center; gap:6px; font-size:12.5px; cursor:pointer; }
+    .filter-radio input[type="radio"] { accent-color:var(--orange); width:13px; height:13px; }
+    .filter-select { width:100%; border:1px solid var(--grey-light); padding:7px 10px; font-size:13px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; }
+    .filter-select:focus { border-color:var(--orange); }
+
+    /* Multi-select dropdown */
+    .ms-wrap { position:relative; }
+    /* input.ms-search : spécificité (0,1,1) = même niveau que input[type="text"] (0,1,1), mais placé après → cascade gagne */
+    input.ms-search { width:100%; border:1px solid var(--grey-light); padding:7px 10px 7px 30px; font-size:12.5px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s; }
+    input.ms-search:focus { border-color:var(--orange); }
+    .ms-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--grey); pointer-events:none; }
+    .ms-dropdown { border:1px solid var(--grey-light); border-top:none; max-height:220px; overflow-y:auto; display:none; background:var(--white); }
+    .ms-dropdown.open { display:block; }
+    .ms-group-header { padding:5px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); background:#F5F5F5; border-bottom:1px solid var(--grey-light); position:sticky; top:0; }
+    .ms-item { display:flex; align-items:center; gap:8px; padding:5px 10px; cursor:pointer; font-size:12.5px; transition:background .1s; }
+    .ms-item:hover { background:var(--hover); }
+    .ms-item input[type="checkbox"] { accent-color:var(--orange); width:13px; height:13px; flex-shrink:0; }
+    .ms-item.hidden { display:none; }
+    .ms-empty { padding:10px; font-size:12px; color:var(--grey); font-style:italic; }
+    .ms-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; min-height:0; }
+    .ms-chip { display:flex; align-items:center; gap:4px; padding:3px 8px; background:var(--hover); border:1px solid var(--grey-light); font-size:11px; font-weight:500; }
+    .ms-chip button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:12px; line-height:1; padding:0 1px; }
+    .ms-chip button:hover { color:var(--red); }
+
+    #ao-generic-notice { margin-top:8px; font-size:11px; color:var(--grey); text-align:center; }
+    #btn-clear-filters { width:100%; padding:6px; background:none; border:1px solid var(--grey-light); font-size:11px; color:var(--grey); cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; display:none; }
+    #btn-clear-filters:hover { border-color:var(--red); color:var(--red); }
+    .options-grid { display:flex; flex-direction:column; gap:10px; }
+    .option-row { display:flex; align-items:center; justify-content:space-between; }
+    .option-row label { font-size:12px; color:var(--grey); font-weight:500; }
+    .option-row select { width:auto; border:1.5px solid var(--grey-light); padding:5px 8px; font-size:12px; }
+    .option-row input[type="checkbox"] { accent-color:var(--orange); width:15px; height:15px; }
+    #btn-generate { width:100%; padding:13px; background:var(--orange); color:white; border:none; font-size:14px; font-weight:700; cursor:pointer; transition:opacity .15s; font-family:'Inter',sans-serif; }
+    #btn-generate:hover:not(:disabled) { opacity:.88; }
+    #btn-generate:disabled { opacity:.35; cursor:not-allowed; }
+    #progress-section { display:none; }
+    .progress-bar-wrap { background:var(--grey-light); height:4px; overflow:hidden; margin:10px 0 4px; }
+    .progress-bar { height:100%; background:var(--orange); transition:width .4s; width:0%; }
+    .progress-label { font-size:12px; color:var(--grey); }
+    #results-section { display:none; }
+    .result-list { display:flex; flex-direction:column; gap:8px; }
+    .result-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--grey-light); }
+    .result-item.ok { border-color:var(--green); background:var(--white); }
+    .result-item.error { border-color:var(--red); background:var(--white); }
+    .result-info { flex:1; min-width:0; }
+    .result-name { font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .result-detail { font-size:11px; color:var(--grey); margin-top:2px; }
+    .result-actions { display:flex; gap:6px; flex-shrink:0; }
+    .btn-dl { padding:5px 12px; background:var(--orange); color:white; border:none; font-size:11px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; font-family:'Inter',sans-serif; }
+    .btn-dl:hover { opacity:.88; }
+
+    /* ───────────────────────────────────────────────
+       ONGLET 2 — FICHE FIN DE PROJET
+    ─────────────────────────────────────────────── */
+    #section-fiche { background:var(--hover); }
+    .fiche-layout { background:transparent; } /* layout réel défini dans le bloc <style> plus bas (identique à #section-cv main) */
+
+    /* Sections numérotées */
+    .fiche-section { background:var(--white); border:1px solid var(--grey-light); }
+    .fiche-section-header { padding:14px 20px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:12px; }
+    .fiche-section-num { width:24px; height:24px; background:var(--orange); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .fiche-section-title { font-size:13px; font-weight:700; flex:1; }
+    .fiche-section-body { padding:20px; }
+
+    /* Radio secteur */
+    .radio-group { display:flex; gap:20px; }
+    .radio-group label { display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer; }
+    .radio-group input[type="radio"] { accent-color:var(--orange); width:15px; height:15px; }
+
+    /* Grille collaborateurs dans tab fiche */
+    .fiche-collab-grid { border:1px solid var(--grey-light); max-height:320px; overflow-y:auto; }
+    .fiche-collab-item { display:flex; align-items:center; gap:10px; padding:8px 14px; cursor:pointer; transition:background .1s; user-select:none; border-bottom:1px solid var(--grey-light); }
+    .fiche-collab-item:last-child { border-bottom:none; }
+    .fiche-collab-item:hover { background:var(--hover); }
+    .fiche-collab-item.selected { background:var(--hover); border-left:3px solid var(--orange); }
+    .fiche-collab-item.selected .fca-name { color:var(--orange); font-weight:600; }
+    .fiche-collab-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
+    .fca-avatar { width:28px; height:28px; background:var(--grey-light); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--grey); flex-shrink:0; }
+    .fiche-collab-item.selected .fca-avatar { background:var(--orange); color:white; }
+    .fca-info { flex:1; min-width:0; }
+    .fca-name { font-size:13px; font-weight:500; }
+    .fca-role { font-size:11px; color:var(--grey); }
+    .no-results { padding:14px; color:var(--grey); font-size:13px; font-style:italic; }
+
+    /* ── Tabs membres ─────────────────────────────── */
+    .membre-tabs-bar {
+      border-bottom: 1px solid var(--grey-light);
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+    }
+    .membre-tabs {
+      display: flex;
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+    .membre-tabs::-webkit-scrollbar { display:none; }
+    .tabs-scroll-btn {
+      background: var(--white);
+      border: none;
+      border-right: 1px solid var(--grey-light);
+      cursor: pointer;
+      padding: 0 10px;
+      font-size: 16px;
+      line-height: 1;
+      color: var(--grey);
+      flex-shrink: 0;
+      display: none;
+      align-items: center;
+      transition: background .1s, color .1s;
+    }
+    .tabs-scroll-btn:hover { background: var(--hover); color: var(--dark); }
+    .tabs-scroll-btn.right { border-right: none; border-left: 1px solid var(--grey-light); }
+    .membre-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--grey);
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      margin-bottom: -1px;
+      transition: color .12s;
+      user-select: none;
+    }
+    .membre-tab:hover { color: var(--ink); }
+    .membre-tab.active {
+      color: var(--orange);
+      border-bottom-color: var(--orange);
+      font-weight: 600;
+    }
+    .tab-avatar {
+      width: 22px; height: 22px;
+      background: var(--grey-light);
+      color: var(--grey);
+      font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .12s, color .12s;
+    }
+    .membre-tab.active .tab-avatar { background: var(--orange); color: white; }
+    .tab-sync-check {
+      display: none;
+      accent-color: var(--orange);
+      width: 13px; height: 13px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    /* Sync mode: show checkboxes, highlight synced tabs */
+    .sync-mode-on .tab-sync-check { display: inline-block; }
+    .membre-tab.synced .tab-avatar { background: var(--orange); color: white; outline: 2px solid var(--orange); outline-offset: 1px; }
+
+    /* Sync mode toggle button area */
+    .sync-mode-btn-wrap {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border-left: 1px solid var(--grey-light);
+      flex-shrink: 0;
+    }
+    #btn-sync-mode {
+      font-size: 11px;
+      padding: 5px 10px;
+      white-space: nowrap;
+      transition: border-color .12s, color .12s;
+    }
+    #btn-sync-mode.active {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: var(--white);
+    }
+
+    /* Sync mode banner inside form panel */
+    .sync-banner {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      background: var(--white);
+      border-top: 1px solid var(--orange);
+      border-bottom: 1px solid var(--orange);
+      font-size: 12px;
+      color: var(--orange);
+      font-weight: 500;
+    }
+    .sync-banner.visible { display: flex; }
+    .sync-banner span { flex: 1; }
+
+    /* Form panels */
+    .membre-form-panels { padding: 24px; }
+    .membre-form-panel { display: none; }
+    .membre-form-panel.active { display: block; }
+
+    /* Domaines checkboxes */
+    .domaines-grid { display:flex; flex-wrap:wrap; gap:8px; }
+    .domaine-chip { display:flex; align-items:center; gap:6px; padding:5px 12px; border:1px solid var(--grey-light); cursor:pointer; font-size:12px; font-weight:500; user-select:none; transition:all .12s; }
+    .domaine-chip input[type="checkbox"] { accent-color:var(--orange); width:13px; height:13px; }
+    .domaine-chip.checked { border-color:var(--orange); background:var(--white); color:var(--orange); }
+    .domaine-group-label { width:100%; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); margin-top:10px; }
+    .domaine-group-label:first-child { margin-top:0; }
+
+    /* Poids */
+    .poids-select { width:auto; min-width:200px; }
+
+    /* Réalisations */
+    .realisations-list { display:flex; flex-direction:column; gap:8px; }
+    .realisation-row { display:flex; align-items:center; gap:8px; }
+    .realisation-num { font-size:12px; font-weight:700; color:var(--grey); width:16px; flex-shrink:0; }
+
+    /* Compétences */
+    .comp-search-wrap { position:relative; margin-bottom:12px; }
+    .comp-search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--grey); pointer-events:none; }
+    input.comp-search { padding-left:32px; }
+    .comp-families { border:1px solid var(--grey-light); max-height:360px; overflow-y:auto; }
+    /* Méta-catégorie (niveau 1) */
+    .comp-meta { border-bottom:1px solid var(--grey-light); }
+    .comp-meta:last-child { border-bottom:none; }
+    .comp-meta-header { display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; user-select:none; background:var(--grey-light); border-bottom:1px solid var(--grey-light); transition:background .1s; }
+    .comp-meta-header:hover { background:var(--hover); }
+    .comp-meta-arrow { font-size:10px; color:var(--orange); transition:transform .2s; }
+    .comp-meta.collapsed .comp-meta-arrow { transform:rotate(-90deg); }
+    .comp-meta.collapsed .comp-meta-body { display:none; }
+    .comp-meta-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); flex:1; }
+    .comp-meta-count { font-size:10px; color:var(--grey); background:var(--white); padding:1px 6px; border:1px solid var(--grey-light); }
+    /* Famille (niveau 2) */
+    .comp-family { border-bottom:1px solid var(--grey-light); }
+    .comp-family:last-child { border-bottom:none; }
+    .comp-family-header { display:flex; align-items:center; gap:8px; padding:7px 12px 7px 20px; cursor:pointer; user-select:none; background:var(--hover); transition:background .1s; }
+    .comp-family-header:hover { background:var(--grey-light); }
+    .comp-family-arrow { font-size:10px; color:var(--grey); transition:transform .2s; }
+    .comp-family.collapsed .comp-family-arrow { transform:rotate(-90deg); }
+    .comp-family.collapsed .comp-family-items { display:none; }
+    .comp-family-label { font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--grey); flex:1; }
+    .comp-family-count { font-size:10px; color:var(--grey); background:var(--grey-light); padding:1px 6px; }
+    .comp-family-items { padding:4px 0; display:flex; flex-wrap:wrap; }
+    .comp-item-label { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 28px; cursor:pointer; font-size:12px; transition:background .1s; min-width:180px; }
+    .comp-item-label:hover { background:var(--hover); }
+    .comp-item-label input { accent-color:var(--orange); width:13px; height:13px; flex-shrink:0; }
+    .comp-item-label.hidden { display:none; }
+    .comp-family.all-hidden { display:none; }
+    .comp-meta.all-hidden { display:none; }
+
+    /* Chips compétences sélectionnées */
+    .comp-chips-selected { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:20px; }
+    .comp-chip-selected { display:flex; align-items:center; gap:5px; padding:4px 10px; background:var(--hover); border:1px solid var(--grey-light); font-size:11px; font-weight:500; }
+    .comp-chip-selected button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:13px; line-height:1; padding:0; }
+    .comp-chip-selected button:hover { color:var(--red); }
+
+    /* Nouvelles compétences */
+    .new-comp-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .new-comp-row { display:grid; grid-template-columns:1fr 2fr auto; gap:8px; align-items:end; }
+    .new-comp-row .form-field { margin-bottom:0; }
+    .btn-remove { padding:8px 10px; background:none; border:1px solid var(--grey-light); color:var(--grey); cursor:pointer; font-size:13px; font-family:'Inter',sans-serif; }
+    .btn-remove:hover { border-color:var(--red); color:var(--red); }
+
+    /* Zone d'erreur + bouton générer */
+    .fiche-errors { background:var(--white); border:1px solid var(--red); padding:12px 16px; color:var(--red); font-size:13px; display:none; }
+    .fiche-errors ul { padding-left:18px; }
+    .fiche-errors ul li { margin-bottom:3px; }
+    #btn-generate-fiche { width:100%; padding:15px; background:var(--orange); color:white; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .15s; }
+    #btn-generate-fiche:hover:not(:disabled) { opacity:.88; }
+    #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
+    .fiche-success { background:var(--white); border:1px solid var(--green); padding:14px 18px; display:none; font-size:13px; color:var(--green); }
+
+    @media(max-width:768px) {
+      #section-cv main { grid-template-columns:1fr; }
+      #col-staff-wrap, #col-right, #col-actions { grid-column:1; grid-row:auto; }
+      .form-row { grid-template-columns:1fr; }
+      .new-comp-row { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 651.79 126.2" height="26" aria-label="Camptocamp" style="display:block;">
+      <style>.lco{fill:#FF680A}.lcg{fill:#7A7F82}</style>
+      <path class="lco" d="M345.09,66.26c0,7.32-4.82,13.52-12.87,13.52c-7.78,0-13.06-6.39-13.06-13.71v-0.19c0-7.32,4.82-13.52,12.87-13.52c7.78,0,13.06,6.39,13.06,13.7V66.26z M358.98,66.08v-0.19c0-14.26-11.39-25.65-26.77-25.65c-15.47,0-26.95,11.58-26.95,25.84v0.18c0,14.26,11.39,25.65,26.76,25.65C347.49,91.91,358.98,80.34,358.98,66.08z"/>
+      <path class="lcg" d="M253.85,66.08c0,8.34-5.56,13.71-12.13,13.71c-6.58,0-12.04-5.46-12.04-13.71v-0.19c0-8.24,5.46-13.71,12.04-13.71c6.57,0,12.13,5.46,12.13,13.71V66.08z M266.52,66.08v-0.19c0-16.58-11.02-25.65-22.6-25.65c-7.32,0-12.04,3.43-15.47,8.06v-7.13h-13.23v64.46h13.23v-21.3c3.33,3.98,7.96,7.41,15.47,7.41C255.68,91.73,266.52,82.65,266.52,66.08z"/>
+      <path class="lcg" d="M206.62,90.8V58.48c0-11.95-6.3-18.24-16.76-18.24c-6.76,0-11.95,2.78-16.3,7.87c-2.59-5-7.5-7.87-13.99-7.87c-7.13,0-11.39,3.8-14.63,7.96v-7.04h-14.08V90.8h14.08V63.11c0-6.67,3.24-10.1,8.52-10.1c5.28,0,8.24,3.43,8.24,10.1V90.8h14.08V63.11c0-6.67,3.24-10.1,8.52-10.1c5.28,0,8.24,3.43,8.24,10.1V90.8H206.62z"/>
+      <path class="lcg" d="M97.95,81.74c-3.99,0-6.43-2.09-6.43-4.74c0-3.06,1.47-4.64,5.87-5.28c9.16-1.35,11.41-2.71,11.41-2.71C110.15,80.2,102.21,81.74,97.95,81.74z M122.44,90.78c0,0-0.08-23.87-0.08-32.23c0-9.89-7.68-18.32-22.15-18.32c-14.71,0-21.42,8.29-21.42,19.16h13.14c0.17-1.15-0.43-7.03,7.86-7.03c5.98,0,8.86,1.76,8.86,4.78c0,8.3-30.43-1.26-30.43,20.78c0,10.69,7.81,13.99,15.12,13.99c11.25,0,15.31-6.35,15.31-6.35l-0.12,5.2L122.44,90.78z"/>
+      <path class="lcg" d="M59.72,72.91c-0.64,2.75-3.78,6.87-10.36,6.87c-7.69,0-12.59-6.11-12.59-13.71v-0.19c0-7.32,5-13.52,12.04-13.52c6.9,0,9.99,3.77,10.92,7.02h13.14c-0.21-6.2-5.9-19.15-23.97-19.15c-15.19,0-26.02,11.67-26.02,25.84v0.18c0,14.17,10.93,25.65,25.84,25.65c17.8,0,23.94-13.16,24.15-19H59.72z"/>
+      <path class="lcg" d="M595.28,66.08c0,8.34-5.56,13.71-12.13,13.71c-6.58,0-12.04-5.46-12.04-13.71v-0.19c0-8.24,5.46-13.71,12.04-13.71c6.57,0,12.13,5.46,12.13,13.71V66.08z M607.95,66.08v-0.19c0-16.58-11.02-25.65-22.6-25.65c-7.32,0-12.04,3.43-15.47,8.06v-7.13h-13.23v64.46h13.23v-21.3c3.33,3.98,7.96,7.41,15.47,7.41C597.12,91.73,607.95,82.65,607.95,66.08z"/>
+      <path class="lcg" d="M548.05,90.8V58.48c0-11.95-6.3-18.24-16.76-18.24c-6.76,0-11.95,2.78-16.3,7.87c-2.59-5-7.5-7.87-13.99-7.87c-7.13,0-11.39,3.8-14.63,7.96v-7.04H472.3V90.8h14.08V63.11c0-6.67,3.24-10.1,8.52-10.1c5.28,0,8.24,3.43,8.24,10.1V90.8h14.08V63.11c0-6.67,3.24-10.1,8.52-10.1c5.28,0,8.24,3.43,8.24,10.1V90.8H548.05z"/>
+      <path class="lcg" d="M439.38,81.74c-3.99,0-6.43-2.09-6.43-4.74c0-3.06,1.47-4.64,5.87-5.28c9.16-1.35,11.41-2.71,11.41-2.71C451.58,80.2,443.64,81.74,439.38,81.74z M463.88,90.78c0,0-0.08-23.87-0.08-32.23c0-9.89-7.68-18.32-22.15-18.32c-14.71,0-21.42,8.29-21.42,19.16h13.14c0.17-1.15-0.43-7.03,7.86-7.03c5.98,0,8.86,1.76,8.86,4.78c0,8.3-30.43-1.26-30.43,20.78c0,10.69,7.8,13.99,15.12,13.99c11.25,0,15.31-6.35,15.31-6.35l-0.12,5.2L463.88,90.78z"/>
+      <path class="lcg" d="M401.15,72.91c-0.64,2.75-3.78,6.87-10.36,6.87c-7.69,0-12.59-6.11-12.59-13.71v-0.19c0-7.32,5-13.52,12.04-13.52c6.9,0,9.99,3.77,10.92,7.02h13.14c-0.21-6.2-5.9-19.15-23.97-19.15c-15.19,0-26.02,11.67-26.02,25.84v0.18c0,14.17,10.93,25.65,25.84,25.65c17.8,0,23.94-13.16,24.15-19H401.15z"/>
+      <g class="lco"><path d="M301.31,79.05c0,0-1.86,0.2-5,0.2c-3.14,0-4.93-1.97-4.93-5.24V53.2h10.26V41.16h-10.26V28.48H277.3v12.69h-7.89V53.2h7.89v22.65c0,11.49,5.77,15.5,14.45,15.5c6.06,0,9.56-0.59,9.56-0.59V79.05z"/></g>
+      <g class="lco">
+        <rect x="617.49" y="20.58" width="2.29" height="2.29"/>
+        <rect x="615.2" y="22.87" width="2.29" height="2.29"/>
+        <rect x="612.92" y="25.15" width="2.29" height="2.29"/>
+        <rect x="610.63" y="27.44" width="2.29" height="2.29"/>
+        <rect x="608.34" y="29.73" width="2.29" height="4.57"/>
+        <polygon points="626.64,32.02 626.64,29.73 624.35,29.73 624.35,25.15 622.06,25.15 622.06,22.87 619.78,22.87 619.78,27.44 617.49,27.44 617.49,29.73 619.78,29.73 619.78,32.02 617.49,32.02 617.49,29.73 615.2,29.73 615.2,32.02 612.92,32.02 612.92,34.3 610.63,34.3 610.63,36.59 608.34,36.59 608.34,34.3 606.06,34.3 606.06,41.16 628.93,41.16 628.93,32.02"/>
+      </g>
+    </svg>
+  </div>
+  <nav>
+    <button class="tab-btn active" id="tab-cv" onclick="switchTab('cv')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Générer des CV
+    </button>
+    <button class="tab-btn" id="tab-fiche" onclick="switchTab('fiche')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Déclarer un projet
+    </button>
+    <div class="nav-spacer"></div>
+    <div class="nav-admin">
+      <button class="tab-btn" id="tab-admin" onclick="toggleAdminMenu(event)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Administration
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-left:2px;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="admin-menu" id="admin-menu">
+        <a onclick="switchTab('admin-collabs')">Éditer les fiches collaborateurs</a>
+        <a onclick="switchTab('admin-donnees')">Éditer les données communes projets</a>
+        <a onclick="switchTab('admin-clients')">Éditer les clients Camptocamp</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     ONGLET 1 — GÉNÉRER DES CVs
+══════════════════════════════════════════════════════ -->
+<div id="section-cv" class="tab-section active">
+<main>
+  <div id="error-banner" class="error-banner"></div>
+  <div id="col-staff-wrap">
+  <div id="col-staff" class="card">
+    <div class="card-header"><h2>Collaborateurs</h2><div class="badge" id="selected-count">0</div></div>
+    <div class="card-body">
+      <div class="collab-tabs-row">
+        <div class="collab-country-tabs" id="collab-country-tabs"></div>
+        <label class="collab-select-all-wrap" title="Tout sélectionner / tout désélectionner">
+          <input type="checkbox" id="collab-select-all-cb" onclick="toggleCollabSelectAll()">
+        </label>
+      </div>
+      <div id="collab-grid"><div class="loading-placeholder">Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- Sélection de l'équipe : profil à afficher par membre -->
+  <div id="profils-membres-section" class="card" style="margin-top:16px;display:none;">
+    <div class="card-header">
+      <h2>Sélection de l'équipe — profil à afficher</h2>
+    </div>
+    <div class="membre-tabs-bar" id="profil-tabs-container">
+      <button class="tabs-scroll-btn" id="profil-tabs-scroll-left" onclick="scrollProfilTabs(-1)">&#8249;</button>
+      <div class="membre-tabs" id="profil-tabs"></div>
+      <button class="tabs-scroll-btn right" id="profil-tabs-scroll-right" onclick="scrollProfilTabs(1)">&#8250;</button>
+    </div>
+    <div class="membre-form-panels" id="profil-panels"></div>
+  </div>
+  </div><!-- /#col-staff-wrap -->
+
+  <div id="col-right">
+    <div class="card">
+      <div class="card-header"><h2>Ciblage AO</h2><span class="tag-opt" id="ao-tag">Optionnel</span></div>
+      <div class="card-body">
+
+        <div class="filter-field">
+          <label class="filter-label">Projets à partir de</label>
+          <select class="filter-select" id="f-annee-min" onchange="onFilterChange()">
+            <option value="0">Toutes années</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Secteur</label>
+          <div class="filter-radio">
+            <label><input type="radio" name="f-secteur" value="" checked onchange="onFilterChange()"> Tous</label>
+            <label><input type="radio" name="f-secteur" value="public" onchange="onFilterChange()"> Public</label>
+            <label><input type="radio" name="f-secteur" value="prive" onchange="onFilterChange()"> Privé</label>
+          </div>
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Domaines</label>
+          <div class="ms-wrap" id="ms-domaines-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-domaines-search" placeholder="Rechercher un domaine…" oninput="filterMsItems('domaines',this.value)" onfocus="openMsDropdown('domaines')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-domaines-dropdown"></div>
+            <div class="ms-chips" id="ms-domaines-chips"></div>
+          </div>
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Compétences clés</label>
+          <div class="ms-wrap" id="ms-comps-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-comps-search" placeholder="Rechercher une compétence…" oninput="filterMsItems('comps',this.value)" onfocus="openMsDropdown('comps')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-comps-dropdown"></div>
+            <div class="ms-chips" id="ms-comps-chips"></div>
+          </div>
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Client à prioriser</label>
+          <div class="ms-wrap" id="ms-clients-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-clients-search" placeholder="Rechercher un client…" oninput="filterMsItems('clients',this.value)" onfocus="openMsDropdown('clients')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-clients-dropdown"></div>
+            <div class="ms-chips" id="ms-clients-chips"></div>
+          </div>
+        </div>
+
+        <div id="ao-generic-notice">Sans filtre → CV générique (tri par récence)</div>
+        <button id="btn-clear-filters" onclick="clearFilters()">✕ Réinitialiser les filtres</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="col-actions">
+    <div class="card">
+      <div class="card-header"><h2>Options</h2></div>
+      <div class="card-body">
+        <div class="options-grid">
+          <div class="option-row"><label for="max-projets">Projets max</label>
+            <select id="max-projets"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="0">Tous</option></select></div>
+          <div class="option-row"><label for="max-pages">Pages max</label>
+            <select id="max-pages"><option value="1" selected>1 page</option><option value="2">2 pages</option><option value="0">Sans limite</option></select></div>
+          <div class="option-row"><label for="inclure-parcours">Parcours professionnel</label>
+            <div><input type="checkbox" id="inclure-parcours" checked style="accent-color:var(--orange);width:15px;height:15px;"></div></div>
+        </div>
+      </div>
+    </div>
+    <button id="btn-generate" onclick="generate()" disabled>Générer les CVs</button>
+    <div id="progress-section" class="card">
+      <div class="card-body">
+        <div class="progress-label" id="progress-label">Génération en cours…</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+    </div>
+    <div id="results-section" class="card">
+      <div class="card-header"><h2>Résultats</h2></div>
+      <div class="card-body">
+        <div id="results-actions" style="margin-bottom:10px;display:none"><a href="#" id="btn-dl-all" class="btn-dl">⬇ Tout télécharger (ZIP)</a></div>
+        <div id="result-list" class="result-list"></div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ONGLET 2 — FICHE FIN DE PROJET
+══════════════════════════════════════════════════════ -->
+<div id="section-fiche" class="tab-section">
+<div class="fiche-layout">
+
+  <!-- COLONNE GAUCHE : collaborateurs + sélection de l'équipe -->
+  <div id="fiche-col-left">
+
+    <!-- Collaborateurs -->
+    <div class="card" id="fiche-s2">
+      <div class="card-header fiche-collab-head" onclick="toggleCollabCard()" title="Réduire / agrandir la liste">
+        <h2>Collaborateurs</h2>
+        <span id="fiche-members-badge" class="badge" style="display:none;">0</span>
+        <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line class="mp-v" x1="12" y1="8" x2="12" y2="16"/></svg>
+      </div>
+      <div class="card-body">
+        <div class="collab-tabs-row">
+          <div class="collab-country-tabs" id="fiche-collab-country-tabs"></div>
+          <label class="collab-select-all-wrap" title="Tout sélectionner / tout désélectionner">
+            <input type="checkbox" id="fiche-select-all-cb" onclick="toggleFicheSelectAll()">
+          </label>
+        </div>
+        <div id="fiche-collab-grid"><div class="loading-placeholder">Chargement des collaborateurs…</div></div>
+        <div class="field-error" id="err-members" style="margin-top:8px;">Sélectionner au moins un membre de l'équipe</div>
+      </div>
+    </div>
+
+    <!-- Sélection de l'équipe : informations par membre -->
+    <div id="fiche-membres-section" class="card" style="display:none;margin-top:16px;">
+      <div class="card-header">
+        <h2>Sélection de l'équipe — informations par membre</h2>
+        <span id="sync-counter" style="font-size:12px;color:var(--grey);font-weight:500;"></span>
+      </div>
+
+      <!-- Tabs bar -->
+      <div class="membre-tabs-bar" id="membre-tabs-container">
+      <button class="tabs-scroll-btn" id="tabs-scroll-left" onclick="scrollMemberTabs(-1)">&#8249;</button>
+      <div class="membre-tabs" id="membre-tabs"></div>
+      <button class="tabs-scroll-btn right" id="tabs-scroll-right" onclick="scrollMemberTabs(1)">&#8250;</button>
+      <div class="sync-mode-btn-wrap">
+        <button class="btn btn-ghost btn-sm" id="btn-sync-mode" onclick="toggleSyncMode()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          Mode commun
+        </button>
+      </div>
+    </div>
+
+    <!-- Sync banner (visible when sync mode is on) -->
+    <div class="sync-banner" id="sync-banner">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      <span>Mode rédaction commune actif — les modifications s'appliquent aux membres sélectionnés (cochez les onglets à synchroniser)</span>
+      <button class="btn btn-ghost btn-sm" onclick="toggleSyncMode()" style="padding:3px 8px;font-size:11px;">Désactiver</button>
+    </div>
+
+    <!-- Form panels (one per member, only active is visible) -->
+      <div class="membre-form-panels" id="membre-form-panels"></div>
+    </div>
+
+  </div><!-- /#fiche-col-left -->
+
+  <!-- COLONNE DROITE : informations projet + valider -->
+  <div id="fiche-col-right">
+    <div class="card" id="fiche-s1">
+      <div class="card-header"><h2>Informations projet</h2></div>
+      <div class="card-body">
+        <div class="form-field">
+          <label class="field-label" for="fp-nom">Désignation du projet *</label>
+          <input type="text" id="fp-nom" oninput="updateFicheBtn()" placeholder="Plateforme d'ingestion des données">
+          <div class="field-error" id="err-fp-nom">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-client-ref">Client *</label>
+          <select id="fp-client-ref" onchange="onFpClientChange()">
+            <option value="">— Sélectionner un client —</option>
+          </select>
+          <div class="field-error" id="err-fp-client-ref">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-sous-entite">Sous-entité</label>
+          <input type="text" id="fp-sous-entite" list="fp-sous-entite-list" oninput="updateFicheBtn()" placeholder="Sélectionnez d'abord un client" disabled>
+          <datalist id="fp-sous-entite-list"></datalist>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-periode">Période *</label>
+          <input type="text" id="fp-periode" oninput="updateFicheBtn()" placeholder="2024 – 2025">
+          <div class="field-error" id="err-fp-periode">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label">Secteur *</label>
+          <div style="display:flex;gap:16px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="public" checked style="accent-color:var(--orange);"> Public</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="prive" style="accent-color:var(--orange);"> Privé</label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-contexte">Contexte du projet *</label>
+          <textarea id="fp-contexte" rows="5" oninput="updateFicheBtn()" placeholder="Décrivez le projet en 3 à 5 phrases : objectif, périmètre technique, résultat livré, impact client."></textarea>
+          <div class="field-error" id="err-fp-contexte">Minimum 3 mots</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="fiche-errors" class="fiche-errors">
+      <strong>Corrections requises :</strong>
+      <ul id="fiche-errors-list"></ul>
+    </div>
+
+    <button id="btn-generate-fiche" onclick="generateFiche()" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg>
+      Valider et documenter les fiches
+    </button>
+  </div><!-- /#fiche-col-right -->
+
+</div>
+</div>
+
+<style>
+  /* ── Top-bar : espace central + dropdown administration ── */
+  header nav { flex:1; }
+  .nav-spacer { flex:1; }
+  .nav-admin { position:relative; display:flex; align-items:stretch; }
+  .admin-menu { position:absolute; top:100%; right:0; background:var(--white); border:1.5px solid var(--grey); min-width:270px; display:none; z-index:200; }
+  .admin-menu.open { display:block; }
+  .admin-menu a { display:block; padding:11px 14px; font-size:13px; color:var(--ink); cursor:pointer; text-decoration:none; border-bottom:1px solid var(--grey-light); }
+  .admin-menu a:last-child { border-bottom:none; }
+  .admin-menu a:hover { background:var(--hover); color:var(--orange); }
+
+  /* ── Éditeurs admin (fiches collaborateurs + données communes) ── */
+  #section-admin-collabs.tab-section.active,
+  #section-admin-donnees.tab-section.active,
+  #section-admin-clients.tab-section.active { display:flex; }
+  .admin-editor { display:flex; width:100%; height:calc(100vh - 53px); }
+  .admin-side { width:280px; border-right:1px solid var(--grey-light); display:flex; flex-direction:column; flex-shrink:0; background:var(--white); }
+  .admin-side-top { padding:12px; border-bottom:1px solid var(--grey-light); display:flex; flex-direction:column; gap:8px; }
+  .admin-side .collab-list { overflow-y:auto; flex:1; }
+  .admin-main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+  .admin-toolbar { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--grey-light); flex-shrink:0; }
+  .admin-filename { font-size:13px; font-weight:700; flex:1; color:var(--ink); }
+  .admin-status { font-size:12px; color:var(--grey); }
+  .admin-status.ok { color:var(--green); font-weight:600; }
+  .admin-status.err { color:var(--red); font-weight:600; }
+  .admin-cm { flex:1; overflow:hidden; }
+  .admin-cm .CodeMirror { height:100% !important; font-family:'JetBrains Mono','Cascadia Code',monospace; font-size:13px; line-height:1.6; }
+
+  /* ── Listes collaborateurs : hauteur max pour ne pas gêner le contenu dessous ── */
+  #collab-grid, #fiche-collab-grid { max-height:360px; overflow-y:auto; }
+
+  /* ── Déclaration : 2 colonnes comme la génération (wrappers gauche/droite) ── */
+  .fiche-layout { max-width:1100px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start; background:transparent; }
+  #fiche-col-left { grid-column:1; min-width:0; }
+  #fiche-col-right { grid-column:2; display:flex; flex-direction:column; gap:16px; }
+  #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
+  /* La barre d'onglets ne doit jamais élargir la colonne : elle occupe l'espace dispo et scrolle */
+  #fiche-membres-section, .membre-tabs-bar, .membre-tabs { min-width:0; }
+  /* Réserver la gouttière de scrollbar → aucun décalage quand le scroll apparaît */
+  html { scrollbar-gutter: stable; }
+  /* Onglets membres : état actif bien visible (fond gris clair + orange vif) */
+  .membre-tab.active { background:var(--hover); font-weight:700; }
+  /* Domaines par membre : conteneur en bloc pour accueillir le dropdown de recherche */
+  .domaines-grid { display:block; }
+  /* Compétences par membre : dropdown identique aux domaines (conteneur .ms-dropdown + items .ms-item) */
+  .member-comp-wrap { position:relative; }
+  .ms-group-header.hidden { display:none; }
+  /* Réduction du composant Collaborateurs (déclaration) : en-tête cliquable iso à l'éditeur de fiche */
+  .fiche-collab-head { cursor:pointer; user-select:none; transition:background .12s; }
+  .fiche-collab-head:hover { background:var(--hover); }
+  .fiche-collab-head:hover .mp-icon { color:var(--orange); }
+  #fiche-s2.collapsed .card-body { display:none; }
+  #fiche-s2.collapsed .card-header { border-bottom:none; }
+  /* Div chips vide = fantôme qui réservait ~30px : on la masque tant qu'aucune sélection */
+  .comp-chips-selected:empty { display:none; }
+  .ms-chips:empty { display:none; }
+
+  /* ── Éditeur des fiches : liste collaborateurs plus large ── */
+  .admin-side { width:560px; }
+
+  /* ── Éditeur de fiche par composants (form-based) ── */
+  .fe-scroll { flex:1; overflow-y:auto; padding:20px 24px 60px; background:var(--hover); }
+  .fe-wrap { max-width:880px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+  .fe-sec { background:var(--white); border:1px solid var(--grey-light); }
+  .fe-sec-head { padding:12px 18px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; transition:background .12s; }
+  .fe-sec-head:hover { background:var(--hover); }
+  .fe-sec-head h3 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); flex:1; }
+  .fe-sec-count { font-size:10px; font-weight:700; color:var(--grey); background:var(--grey-light); padding:1px 7px; }
+  .fe-sec.collapsed .fe-sec-head { border-bottom:none; }
+  .fe-sec.collapsed .fe-sec-body { display:none; }
+  .fe-sec-body { padding:16px 18px; }
+  .fe-sec-head:hover .mp-icon { color:var(--orange); }
+  /* Icône réduire/agrandir partagée : − dans un cercle (déployé) ↔ + dans un cercle (replié) */
+  .mp-icon { width:17px; height:17px; color:var(--grey); flex-shrink:0; transition:color .12s; }
+  .mp-icon .mp-v { display:none; }
+  .collapsed .mp-icon .mp-v { display:block; }
+  .fe-item { border:1px solid var(--grey-light); padding:14px; margin-bottom:12px; background:var(--white); }
+  .fe-item:last-of-type { margin-bottom:12px; }
+  .fe-item-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .fe-item-title { font-size:12px; font-weight:700; color:var(--ink); flex:1; }
+  .fe-del { background:none; border:1px solid var(--grey-light); color:var(--grey); font-size:11px; padding:3px 9px; cursor:pointer; font-family:'Inter',sans-serif; }
+  .fe-del:hover { border-color:var(--red); color:var(--red); }
+  .fe-add { background:transparent; border:1px dashed var(--grey); color:var(--grey); font-size:12px; font-weight:600; padding:9px; cursor:pointer; width:100%; font-family:'Inter',sans-serif; transition:all .12s; }
+  .fe-add:hover { border-color:var(--orange); color:var(--orange); }
+  .fe-counter { font-size:11px; color:var(--grey); text-align:right; margin-top:4px; }
+  .fe-counter.over { color:var(--red); font-weight:700; }
+  .fe-sub { font-size:11.5px; color:var(--grey); margin:-2px 0 12px; line-height:1.5; }
+  /* multi-select : le dropdown chevauche le contenu suivant plutôt que de le pousser */
+  .acms-wrap { position:relative; }
+  .acms-wrap .ms-dropdown { position:absolute; left:0; right:0; z-index:20; border:1.5px solid var(--grey); border-top:none; }
+  .acms-freeadd { color:var(--orange); font-weight:600; }
+  /* panneau brut (lecture seule + échappatoire) */
+  .fe-raw { border-top:2px solid var(--orange); display:none; flex-direction:column; flex-shrink:0; height:46%; }
+  .fe-raw.open { display:flex; }
+  .fe-raw-bar { display:flex; align-items:center; gap:10px; padding:7px 16px; background:#F5F5F5; border-bottom:1px solid var(--grey-light); }
+  .fe-raw-bar .fe-raw-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); }
+  .fe-raw-bar .field-hint { flex:1; margin:0; }
+  .fe-raw .admin-cm { flex:1; overflow:hidden; }
+  /* analyseur de manques */
+  .fe-gaps { background:var(--white); border:1px solid var(--orange); margin-bottom:4px; }
+  .fe-gaps-head { padding:10px 16px; display:flex; align-items:center; gap:10px; background:#FFF4EC; border-bottom:1px solid var(--grey-light); }
+  .fe-gaps-head strong { font-size:12px; color:var(--orange); flex:1; }
+  .fe-gaps ul { list-style:none; padding:6px 0; margin:0; max-height:240px; overflow-y:auto; }
+  .fe-gaps li { padding:5px 16px; font-size:12.5px; color:var(--ink); cursor:pointer; display:flex; gap:10px; align-items:baseline; }
+  .fe-gaps li:hover { background:var(--hover); }
+  .fe-gaps li .fe-gap-sec { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--grey); min-width:96px; flex-shrink:0; }
+  .fe-gaps-none { padding:12px 16px; font-size:12.5px; color:var(--green); font-weight:600; }
+  .fe-badge { background:var(--orange); color:#fff; font-size:10px; font-weight:700; padding:1px 7px; margin-left:6px; }
+  .fe-badge.zero { background:var(--green); }
+  .fe-flash { animation:feflash 1.3s ease; }
+  @keyframes feflash { 0%,100%{ outline:2px solid transparent; outline-offset:2px; } 25%{ outline:2px solid var(--orange); outline-offset:2px; } }
+</style>
+
+<!-- ══════════════════════════════════════════════════════
+     ADMIN 1 — ÉDITER LES FICHES COLLABORATEURS
+══════════════════════════════════════════════════════ -->
+<div id="section-admin-collabs" class="tab-section">
+  <div class="admin-editor">
+    <aside class="admin-side">
+      <div class="admin-side-top">
+        <input class="ms-search" id="ac-search" type="search" placeholder="Filtrer les collaborateurs…" oninput="acRenderList()">
+        <button class="btn btn-ghost btn-sm btn-full" onclick="acNew()">+ Nouveau collaborateur</button>
+      </div>
+      <div class="collab-list" id="ac-list"><div class="loading-placeholder" style="padding:12px;">Chargement…</div></div>
+    </aside>
+    <div class="admin-main">
+      <div class="admin-toolbar">
+        <span class="admin-filename" id="ac-filename">Sélectionne une fiche à gauche</span>
+        <span class="admin-status" id="ac-status"></span>
+        <button class="btn btn-ghost btn-sm" id="ac-gaps-btn" onclick="acToggleGaps()" disabled>Analyser les manques<span class="fe-badge" id="ac-gaps-badge" style="display:none">0</span></button>
+        <button class="btn btn-ghost btn-sm" id="ac-raw-btn" onclick="acToggleRaw()" disabled>Voir le brut</button>
+        <button class="btn btn-ghost btn-sm" id="ac-del" onclick="acDelete()" disabled>Supprimer</button>
+        <button class="btn btn-primary btn-sm" id="ac-save" onclick="acSave()" disabled>Enregistrer</button>
+      </div>
+      <div class="fe-scroll" id="ac-form">
+        <div class="fe-wrap" id="ac-form-wrap">
+          <div class="loading-placeholder" style="padding:20px;">Sélectionne une fiche à gauche pour l'éditer.</div>
+        </div>
+      </div>
+      <div class="fe-raw" id="ac-raw-panel">
+        <div class="fe-raw-bar">
+          <span class="fe-raw-title">Aperçu brut (YAML)</span>
+          <span class="field-hint" id="ac-raw-hint">lecture seule — régénéré depuis le formulaire</span>
+          <button class="btn btn-ghost btn-sm" id="ac-raw-edit" onclick="acToggleRawEdit()">Éditer le brut</button>
+          <button class="btn btn-ghost btn-sm" id="ac-raw-apply" onclick="acApplyRaw()" style="display:none">Appliquer au formulaire</button>
+        </div>
+        <div class="admin-cm" id="ac-editor-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ADMIN 2 — ÉDITER LES DONNÉES COMMUNES PROJETS
+══════════════════════════════════════════════════════ -->
+<div id="section-admin-donnees" class="tab-section">
+  <div class="admin-editor">
+    <div class="admin-main">
+      <div class="admin-toolbar">
+        <span class="admin-filename">Données communes projets — référentiel domaines &amp; compétences</span>
+        <span class="admin-status" id="ad-status"></span>
+        <button class="btn btn-primary btn-sm" id="ad-save" onclick="adSave()" disabled>Sauvegarder</button>
+      </div>
+      <div class="admin-cm" id="ad-editor-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ADMIN 3 — ÉDITER LES CLIENTS CAMPTOCAMP
+══════════════════════════════════════════════════════ -->
+<div id="section-admin-clients" class="tab-section">
+  <div class="admin-editor">
+    <aside class="admin-side">
+      <div class="admin-side-top">
+        <input class="ms-search" id="cli-search" type="search" placeholder="Filtrer les clients…" oninput="cliRenderList()">
+        <button class="btn btn-ghost btn-sm btn-full" onclick="cliNew()">+ Ajouter un client</button>
+      </div>
+      <div class="collab-list" id="cli-list"><div class="loading-placeholder" style="padding:12px;">Chargement…</div></div>
+    </aside>
+    <div class="admin-main">
+      <div class="admin-toolbar">
+        <span class="admin-filename" id="cli-filename">Sélectionne un client à gauche</span>
+        <span class="admin-status" id="cli-status"></span>
+        <button class="btn btn-ghost btn-sm" id="cli-raw-btn" onclick="cliToggleRaw()">Voir le brut</button>
+        <button class="btn btn-ghost btn-sm" id="cli-del" onclick="cliDelete()" disabled>Supprimer</button>
+        <button class="btn btn-primary btn-sm" id="cli-save" onclick="cliSave()" disabled>Enregistrer</button>
+      </div>
+      <div class="fe-scroll" id="cli-form">
+        <div class="fe-wrap" id="cli-form-wrap">
+          <div class="loading-placeholder" style="padding:20px;">Sélectionne un client à gauche pour l'éditer.</div>
+        </div>
+      </div>
+      <div class="fe-raw" id="cli-raw-panel">
+        <div class="fe-raw-bar">
+          <span class="fe-raw-title">Aperçu brut (YAML)</span>
+          <span class="field-hint" id="cli-raw-hint">lecture seule — régénéré depuis le formulaire</span>
+          <button class="btn btn-ghost btn-sm" id="cli-raw-edit" onclick="cliToggleRawEdit()">Éditer le brut</button>
+          <button class="btn btn-ghost btn-sm" id="cli-raw-apply" onclick="cliApplyRaw()" style="display:none">Appliquer au formulaire</button>
+        </div>
+        <div class="admin-cm" id="cli-editor-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// Navigation principale
+// ══════════════════════════════════════════════════════
+function switchTab(tab) {
+  ['cv','fiche','admin-collabs','admin-donnees','admin-clients'].forEach(t => {
+    const s = document.getElementById('section-'+t);
+    if (s) s.classList.toggle('active', t===tab);
+  });
+  document.getElementById('tab-cv').classList.toggle('active', tab==='cv');
+  document.getElementById('tab-fiche').classList.toggle('active', tab==='fiche');
+  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-clients');
+  closeAdminMenu();
+  if (tab==='fiche' && !ficheDataLoaded) loadFicheData();
+  if (tab==='admin-collabs') initAdminCollabs();
+  if (tab==='admin-donnees') initDonnees();
+  if (tab==='admin-clients') initAdminClients();
+}
+function toggleAdminMenu(e){ e.stopPropagation(); document.getElementById('admin-menu').classList.toggle('open'); }
+function closeAdminMenu(){ const m=document.getElementById('admin-menu'); if(m) m.classList.remove('open'); }
+document.addEventListener('click', closeAdminMenu);
+
+// ══════════════════════════════════════════════════════
+// ONGLET 1 — GÉNÉRER CVs
+// ══════════════════════════════════════════════════════
+const CAT_ORDER = ['developpeur','architecte','devops','consultant_sig','chef_projet','product_owner','designer','data','direction',''];
+const CAT_LABELS = {developpeur:'Développeurs',architecte:'Architectes',devops:'DevOps & Infrastructure',consultant_sig:'Consultants SIG',chef_projet:'Chefs de projet',product_owner:'Product Owners',designer:'Designers',data:'Data & BI',direction:'Direction','':'Autres'};
+function normaliserCategorie(raw) {
+  const v = (raw||'').toLowerCase().trim();
+  if (!v) return '';
+  if (v.includes('design') || v.includes('ux') || v.includes('ui')) return 'designer';
+  if (v.includes('devops') || v.includes('infra') || v.includes('ops')) return 'devops';
+  if (v.includes('dev') || v.includes('développ') || v.includes('develop')) return 'developpeur';
+  if (v.includes('archi')) return 'architecte';
+  if (v.includes('sig') || v.includes('carto') || v.includes('géo') || v.includes('geo')) return 'consultant_sig';
+  if (v.includes('chef') || v.includes('projet') || v.includes('manager')) return 'chef_projet';
+  if (v.includes('product') || v.includes('owner') || v.includes('po')) return 'product_owner';
+  if (v.includes('data') || v.includes('bi') || v.includes('analyst')) return 'data';
+  if (v.includes('direct') || v.includes('lead')) return 'direction';
+  if (CAT_ORDER.includes(v)) return v;
+  return v;
+}
+let collaborateurs = [];
+let msDomaines = [];
+let msComps = [];
+let msClients = [];
+let msDomainesSelected = new Set();
+let msCompsSelected = new Set();
+let msClientsSelected = new Set();
+function msItems(type){ return type==='domaines'?msDomaines : type==='comps'?msComps : msClients; }
+function msSelected(type){ return type==='domaines'?msDomainesSelected : type==='comps'?msCompsSelected : msClientsSelected; }
+
+async function loadCollaborateurs() {
+  try {
+    const res = await fetch('/api/collaborateurs');
+    if (!res.ok) throw new Error((await res.json()).detail || 'Erreur');
+    collaborateurs = await res.json();
+    renderCollabGrid();
+  } catch(e) {
+    // Erreur affichée DANS la liste (pas de bannière en haut) → aucun décalage vertical,
+    // et rendu identique à « Déclarer un projet » même si le chargement échoue.
+    document.getElementById('collab-grid').innerHTML='<div class="loading-placeholder">Impossible de charger les collaborateurs : '+e.message+'</div>';
+  }
+}
+
+async function loadFiltres() {
+  try {
+    const [filtresRes, compsRes, clientsRes] = await Promise.all([
+      fetch('/api/filtres').then(r=>r.json()).catch(()=>({domaines:[]})),
+      fetch('/api/competences').then(r=>r.json()).catch(()=>[]),
+      fetch('/api/clients').then(r=>r.json()).catch(()=>[]),
+    ]);
+    msDomaines = (filtresRes.domaines && filtresRes.domaines.length) ? filtresRes.domaines : DOMAINES_FALLBACK;
+    msComps = [];
+    (compsRes || []).forEach(fam => {
+      (fam.items || []).forEach(item => msComps.push({label: item, group: fam.meta + ' / ' + fam.label}));
+    });
+    msClients = clientsRes || [];
+    renderMsDropdown('domaines');
+    renderMsDropdown('comps');
+    renderMsDropdown('clients');
+    // Rafraîchir les panels membres créés avant que les filtres soient disponibles
+    document.querySelectorAll('[id$="-domaines"].domaines-grid').forEach(grid => {
+      if (!grid.querySelector('.ms-wrap')) {
+        const m = grid.id.match(/^mf-(.+)-domaines$/);
+        if (m) grid.innerHTML = renderDomainesForMember(m[1]);
+      }
+    });
+  } catch(e) {
+    console.warn('Filtres non chargés:', e);
+  }
+}
+
+const COLLAB_COUNTRIES = ['France', 'Suisse', 'Allemagne'];
+let collabActiveCountry = 'France';
+let collabByCountry = {};
+
+function collabCountryOf(c) {
+  const loc = (c.localisation || '').toLowerCase();
+  if (loc.includes('suisse') || loc.includes('switzerland')) return 'Suisse';
+  if (loc.includes('allemagne') || loc.includes('germany') || loc.includes('deutschland')) return 'Allemagne';
+  return 'France';
+}
+
+function renderCollabCountryTabs(byCountry) {
+  const bar = document.getElementById('collab-country-tabs');
+  if (!bar) return;
+  bar.innerHTML = COLLAB_COUNTRIES.map(country => {
+    const items = byCountry[country] || [];
+    const n = items.length;
+    const sel = items.filter(c => document.getElementById('cb-'+c.id)?.checked).length;
+    const countLabel = (sel > 0 && sel < n) ? `${sel}/${n}` : `(${n})`;
+    return `<button type="button" class="collab-country-tab ${country===collabActiveCountry?'active':''}" onclick="switchCollabCountry('${country}')">${country} <span class="cct-count">${countLabel}</span></button>`;
+  }).join('');
+  updateCollabSelectAllCheckbox();
+}
+
+function updateCollabSelectAllCheckbox() {
+  const cb = document.getElementById('collab-select-all-cb');
+  if (!cb) return;
+  const total = collaborateurs.length;
+  const selected = getSelectedIds().length;
+  cb.checked = total > 0 && selected === total;
+  cb.indeterminate = selected > 0 && selected < total;
+}
+
+function refreshCollabCountryTabs() { renderCollabCountryTabs(collabByCountry); }
+
+function toggleCollabSelectAll() {
+  const selected = getSelectedIds().length;
+  const makeSelected = selected === 0;
+  document.querySelectorAll('#collab-grid .collab-item').forEach(el => {
+    el.querySelector('input').checked = makeSelected;
+    el.classList.toggle('selected', makeSelected);
+  });
+  updateCount();
+  updateGenerateBtn();
+}
+
+function switchCollabCountry(country) {
+  collabActiveCountry = country;
+  document.querySelectorAll('.collab-country').forEach(el => el.classList.remove('active'));
+  document.getElementById('collab-country-'+country)?.classList.add('active');
+  refreshCollabCountryTabs();
+}
+
+function renderCollabGrid() {
+  const grid=document.getElementById('collab-grid');
+  if(!collaborateurs.length){grid.innerHTML='<div class="loading-placeholder">Aucun collaborateur.</div>';document.getElementById('collab-country-tabs').innerHTML='';return;}
+  const byCountry={};
+  collaborateurs.forEach(c=>{const country=collabCountryOf(c);(byCountry[country]=byCountry[country]||[]).push(c);});
+  collabByCountry = byCountry;
+  renderCollabCountryTabs(byCountry);
+  grid.innerHTML=COLLAB_COUNTRIES.map(country=>{
+    const groups={};
+    (byCountry[country]||[]).forEach(c=>{const k=normaliserCategorie(c.categorie);(groups[k]=groups[k]||[]).push(c);});
+    const cats=[...CAT_ORDER.filter(k=>groups[k]),...Object.keys(groups).filter(k=>!CAT_ORDER.includes(k)&&groups[k])];
+    const body = cats.length ? cats.map(cat=>{
+      const items=groups[cat];
+      const label=CAT_LABELS[cat]||cat||'Autres';
+      return`<div class="cat-group" id="cat-${country}-${cat}">
+        <div class="cat-header" onclick="toggleCat('${country}-${cat}')">
+          <span class="cat-arrow">▾</span><span class="cat-title">${label}</span>
+          <span class="cat-count">${items.length}</span>
+          <span class="cat-sel-link" onclick="event.stopPropagation();selectCat('${country}-${cat}')">Tout sél.</span>
+        </div>
+        <div class="cat-body"><div class="cat-body-inner collab-list">
+          ${items.map(c=>{const ini=c.display.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+            return`<div class="collab-item" onclick="toggleCollab('${c.id}',this)">
+              <input type="checkbox" id="cb-${c.id}" value="${c.id}" onclick="event.stopPropagation();toggleCollabCheckbox(this)">
+              <div class="avatar">${ini}</div><div class="collab-name">${c.display}</div></div>`;}).join('')}
+        </div></div></div>`;
+    }).join('') : '<div class="loading-placeholder">Aucun collaborateur.</div>';
+    return `<div class="collab-country ${country===collabActiveCountry?'active':''}" id="collab-country-${country}">${body}</div>`;
+  }).join('');
+  updateCount();
+}
+
+function toggleCat(cat){document.getElementById('cat-'+cat).classList.toggle('collapsed');}
+function selectCat(cat){const g=document.getElementById('cat-'+cat);const any=[...g.querySelectorAll('input[type="checkbox"]')].some(cb=>!cb.checked);g.querySelectorAll('.collab-item').forEach(el=>{el.querySelector('input').checked=any;el.classList.toggle('selected',any);});updateCount();updateGenerateBtn();}
+function toggleCollab(id,el){const cb=document.getElementById('cb-'+id);cb.checked=!cb.checked;el.classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();}
+function toggleCollabCheckbox(cb){cb.closest('.collab-item').classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();}
+function getSelectedIds(){return[...document.querySelectorAll('.collab-item input:checked')].map(cb=>cb.value);}
+function updateCount(){document.getElementById('selected-count').textContent=getSelectedIds().length;syncProfilTabs();refreshCollabCountryTabs();}
+function updateGenerateBtn(){const btn=document.getElementById('btn-generate');const n=getSelectedIds().length;const cible=hasFilters();btn.disabled=n===0;btn.textContent=n===0?'Générer les CVs':cible?`Générer ${n>1?n+' CVs ciblés':'le CV ciblé'}`:`Générer ${n>1?n+' CVs génériques':'le CV générique'}`;}
+
+function msValOf(type, it) { return (type === 'domaines') ? it.id : it.label; }
+
+function renderMsDropdown(type) {
+  const items = msItems(type);
+  const selected = msSelected(type);
+  const el = document.getElementById(`ms-${type}-dropdown`);
+  if (!items.length) { el.innerHTML = '<div class="ms-empty">Chargement…</div>'; return; }
+  const groups = {};
+  items.forEach(it => { const g = it.group || 'Autres'; if (!groups[g]) groups[g] = []; groups[g].push(it); });
+  el.innerHTML = Object.entries(groups).map(([g, its]) =>
+    `<div class="ms-group-header">${esc(g)}</div>` +
+    its.map(it => {
+      const val = msValOf(type, it);
+      const chk = selected.has(val) ? 'checked' : '';
+      return `<label class="ms-item" data-val="${esc(val)}">
+        <input type="checkbox" ${chk} onchange="toggleMs('${type}','${escJs(val)}',this)">
+        ${esc(it.label)}
+      </label>`;
+    }).join('')
+  ).join('');
+}
+
+function filterMsItems(type, q) {
+  const el = document.getElementById(`ms-${type}-dropdown`);
+  el.classList.add('open');
+  const lq = q.toLowerCase();
+  let anyVisible = false;
+  el.querySelectorAll('.ms-item').forEach(item => {
+    const matches = !lq || item.dataset.val.toLowerCase().includes(lq) || item.textContent.toLowerCase().includes(lq);
+    item.classList.toggle('hidden', !matches);
+    if (matches) anyVisible = true;
+  });
+  el.querySelectorAll('.ms-group-header').forEach(h => {
+    let n = h.nextElementSibling, hasVisible = false;
+    while (n && n.classList.contains('ms-item')) { if (!n.classList.contains('hidden')) { hasVisible = true; break; } n = n.nextElementSibling; }
+    h.classList.toggle('hidden', !hasVisible);
+  });
+  const empty = el.querySelector('.ms-empty');
+  if (empty) { empty.style.display = anyVisible ? 'none' : 'block'; }
+  else if (!anyVisible) { el.insertAdjacentHTML('beforeend', '<div class="ms-empty">Aucun résultat</div>'); }
+}
+
+function openMsDropdown(type) { document.getElementById(`ms-${type}-dropdown`).classList.add('open'); }
+
+function toggleMs(type, val, cb) {
+  const selected = msSelected(type);
+  if (cb.checked) selected.add(val); else selected.delete(val);
+  renderMsChips(type); onFilterChange();
+}
+
+function renderMsChips(type) {
+  const selected = msSelected(type);
+  const items = msItems(type);
+  const el = document.getElementById(`ms-${type}-chips`);
+  el.innerHTML = [...selected].map(val => {
+    const found = items.find(i => msValOf(type, i) === val);
+    const label = found ? found.label : val;
+    return `<div class="ms-chip"><span>${esc(label)}</span><button onclick="removeMs('${type}','${escJs(val)}')" title="Retirer">×</button></div>`;
+  }).join('');
+}
+
+function removeMs(type, val) {
+  const selected = msSelected(type);
+  selected.delete(val);
+  const all = document.querySelectorAll(`#ms-${type}-dropdown .ms-item`);
+  all.forEach(item => { if (item.dataset.val === val) item.querySelector('input').checked = false; });
+  renderMsChips(type); onFilterChange();
+}
+
+function hasFilters() {
+  return msDomainesSelected.size > 0 || msCompsSelected.size > 0 || msClientsSelected.size > 0
+    || document.getElementById('f-annee-min').value !== '0'
+    || (document.querySelector('input[name="f-secteur"]:checked')?.value || '') !== '';
+}
+
+function onFilterChange() {
+  const active = hasFilters();
+  document.getElementById('ao-tag').textContent = active ? 'Actif' : 'Optionnel';
+  document.getElementById('ao-generic-notice').style.display = active ? 'none' : 'block';
+  document.getElementById('btn-clear-filters').style.display = active ? 'block' : 'none';
+  updateGenerateBtn();
+}
+
+function clearFilters() {
+  document.getElementById('f-annee-min').value = '0';
+  document.querySelectorAll('input[name="f-secteur"]')[0].checked = true;
+  msDomainesSelected.clear(); msCompsSelected.clear(); msClientsSelected.clear();
+  renderMsDropdown('domaines'); renderMsDropdown('comps'); renderMsDropdown('clients');
+  renderMsChips('domaines'); renderMsChips('comps'); renderMsChips('clients');
+  onFilterChange();
+}
+
+document.addEventListener('click', e => {
+  ['domaines','comps','clients'].forEach(type => {
+    const wrap = document.getElementById(`ms-${type}-wrap`);
+    if (wrap && !wrap.contains(e.target)) document.getElementById(`ms-${type}-dropdown`).classList.remove('open');
+  });
+});
+
+async function generate(){
+  const ids=getSelectedIds();if(!ids.length)return;
+  const btn=document.getElementById('btn-generate');btn.disabled=true;
+  const prog=document.getElementById('progress-section'),bar=document.getElementById('progress-bar'),lbl=document.getElementById('progress-label'),res=document.getElementById('results-section'),rl=document.getElementById('result-list');
+  prog.style.display='block';res.style.display='none';rl.innerHTML='';bar.style.width='20%';bar.style.background='';
+  const isCible=hasFilters();
+  lbl.textContent=isCible?`Génération de ${ids.length} CV(s) ciblé(s)…`:`Génération de ${ids.length} CV(s) générique(s)…`;
+  hideError();
+  prog.scrollIntoView({behavior:'smooth',block:'center'});
+  const fd=new FormData();
+  ids.forEach(id=>fd.append('collaborateurs',id));
+  fd.append('max_projets',document.getElementById('max-projets').value);
+  fd.append('max_pages',document.getElementById('max-pages').value);
+  fd.append('inclure_parcours',document.getElementById('inclure-parcours').checked?'true':'false');
+  fd.append('annee_min',document.getElementById('f-annee-min').value||'0');
+  fd.append('secteur',document.querySelector('input[name="f-secteur"]:checked')?.value||'');
+  [...msDomainesSelected].forEach(d=>fd.append('domaines',d));
+  [...msCompsSelected].forEach(c=>fd.append('competences',c));
+  [...msClientsSelected].forEach(c=>fd.append('client_refs',c));
+  const profilsMap = {};
+  ids.forEach(id => { if (cvProfilSelection[id]) profilsMap[id] = cvProfilSelection[id]; });
+  if (Object.keys(profilsMap).length) fd.append('profils', JSON.stringify(profilsMap));
+  bar.style.width='50%';
+  try{
+    const r=await fetch('/api/generate',{method:'POST',body:fd});bar.style.width='90%';
+    if(!r.ok){const e=await r.json().catch(()=>({detail:'Erreur inconnue'}));throw new Error(e.detail);}
+    const ct=r.headers.get('content-type')||'',disp=r.headers.get('content-disposition')||'';
+    const fn=(disp.match(/filename="(.+?)"/)||[])[1]||'cvs.zip';
+    const blob=await r.blob(),url=URL.createObjectURL(blob);
+    bar.style.width='100%';lbl.textContent='Terminé !';res.style.display='block';
+    res.scrollIntoView({behavior:'smooth',block:'center'});
+    if(ct.includes('zip')){const dl=document.getElementById('btn-dl-all');dl.href=url;dl.download=fn;document.getElementById('results-actions').style.display='block';rl.innerHTML=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${ids.length} CVs générés</div><div class="result-detail">Téléchargez le ZIP ci-dessus</div></div></div>`;}
+    else{document.getElementById('results-actions').style.display='none';const a=document.createElement('a');a.href=url;a.download=fn;a.click();const c=collaborateurs.find(c=>ids[0]===c.id);rl.innerHTML=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${c?.display||fn}</div></div><div class="result-actions"><a href="${url}" download="${fn}" class="btn-dl">⬇ Re-télécharger</a></div></div>`;}
+  }catch(e){bar.style.width='100%';bar.style.background='var(--red)';lbl.textContent='Erreur';showError('Erreur : '+e.message);}
+  finally{btn.disabled=false;updateGenerateBtn();setTimeout(()=>{prog.style.display='none';bar.style.width='0%';bar.style.background='';},2000);}
+}
+function showError(msg){const el=document.getElementById('error-banner');el.textContent=msg;el.style.display='block';}
+function hideError(){document.getElementById('error-banner').style.display='none';}
+
+// ══════════════════════════════════════════════════════
+// Sélection de l'équipe — profil à afficher par membre
+// ══════════════════════════════════════════════════════
+let cvProfilSelection = {};       // { collabId: profil_cle }
+let cvProfilOptionsCache = {};    // { collabId: [{cle,label}] } — chargé à la demande
+let cvProfilActiveId = null;
+
+function syncProfilTabs() {
+  const section = document.getElementById('profils-membres-section');
+  if (!section) return;
+  const ids = getSelectedIds();
+  const idSet = new Set(ids);
+  section.style.display = ids.length ? 'block' : 'none';
+
+  // Retirer les onglets des collaborateurs désélectionnés
+  document.querySelectorAll('#profil-tabs .membre-tab').forEach(tab => {
+    const id = tab.id.replace('ptab-', '');
+    if (!idSet.has(id)) {
+      tab.remove();
+      document.getElementById('pform-' + id)?.remove();
+      delete cvProfilSelection[id];
+      if (cvProfilActiveId === id) cvProfilActiveId = null;
+    }
+  });
+
+  // Ajouter les onglets des nouveaux collaborateurs sélectionnés
+  const existing = new Set([...document.querySelectorAll('#profil-tabs .membre-tab')].map(t => t.id.replace('ptab-', '')));
+  ids.forEach(id => {
+    if (existing.has(id)) return;
+    const c = collaborateurs.find(c => c.id === id);
+    if (c) addProfilTab(c);
+  });
+
+  if (!cvProfilActiveId && ids.length) switchProfilTab(ids[0]);
+  requestAnimationFrame(updateProfilScrollButtons);
+}
+
+function addProfilTab(collab) {
+  const id = collab.id;
+  const ini = collab.display.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const tabsEl = document.getElementById('profil-tabs');
+  const tab = document.createElement('div');
+  tab.className = 'membre-tab';
+  tab.id = 'ptab-' + id;
+  tab.setAttribute('onclick', `switchProfilTab('${id}')`);
+  tab.innerHTML = `<div class="tab-avatar">${ini}</div><span>${esc(collab.display)}</span>`;
+  tabsEl.appendChild(tab);
+
+  const panelsEl = document.getElementById('profil-panels');
+  const panel = document.createElement('div');
+  panel.className = 'membre-form-panel';
+  panel.id = 'pform-' + id;
+  panel.innerHTML = `
+    <div class="form-field">
+      <label class="field-label">Profil affiché sur le CV</label>
+      <select id="profilsel-${id}" onchange="cvProfilSelection['${id}']=this.value">
+        <option value="">Profil générique</option>
+        <option value="__loading">Chargement…</option>
+      </select>
+    </div>`;
+  panelsEl.appendChild(panel);
+
+  loadProfilOptions(collab);
+}
+
+async function loadProfilOptions(collab) {
+  const id = collab.id;
+  if (!cvProfilOptionsCache[id]) {
+    try {
+      const r = await fetch(`/api/collaborateurs/${encodeURIComponent(id)}`);
+      const d = await r.json();
+      const data = jsyaml.load(d.content || '') || {};
+      const cibles = data.profils_cibles;
+      cvProfilOptionsCache[id] = (cibles && typeof cibles === 'object' && !Array.isArray(cibles))
+        ? Object.keys(cibles).filter(Boolean) : [];
+    } catch (e) { cvProfilOptionsCache[id] = []; }
+  }
+  const sel = document.getElementById('profilsel-' + id);
+  if (!sel) return;
+  const current = cvProfilSelection[id] || '';
+  const cles = cvProfilOptionsCache[id];
+  sel.innerHTML = '<option value="">Profil générique</option>' +
+    cles.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  sel.value = cles.includes(current) ? current : '';
+  cvProfilSelection[id] = sel.value;
+}
+
+function switchProfilTab(id) {
+  document.querySelectorAll('#profil-tabs .membre-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#profil-panels .membre-form-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('ptab-' + id)?.classList.add('active');
+  document.getElementById('pform-' + id)?.classList.add('active');
+  cvProfilActiveId = id;
+}
+
+function scrollProfilTabs(dir) {
+  const tabs = document.getElementById('profil-tabs');
+  tabs.scrollBy({ left: dir * 160, behavior: 'smooth' });
+  setTimeout(updateProfilScrollButtons, 200);
+}
+
+function updateProfilScrollButtons() {
+  const tabs = document.getElementById('profil-tabs');
+  const leftBtn = document.getElementById('profil-tabs-scroll-left');
+  const rightBtn = document.getElementById('profil-tabs-scroll-right');
+  if (!tabs || !leftBtn || !rightBtn) return;
+  const overflows = tabs.scrollWidth > tabs.clientWidth + 1;
+  leftBtn.style.display = (overflows && tabs.scrollLeft > 0) ? 'flex' : 'none';
+  rightBtn.style.display = (overflows && tabs.scrollLeft < tabs.scrollWidth - tabs.clientWidth - 1) ? 'flex' : 'none';
+}
+document.getElementById('profil-tabs')?.addEventListener('scroll', updateProfilScrollButtons);
+
+// ══════════════════════════════════════════════════════
+// ONGLET 2 — FICHE FIN DE PROJET
+// ══════════════════════════════════════════════════════
+let ficheDataLoaded = false;
+let ficheCollabs = [];
+let ficheCompetences = [];
+let ficheSelectedIds = new Set();
+
+// Tab state
+let ficheActiveMemberId = null;
+let ficheSyncMode = false;
+let ficheGroupedIds = new Set();
+
+const DOMAINES_FALLBACK = [
+  {id:'geospatial',          label:'Géospatial',              group:'Grands domaines'},
+  {id:'developpement',       label:'Développement',            group:'Grands domaines'},
+  {id:'infrastructure',      label:'Infrastructure',            group:'Grands domaines'},
+  {id:'erp',                 label:'ERP / Odoo',               group:'Grands domaines'},
+  {id:'business',            label:'Business & Conseil',       group:'Grands domaines'},
+  {id:'design',              label:'Design & UX',              group:'Grands domaines'},
+  {id:'3d',                  label:'3D / Visualisation 3D',    group:'Sous-domaines'},
+  {id:'administration',      label:'Administration',            group:'Sous-domaines'},
+  {id:'agriculture',         label:'Agriculture',               group:'Sous-domaines'},
+  {id:'archeologie',         label:'Archéologie',               group:'Sous-domaines'},
+  {id:'backend',             label:'Backend',                   group:'Sous-domaines'},
+  {id:'cadastre',            label:'Cadastre',                  group:'Sous-domaines'},
+  {id:'cartographie',        label:'Cartographie',              group:'Sous-domaines'},
+  {id:'cloud',               label:'Cloud',                     group:'Sous-domaines'},
+  {id:'conseil',             label:'Conseil',                   group:'Sous-domaines'},
+  {id:'crm',                 label:'CRM',                       group:'Sous-domaines'},
+  {id:'defense',             label:'Défense',                   group:'Sous-domaines'},
+  {id:'devops',              label:'DevOps',                    group:'Sous-domaines'},
+  {id:'drone',               label:'Drone / UAV',               group:'Sous-domaines'},
+  {id:'e-commerce',          label:'E-commerce',                group:'Sous-domaines'},
+  {id:'eau',                 label:'Eau',                       group:'Sous-domaines'},
+  {id:'embedded',            label:'Embarqué / IoT',            group:'Sous-domaines'},
+  {id:'energie',             label:'Énergie',                   group:'Sous-domaines'},
+  {id:'environnement',       label:'Environnement',             group:'Sous-domaines'},
+  {id:'finance',             label:'Finance',                   group:'Sous-domaines'},
+  {id:'formation',           label:'Formation',                 group:'Sous-domaines'},
+  {id:'geoportail',          label:'Géoportail',                group:'Sous-domaines'},
+  {id:'gestion-projet',      label:'Gestion de projet',         group:'Sous-domaines'},
+  {id:'gouvernance',         label:'Gouvernance open source',   group:'Sous-domaines'},
+  {id:'halieutique',         label:'Halieutique',               group:'Sous-domaines'},
+  {id:'humanitaire',         label:'Humanitaire',               group:'Sous-domaines'},
+  {id:'hydrologie',          label:'Hydrologie',                group:'Sous-domaines'},
+  {id:'ia',                  label:'IA / Machine learning',     group:'Sous-domaines'},
+  {id:'immobilier',          label:'Immobilier',                group:'Sous-domaines'},
+  {id:'impression',          label:'Impression / Carto papier', group:'Sous-domaines'},
+  {id:'logistique',          label:'Logistique',                group:'Sous-domaines'},
+  {id:'management',          label:'Management',                group:'Sous-domaines'},
+  {id:'metadonnees',         label:'Métadonnées / Catalogues',  group:'Sous-domaines'},
+  {id:'meteorologie',        label:'Météorologie',              group:'Sous-domaines'},
+  {id:'migration',           label:'Migration',                 group:'Sous-domaines'},
+  {id:'mobile',              label:'Mobile',                    group:'Sous-domaines'},
+  {id:'modelisation-urbaine',label:'Modélisation urbaine',      group:'Sous-domaines'},
+  {id:'mobilite',            label:'Mobilité',                  group:'Sous-domaines'},
+  {id:'networking',          label:'Réseau / Télécoms',         group:'Sous-domaines'},
+  {id:'ocean',               label:'Océan / Milieu marin',      group:'Sous-domaines'},
+  {id:'open-data',           label:'Open data',                 group:'Sous-domaines'},
+  {id:'open-source',         label:'Open source',               group:'Sous-domaines'},
+  {id:'patrimoine',          label:'Patrimoine',                group:'Sous-domaines'},
+  {id:'product-ownership',   label:'Product ownership',         group:'Sous-domaines'},
+  {id:'qgis',                label:'QGIS',                      group:'Sous-domaines'},
+  {id:'rd',                  label:'R&D',                       group:'Sous-domaines'},
+  {id:'recherche',           label:'Recherche',                 group:'Sous-domaines'},
+  {id:'rh',                  label:'RH',                        group:'Sous-domaines'},
+  {id:'risques-naturels',    label:'Risques naturels',          group:'Sous-domaines'},
+  {id:'routing',             label:'Routage / Navigation',      group:'Sous-domaines'},
+  {id:'secours',             label:'Secours',                   group:'Sous-domaines'},
+  {id:'securite',            label:'Sécurité informatique',     group:'Sous-domaines'},
+  {id:'securite-civile',     label:'Sécurité civile',           group:'Sous-domaines'},
+  {id:'statistiques',        label:'Statistiques',              group:'Sous-domaines'},
+  {id:'teledetection',       label:'Télédétection',             group:'Sous-domaines'},
+  {id:'tourisme',            label:'Tourisme',                  group:'Sous-domaines'},
+  {id:'traitement-image',    label:'Traitement d\'image',       group:'Sous-domaines'},
+  {id:'traitement-signal',   label:'Traitement du signal',      group:'Sous-domaines'},
+  {id:'transport',           label:'Transport',                 group:'Sous-domaines'},
+  {id:'urbanisme',           label:'Urbanisme',                 group:'Sous-domaines'},
+  {id:'urgences',            label:'Urgences',                  group:'Sous-domaines'},
+  {id:'visualisation',       label:'Visualisation de données',  group:'Sous-domaines'},
+  {id:'web',                 label:'Web',                       group:'Sous-domaines'},
+  {id:'websig',              label:'WebSIG',                    group:'Sous-domaines'},
+];
+
+const POIDS_OPTIONS = [
+  {value:1, label:'1 — Projet secondaire'},
+  {value:2, label:'2 — Rôle limité'},
+  {value:3, label:'3 — Projet standard'},
+  {value:4, label:'4 — Rôle important'},
+  {value:5, label:'5 — Projet phare'},
+];
+
+async function loadFicheData() {
+  ficheDataLoaded = true;
+  if (!msDomaines.length) await loadFiltres();
+  ficheCollabs = collaborateurs.length ? collaborateurs : await fetch('/api/collaborateurs').then(r=>r.json()).catch(()=>[]);
+  ficheCompetences = await fetch('/api/competences').then(r=>r.json()).catch(()=>[]);
+  renderFicheCollabGrid(ficheCollabs);
+  renderFpClientOptions();
+  updateFicheBtn();
+}
+
+function renderFpClientOptions() {
+  const sel = document.getElementById('fp-client-ref');
+  if (!sel || sel.dataset.filled) return;
+  const groups = {};
+  msClients.forEach(c => { const g = c.group || 'Autres'; (groups[g] = groups[g] || []).push(c); });
+  sel.innerHTML = '<option value="">— Sélectionner un client —</option>' +
+    Object.entries(groups).map(([g, its]) =>
+      `<optgroup label="${esc(g)}">` +
+      its.map(c => `<option value="${esc(c.label)}">${esc(c.label)}</option>`).join('') +
+      `</optgroup>`
+    ).join('');
+  sel.dataset.filled = '1';
+}
+
+function onFpClientChange() {
+  const val = document.getElementById('fp-client-ref').value;
+  const client = msClients.find(c => c.label === val);
+  const dl = document.getElementById('fp-sous-entite-list');
+  dl.innerHTML = (client?.sous_entites || []).map(s => `<option value="${esc(s)}">`).join('');
+  const inp = document.getElementById('fp-sous-entite');
+  inp.disabled = !val;
+  if (!val) { inp.value = ''; inp.placeholder = 'Sélectionnez d\'abord un client'; }
+  else { inp.placeholder = 'Optionnel — ex : ANSC, Programme NexSIS'; }
+  updateFicheBtn();
+}
+
+let ficheActiveCountry = 'France';
+let ficheByCountry = {};
+
+function renderFicheCollabCountryTabs(byCountry) {
+  const bar = document.getElementById('fiche-collab-country-tabs');
+  if (!bar) return;
+  bar.innerHTML = COLLAB_COUNTRIES.map(country => {
+    const items = byCountry[country] || [];
+    const n = items.length;
+    const sel = items.filter(c => ficheSelectedIds.has(c.id)).length;
+    const countLabel = (sel > 0 && sel < n) ? `${sel}/${n}` : `(${n})`;
+    return `<button type="button" class="collab-country-tab ${country===ficheActiveCountry?'active':''}" onclick="switchFicheCollabCountry('${country}')">${country} <span class="cct-count">${countLabel}</span></button>`;
+  }).join('');
+  updateFicheSelectAllCheckbox();
+}
+
+function updateFicheSelectAllCheckbox() {
+  const cb = document.getElementById('fiche-select-all-cb');
+  if (!cb) return;
+  const total = Object.values(ficheByCountry).reduce((n, items) => n + items.length, 0);
+  const selected = ficheSelectedIds.size;
+  cb.checked = total > 0 && selected === total;
+  cb.indeterminate = selected > 0 && selected < total;
+}
+
+function refreshFicheCollabCountryTabs() { renderFicheCollabCountryTabs(ficheByCountry); }
+
+function toggleFicheSelectAll() {
+  const makeSelected = ficheSelectedIds.size === 0;
+  document.querySelectorAll('#fiche-collab-grid .collab-item').forEach(el => {
+    const id = el.getAttribute('data-id');
+    const isSelected = ficheSelectedIds.has(id);
+    if (makeSelected && !isSelected) toggleFicheCollab(id, el);
+    if (!makeSelected && isSelected) toggleFicheCollab(id, el);
+  });
+}
+
+function switchFicheCollabCountry(country) {
+  ficheActiveCountry = country;
+  document.querySelectorAll('#fiche-collab-grid .collab-country').forEach(el => el.classList.remove('active'));
+  document.getElementById('fiche-collab-country-'+country)?.classList.add('active');
+  refreshFicheCollabCountryTabs();
+}
+
+function renderFicheCollabGrid(list) {
+  // Même composant que la génération : onglets pays + catégories + rangées .collab-item.
+  const grid = document.getElementById('fiche-collab-grid');
+  if (!list.length) { grid.innerHTML = '<div class="loading-placeholder">Aucun collaborateur.</div>'; document.getElementById('fiche-collab-country-tabs').innerHTML=''; return; }
+  const byCountry = {};
+  list.forEach(c => { const country = collabCountryOf(c); (byCountry[country]=byCountry[country]||[]).push(c); });
+  ficheByCountry = byCountry;
+  renderFicheCollabCountryTabs(byCountry);
+  grid.innerHTML = COLLAB_COUNTRIES.map(country => {
+    const groups = {};
+    (byCountry[country]||[]).forEach(c => { const k = normaliserCategorie(c.categorie); (groups[k]=groups[k]||[]).push(c); });
+    const cats = [...CAT_ORDER.filter(k=>groups[k]), ...Object.keys(groups).filter(k=>!CAT_ORDER.includes(k)&&groups[k])];
+    const body = cats.length ? cats.map(cat => {
+      const items = groups[cat]; const label = CAT_LABELS[cat] || cat || 'Autres';
+      return `<div class="cat-group" id="fcat-${country}-${cat}">
+        <div class="cat-header" onclick="document.getElementById('fcat-${country}-${cat}').classList.toggle('collapsed')">
+          <span class="cat-arrow">▾</span><span class="cat-title">${label}</span><span class="cat-count">${items.length}</span>
+        </div>
+        <div class="cat-body"><div class="cat-body-inner collab-list">
+          ${items.map(c => {
+            const ini = (c.display||'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+            const sel = ficheSelectedIds.has(c.id);
+            return `<div class="collab-item${sel?' selected':''}" data-id="${c.id}" onclick="toggleFicheCollab('${c.id}',this)">
+              <input type="checkbox" ${sel?'checked':''} onclick="event.stopPropagation();toggleFicheCollab('${c.id}',this.closest('.collab-item'))">
+              <div class="avatar">${ini}</div><div class="collab-name">${esc(c.display)}</div>
+            </div>`;
+          }).join('')}
+        </div></div></div>`;
+    }).join('') : '<div class="loading-placeholder">Aucun collaborateur.</div>';
+    return `<div class="collab-country ${country===ficheActiveCountry?'active':''}" id="fiche-collab-country-${country}">${body}</div>`;
+  }).join('');
+}
+
+function toggleFicheCollab(id, el) {
+  const cb = el.querySelector('input[type="checkbox"]');
+  const wasSelected = ficheSelectedIds.has(id);
+  if (wasSelected) {
+    ficheSelectedIds.delete(id);
+    el.classList.remove('selected');
+    cb.checked = false;
+    removeMemberTab(id);
+  } else {
+    ficheSelectedIds.add(id);
+    el.classList.add('selected');
+    cb.checked = true;
+    const collab = ficheCollabs.find(c=>c.id===id);
+    if (collab) addMemberTab(collab);
+  }
+  updateFicheMembersBadge();
+}
+
+function updateFicheMembersBadge() {
+  const badge = document.getElementById('fiche-members-badge');
+  const n = ficheSelectedIds.size;
+  badge.textContent = n;
+  badge.style.display = n ? 'flex' : 'none';
+  document.getElementById('fiche-membres-section').style.display = n ? 'block' : 'none';
+  updateFicheBtn();
+  refreshFicheCollabCountryTabs();
+}
+
+// Bouton « Valider » actif seulement si le minimum est atteint :
+// ≥1 membre + désignation + client + période + contexte d'au moins 3 mots.
+function updateFicheBtn() {
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  const ctx = val('fp-contexte');
+  const words = ctx ? ctx.split(/\s+/).filter(Boolean).length : 0;
+  const ok = ficheSelectedIds.size >= 1 && val('fp-nom') && val('fp-client-ref') && val('fp-periode') && words >= 3;
+  const btn = document.getElementById('btn-generate-fiche');
+  if (btn) btn.disabled = !ok;
+}
+
+// ── Tab management ────────────────────────────────────────────────────────
+
+function addMemberTab(collab) {
+  const id = collab.id;
+  const ini = collab.display.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  // Create tab button
+  const tabsEl = document.getElementById('membre-tabs');
+  const tab = document.createElement('div');
+  tab.className = 'membre-tab';
+  tab.id = 'tab-' + id;
+  tab.setAttribute('onclick', `switchMemberTab('${id}')`);
+  tab.innerHTML = `
+    <input type="checkbox" class="tab-sync-check" id="tab-sync-${id}"
+      onclick="event.stopPropagation();toggleTabSync('${id}',this)">
+    <div class="tab-avatar" id="tab-av-${id}">${ini}</div>
+    <span>${esc(collab.display)}</span>
+  `;
+  tabsEl.appendChild(tab);
+  requestAnimationFrame(updateScrollButtons);
+  updateSyncCounter();
+
+  // Create form panel
+  addMemberPanel(collab);
+
+  // Switch to this tab
+  switchMemberTab(id);
+
+  // If sync mode is on, add to grouped set and check the new tab
+  if (ficheSyncMode) {
+    ficheGroupedIds.add(id);
+    const syncCb = document.getElementById('tab-sync-' + id);
+    if (syncCb) { syncCb.checked = true; tab.classList.add('synced'); }
+  }
+}
+
+function removeMemberTab(id) {
+  const tab = document.getElementById('tab-' + id);
+  if (tab) tab.remove();
+  const panel = document.getElementById('mform-' + id);
+  if (panel) panel.remove();
+  requestAnimationFrame(updateScrollButtons);
+
+  ficheGroupedIds.delete(id);
+  updateSyncCounter();
+
+  if (ficheActiveMemberId === id) {
+    ficheActiveMemberId = null;
+    const remaining = document.querySelectorAll('.membre-tab');
+    if (remaining.length) {
+      const nextId = remaining[remaining.length - 1].id.replace('tab-', '');
+      switchMemberTab(nextId);
+    }
+  }
+}
+
+function switchMemberTab(id) {
+  document.querySelectorAll('.membre-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.membre-form-panel').forEach(p => p.classList.remove('active'));
+
+  const tab = document.getElementById('tab-' + id);
+  const panel = document.getElementById('mform-' + id);
+  if (tab) tab.classList.add('active');
+  if (panel) panel.classList.add('active');
+
+  ficheActiveMemberId = id;
+}
+
+function scrollMemberTabs(dir) {
+  const tabs = document.getElementById('membre-tabs');
+  tabs.scrollBy({ left: dir * 160, behavior: 'smooth' });
+  setTimeout(updateScrollButtons, 200);
+}
+
+function updateScrollButtons() {
+  const tabs = document.getElementById('membre-tabs');
+  const leftBtn = document.getElementById('tabs-scroll-left');
+  const rightBtn = document.getElementById('tabs-scroll-right');
+  if (!tabs || !leftBtn || !rightBtn) return;
+  const overflows = tabs.scrollWidth > tabs.clientWidth + 1;
+  leftBtn.style.display = (overflows && tabs.scrollLeft > 0) ? 'flex' : 'none';
+  rightBtn.style.display = (overflows && tabs.scrollLeft < tabs.scrollWidth - tabs.clientWidth - 1) ? 'flex' : 'none';
+}
+
+function toggleSyncMode() {
+  ficheSyncMode = !ficheSyncMode;
+  const container = document.getElementById('membre-tabs-container');
+  container.classList.toggle('sync-mode-on', ficheSyncMode);
+  const btn = document.getElementById('btn-sync-mode');
+  const banner = document.getElementById('sync-banner');
+
+  if (ficheSyncMode) {
+    btn.classList.add('active');
+    banner.classList.add('visible');
+    // Start with no members selected in sync group
+    ficheGroupedIds = new Set();
+    ficheSelectedIds.forEach(id => {
+      const cb = document.getElementById('tab-sync-' + id);
+      const tab = document.getElementById('tab-' + id);
+      if (cb) cb.checked = false;
+      if (tab) tab.classList.remove('synced');
+    });
+  } else {
+    btn.classList.remove('active');
+    banner.classList.remove('visible');
+    ficheGroupedIds.clear();
+    document.querySelectorAll('.membre-tab').forEach(tab => tab.classList.remove('synced'));
+  }
+  updateSyncCounter();
+}
+
+function toggleTabSync(id, cb) {
+  if (cb.checked) {
+    ficheGroupedIds.add(id);
+    document.getElementById('tab-' + id)?.classList.add('synced');
+  } else {
+    ficheGroupedIds.delete(id);
+    document.getElementById('tab-' + id)?.classList.remove('synced');
+  }
+  updateSyncCounter();
+}
+
+function updateSyncCounter() {
+  const el = document.getElementById('sync-counter');
+  if (!el) return;
+  const total = ficheSelectedIds.size;
+  if (ficheSyncMode) {
+    el.textContent = `${ficheGroupedIds.size}/${total} sélectionnés`;
+  } else {
+    el.textContent = total ? `${total} membre${total > 1 ? 's' : ''}` : '';
+  }
+}
+
+// ── Sync helpers ──────────────────────────────────────────────────────────
+
+function syncTextField(sourceId, fieldKey, value) {
+  if (!ficheSyncMode || !ficheGroupedIds.has(sourceId)) return;
+  ficheGroupedIds.forEach(targetId => {
+    if (targetId === sourceId) return;
+    const el = document.getElementById(`mf-${targetId}-${fieldKey}`);
+    if (el) el.value = value;
+  });
+}
+
+function syncSelectField(sourceId, fieldKey, value) {
+  if (!ficheSyncMode || !ficheGroupedIds.has(sourceId)) return;
+  ficheGroupedIds.forEach(targetId => {
+    if (targetId === sourceId) return;
+    const el = document.getElementById(`mf-${targetId}-${fieldKey}`);
+    if (el) el.value = value;
+  });
+}
+
+function syncDomaineField(sourceId, domValue, checked) {
+  if (!ficheSyncMode || !ficheGroupedIds.has(sourceId)) return;
+  ficheGroupedIds.forEach(targetId => {
+    if (targetId === sourceId) return;
+    const targetCb = document.querySelector(`#mf-${targetId}-dom-dropdown input[value="${domValue}"]`);
+    if (targetCb && targetCb.checked !== checked) {
+      targetCb.checked = checked;
+      updateMemberDomChips(targetId);
+    }
+  });
+}
+
+function syncCompField(sourceId, compName, checked) {
+  if (!ficheSyncMode || !ficheGroupedIds.has(sourceId)) return;
+  ficheGroupedIds.forEach(targetId => {
+    if (targetId === sourceId) return;
+    const targetCb = document.querySelector(`#mf-${targetId}-comp-families input[value="${CSS.escape(compName)}"]`);
+    if (targetCb && targetCb.checked !== checked) {
+      targetCb.checked = checked;
+      updateCompChips(targetId);
+    }
+  });
+}
+
+function syncRealisationField(sourceId, idx, value) {
+  if (!ficheSyncMode || !ficheGroupedIds.has(sourceId)) return;
+  ficheGroupedIds.forEach(targetId => {
+    if (targetId === sourceId) return;
+    const inputs = [...document.querySelectorAll(`#mf-${targetId}-realisations input[type="text"]`)];
+    if (inputs[idx]) inputs[idx].value = value;
+  });
+}
+
+// ── Form panel creation ───────────────────────────────────────────────────
+
+function renderDomainesForMember(id) {
+  if (!msDomaines.length) {
+    return '<div style="color:var(--grey);font-size:12px;font-style:italic;">Chargement des domaines…</div>';
+  }
+  const groups = {};
+  const groupOrder = [];
+  msDomaines.forEach(d => {
+    const g = d.group || '';
+    if (!groups[g]) { groups[g] = []; groupOrder.push(g); }
+    groups[g].push(d);
+  });
+  const itemsHtml = groupOrder.map(g => `
+    ${g ? `<div class="ms-group-header">${esc(g)}</div>` : ''}
+    ${groups[g].map(d => `
+      <label class="ms-item" data-label="${esc(d.label).toLowerCase()}">
+        <input type="checkbox" value="${d.id}" data-label="${esc(d.label)}" onchange="updateMemberDomChips('${id}');syncDomaineField('${id}',this.value,this.checked)">
+        <span>${esc(d.label)}</span>
+      </label>`).join('')}
+  `).join('');
+  return `<div class="ms-wrap member-dom-wrap">
+    <div style="position:relative;">
+      <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="ms-search" id="mf-${id}-dom-search" placeholder="Rechercher un domaine…" autocomplete="off"
+        onfocus="openMemberDom('${id}')" oninput="filterMemberDom('${id}',this.value)">
+    </div>
+    <div class="ms-dropdown" id="mf-${id}-dom-dropdown">${itemsHtml}</div>
+    <div class="ms-chips" id="mf-${id}-dom-chips"></div>
+  </div>`;
+}
+
+function openMemberDom(id) {
+  const dd = document.getElementById(`mf-${id}-dom-dropdown`);
+  if (dd) dd.classList.add('open');
+}
+function filterMemberDom(id, q) {
+  openMemberDom(id);
+  const lq = (q || '').toLowerCase();
+  document.querySelectorAll(`#mf-${id}-dom-dropdown .ms-item`).forEach(it => {
+    it.classList.toggle('hidden', !(it.getAttribute('data-label') || '').includes(lq));
+  });
+}
+function updateMemberDomChips(id) {
+  const dd = document.getElementById(`mf-${id}-dom-dropdown`);
+  const chips = document.getElementById(`mf-${id}-dom-chips`);
+  if (!dd || !chips) return;
+  const sel = [...dd.querySelectorAll('input:checked')];
+  chips.innerHTML = sel.map(cb =>
+    `<span class="ms-chip">${esc(cb.getAttribute('data-label'))}<span style="cursor:pointer;font-weight:700;margin-left:2px;" onclick="uncheckMemberDom('${id}','${cb.value}')">×</span></span>`
+  ).join('');
+  const err = document.getElementById(`err-mf-${id}-domaines`);
+  if (err) err.classList.remove('visible');
+}
+function uncheckMemberDom(id, val) {
+  const cb = document.querySelector(`#mf-${id}-dom-dropdown input[value="${val}"]`);
+  if (cb) { cb.checked = false; updateMemberDomChips(id); }
+}
+// Fermer les dropdowns de domaines au clic à l'extérieur.
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.member-dom-wrap').forEach(w => {
+    if (!w.contains(e.target)) { const dd = w.querySelector('.ms-dropdown'); if (dd) dd.classList.remove('open'); }
+  });
+});
+
+// Compétences : dropdown de recherche identique aux domaines.
+function openMemberComp(id) {
+  const el = document.getElementById(`mf-${id}-comp-families`);
+  if (el) el.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.member-comp-wrap').forEach(w => {
+    if (!w.contains(e.target)) { const dd = w.querySelector('.ms-dropdown'); if (dd) dd.classList.remove('open'); }
+  });
+});
+
+// Réduire / agrandir le composant Collaborateurs (déclaration) : l'icône − dans un
+// cercle ↔ + dans un cercle est pilotée par la classe .collapsed (voir .mp-icon).
+function toggleCollabCard() {
+  document.getElementById('fiche-s2').classList.toggle('collapsed');
+}
+
+function addMemberPanel(collab) {
+  const container = document.getElementById('membre-form-panels');
+  const id = collab.id;
+
+  const div = document.createElement('div');
+  div.className = 'membre-form-panel';
+  div.id = 'mform-' + id;
+  div.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Rôle + Importance -->
+      <div class="form-row" style="margin-bottom:0;">
+        <div class="form-field" style="margin-bottom:0;">
+          <label class="field-label">Rôle sur ce projet *</label>
+          <input type="text" id="mf-${id}-role" placeholder="Ex : Développeur backend principal"
+            oninput="syncTextField('${id}','role',this.value)">
+          <div class="field-error" id="err-mf-${id}-role">Champ obligatoire</div>
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label class="field-label">Importance du projet *</label>
+          <select id="mf-${id}-poids" class="poids-select"
+            onchange="syncSelectField('${id}','poids',this.value)">
+            ${POIDS_OPTIONS.map(o=>`<option value="${o.value}"${o.value===3?' selected':''}>${o.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <!-- Domaines -->
+      <div class="form-field" style="margin-bottom:0;">
+        <label class="field-label">Domaines *</label>
+        <div class="domaines-grid" id="mf-${id}-domaines">
+          ${renderDomainesForMember(id)}
+        </div>
+        <div class="field-error" id="err-mf-${id}-domaines">Sélectionner au moins un domaine</div>
+      </div>
+
+      <!-- Compétences (même dropdown de recherche que les domaines) -->
+      <div class="form-field" style="margin-bottom:0;">
+        <label class="field-label">Compétences mobilisées *</label>
+        <div class="ms-wrap member-comp-wrap">
+          <div class="comp-search-wrap" style="margin-bottom:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="comp-search" id="mf-${id}-comp-search" placeholder="Rechercher des compétences…" autocomplete="off"
+              onfocus="openMemberComp('${id}')" oninput="openMemberComp('${id}');filterComps('${id}',this.value)">
+          </div>
+          <div class="ms-dropdown" id="mf-${id}-comp-families">
+            ${renderCompFamilies(id)}
+          </div>
+        </div>
+        <div class="comp-chips-selected" id="mf-${id}-chips"></div>
+        <div class="field-error" id="err-mf-${id}-comps">Sélectionner au moins une compétence</div>
+        <!-- Hors référentiel : bouton seul, même espacement que « + Ajouter une réalisation » -->
+        <div class="new-comp-list" id="mf-${id}-new-comps"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="addNewComp('${id}')">+ Ajouter une compétence hors référentiel</button>
+      </div>
+
+      <!-- Réalisations -->
+      <div class="form-field" style="margin-bottom:0;">
+        <label class="field-label">Réalisations (3 minimum) *</label>
+        <div class="realisations-list" id="mf-${id}-realisations">
+          ${[0,1,2].map(n=>`
+            <div class="realisation-row">
+              <span class="realisation-num">${n+1}.</span>
+              <input type="text" id="mf-${id}-real-${n+1}" placeholder="Verbe d'action + résultat concret et mesurable"
+                oninput="syncRealisationField('${id}',${n},this.value)">
+            </div>`).join('')}
+        </div>
+        <div class="field-error" id="err-mf-${id}-realisations">Renseigner au moins 3 réalisations</div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="addRealisation('${id}')">+ Ajouter une réalisation</button>
+      </div>
+
+    </div>`;
+  container.appendChild(div);
+}
+
+// Mapping méta-catégories
+const FAMILY_META_JS = {
+  cartographie_web:'Carto & SIG', serveurs_carto:'Carto & SIG',
+  sig_desktop:'Carto & SIG', catalogues_metadonnees:'Carto & SIG',
+  langages:'Développeurs', bases_de_donnees:'Développeurs', etl_donnees:'Développeurs',
+  frameworks_backend:'Développeurs', frameworks_frontend:'Développeurs',
+  ia_ml:'Développeurs', mobile:'Développeurs', tests:'Développeurs',
+  outils_dev:'Développeurs', cms:'Développeurs', '3d_visualisation':'Développeurs',
+  infrastructure:'DevOps & Infrastructure',
+  monitoring_bi:'DevOps & Infrastructure', reseau_telecom_securite:'DevOps & Infrastructure',
+  design_systems:'Designers & UX', design_ui:'Designers & UX', design_ux:'Designers & UX',
+  methodes_ux:'Designers & UX', Product:'Designers & UX',
+  gestion_conseil:'Chefs de projet & Conseil', erp_odoo:'Chefs de projet & Conseil',
+};
+const META_ORDER_JS = ['Carto & SIG','Développeurs','DevOps & Infrastructure','Designers & UX','Chefs de projet & Conseil'];
+
+function renderCompFamilies(memberId) {
+  // Liste plate identique aux domaines : en-tête de groupe (.ms-group-header) + items (.ms-item).
+  if (!ficheCompetences.length) return '<div style="padding:12px;color:var(--grey);font-size:12px;">Chargement des compétences…</div>';
+  const metaGroups = {};
+  ficheCompetences.forEach(f => {
+    const meta = f.meta || FAMILY_META_JS[f.key] || 'Autres';
+    if (!metaGroups[meta]) metaGroups[meta] = [];
+    metaGroups[meta].push(f);
+  });
+  const sortedMetas = [...META_ORDER_JS.filter(m => metaGroups[m]), ...Object.keys(metaGroups).filter(m => !META_ORDER_JS.includes(m))];
+  let html = '';
+  sortedMetas.forEach(meta => {
+    metaGroups[meta].forEach(f => {
+      html += `<div class="ms-group-header">${esc(f.label)}</div>`;
+      (f.items || []).forEach(item => {
+        html += `<label class="ms-item" data-label="${esc(String(item).toLowerCase())}">
+          <input type="checkbox" value="${esc(item)}" onchange="onCompChange('${memberId}','${escJs(item)}',this)">
+          <span>${esc(item)}</span>
+        </label>`;
+      });
+    });
+  });
+  return html;
+}
+
+function slugId(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g,''); }
+function toggleCompMeta(memberId, metaId) { document.getElementById(`mf-${memberId}-meta-${metaId}`).classList.toggle('collapsed'); }
+function toggleCompFamily(memberId, familyKey) { document.getElementById(`mf-${memberId}-fam-${familyKey}`).classList.toggle('collapsed'); }
+
+function filterComps(memberId, query) {
+  const q = (query || '').toLowerCase();
+  const c = document.getElementById(`mf-${memberId}-comp-families`);
+  if (!c) return;
+  c.querySelectorAll('.ms-item').forEach(it => {
+    it.classList.toggle('hidden', !(it.getAttribute('data-label') || '').includes(q));
+  });
+  // Masque un en-tête de groupe si aucun de ses items n'est visible
+  let header = null, hasVisible = false;
+  c.childNodes.forEach(node => {
+    if (node.nodeType !== 1) return;
+    if (node.classList.contains('ms-group-header')) {
+      if (header) header.classList.toggle('hidden', !hasVisible);
+      header = node; hasVisible = false;
+    } else if (node.classList.contains('ms-item') && !node.classList.contains('hidden')) {
+      hasVisible = true;
+    }
+  });
+  if (header) header.classList.toggle('hidden', !hasVisible);
+}
+
+function onCompChange(memberId, compName, cb) {
+  updateCompChips(memberId);
+  syncCompField(memberId, compName, cb.checked);
+}
+
+function updateCompChips(memberId) {
+  const famContainer = document.getElementById(`mf-${memberId}-comp-families`);
+  const checked = [...famContainer.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value);
+  const chipsEl = document.getElementById(`mf-${memberId}-chips`);
+  chipsEl.innerHTML = checked.map(c => `
+    <div class="comp-chip-selected">
+      <span>${esc(c)}</span>
+      <button onclick="removeComp('${memberId}','${escJs(c)}')" title="Retirer">×</button>
+    </div>`).join('');
+}
+
+function removeComp(memberId, compName) {
+  const famContainer = document.getElementById(`mf-${memberId}-comp-families`);
+  const cb = famContainer.querySelector(`input[value="${CSS.escape(compName)}"]`);
+  if (cb) { cb.checked = false; updateCompChips(memberId); }
+}
+
+function updateDomaineChip(memberId, value, cb) {
+  document.getElementById(`mf-${memberId}-dom-${value}`).classList.toggle('checked', cb.checked);
+  syncDomaineField(memberId, value, cb.checked);
+}
+
+function addRealisation(memberId) {
+  const list = document.getElementById(`mf-${memberId}-realisations`);
+  const n = list.querySelectorAll('.realisation-row').length;
+  const row = document.createElement('div');
+  row.className = 'realisation-row';
+  row.innerHTML = `<span class="realisation-num">${n+1}.</span>
+    <input type="text" id="mf-${memberId}-real-${n+1}" placeholder="Verbe d'action + résultat concret"
+      oninput="syncRealisationField('${memberId}',${n},this.value)">
+    <button class="btn-remove" onclick="this.closest('.realisation-row').remove(); renumberRealisations('${memberId}')">×</button>`;
+  list.appendChild(row);
+}
+
+function renumberRealisations(memberId) {
+  const rows = document.querySelectorAll(`#mf-${memberId}-realisations .realisation-row`);
+  rows.forEach((row, i) => { const num = row.querySelector('.realisation-num'); if(num) num.textContent=(i+1)+'.'; });
+}
+
+let newCompCount = {};
+function addNewComp(memberId) {
+  newCompCount[memberId] = (newCompCount[memberId]||0) + 1;
+  const n = newCompCount[memberId];
+  const list = document.getElementById(`mf-${memberId}-new-comps`);
+  const row = document.createElement('div');
+  row.className = 'new-comp-row';
+  row.id = `new-comp-${memberId}-${n}`;
+
+  const metaOrder = ['Carto & SIG','Développeurs','DevOps & Infrastructure','Designers & UX','Chefs de projet & Conseil'];
+  const metaGroups = {};
+  ficheCompetences.forEach(f => {
+    const meta = f.meta || FAMILY_META_JS[f.key] || 'Autres';
+    if (!metaGroups[meta]) metaGroups[meta] = [];
+    metaGroups[meta].push(f);
+  });
+  let optionsHtml = '<option value="">— Choisir une section —</option>';
+  metaOrder.forEach(meta => {
+    if (!metaGroups[meta]?.length) return;
+    optionsHtml += `<optgroup label="${meta}">`;
+    metaGroups[meta].forEach(f => { optionsHtml += `<option value="${f.key}">${f.label}</option>`; });
+    optionsHtml += '</optgroup>';
+  });
+
+  row.innerHTML = `
+    <div class="form-field">
+      <label class="field-label">Libellé *</label>
+      <input type="text" id="nc-${memberId}-${n}-nom" placeholder="Ex : Prompt Engineering">
+    </div>
+    <div class="form-field">
+      <label class="field-label">Section *</label>
+      <select id="nc-${memberId}-${n}-section">${optionsHtml}</select>
+    </div>
+    <button class="btn-remove" onclick="this.closest('.new-comp-row').remove()" title="Supprimer">×</button>`;
+  list.appendChild(row);
+}
+
+// ── Génération YAML ────────────────────────────────────────────────────────
+
+async function generateFiche() {
+  const errors = validateFicheForm();
+  const errDiv = document.getElementById('fiche-errors');
+  const errList = document.getElementById('fiche-errors-list');
+  if (errors.length) {
+    errDiv.style.display = 'block';
+    errList.innerHTML = errors.map(e=>`<li>${e}</li>`).join('');
+    errDiv.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  errDiv.style.display = 'none';
+
+  // Auto-ingestion : on analyse la fiche côté serveur, on montre un aperçu,
+  // puis (après confirmation) on écrit directement dans les fiches maîtres.
+  const yaml = buildFicheYAML();
+  try {
+    const fd = new FormData();
+    fd.append('fiche_yaml', yaml);
+    const r = await fetch('/api/fiche/parse', { method:'POST', body:fd });
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail || ('HTTP '+r.status)); }
+    const preview = await r.json();
+    if (preview.errors && preview.errors.length) { alert('⚠ ' + preview.errors.join(' · ')); return; }
+    showIngestPreview(preview, yaml);
+  } catch(e) {
+    alert("Erreur lors de l'analyse de la fiche : " + e.message);
+  }
+}
+
+// ── Auto-ingestion : aperçu + confirmation ──────────────────────────────────
+let _ingestPreview = null;
+
+function _ingModal() {
+  let ov = document.getElementById('ingest-overlay');
+  if (ov) return ov;
+  ov = document.createElement('div');
+  ov.id = 'ingest-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;';
+  ov.innerHTML = '<div id="ingest-box" style="background:#fff;max-width:720px;width:100%;max-height:85vh;overflow:auto;border-top:3px solid #FF680A;padding:22px 24px;font-family:Inter,system-ui,sans-serif;font-size:13.5px;color:#1A1A1A;"></div>';
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+  return ov;
+}
+
+function showIngestPreview(preview, yamlText) {
+  _ingestPreview = preview;
+  const projet = preview.projet || {};
+  const membres = preview.membres || [];
+  const found = membres.filter(m => m.found).length;
+  const box = _ingModal().querySelector('#ingest-box');
+
+  const membresHtml = membres.map(m => {
+    const badge = m.found
+      ? '<span style="background:#2e7d32;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;">Trouvé</span>'
+      : '<span style="background:#c0392b;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;">Introuvable</span>';
+    const okC = (m.competences_ok||[]).map(c=>`<span style="border:1px solid #2e7d32;color:#2e7d32;padding:1px 6px;margin:2px;display:inline-block;font-size:11px;">${esc(c)}</span>`).join('');
+    const newC = (m.new_competences_for_collab||[]).map(c=>`<span style="border:1px solid #FF680A;color:#FF680A;padding:1px 6px;margin:2px;display:inline-block;font-size:11px;">${esc(c.nom)}</span>`).join('');
+    const warns = (m.warnings||[]).map(w=>`<div style="color:#e65100;font-size:12px;margin-top:4px;">⚠ ${esc(w)}</div>`).join('');
+    return `<div style="border:1px solid #e0e0e0;margin-bottom:10px;">
+      <div style="background:rgba(255,104,10,.07);padding:8px 12px;display:flex;gap:8px;align-items:center;">
+        <strong style="flex:1;">${esc(m.display||m.slug)}</strong>
+        <span style="font-size:11px;color:#7A7F82;">${esc(m.slug)}</span>${badge}
+      </div>
+      <div style="padding:10px 12px;">
+        ${warns}
+        ${m.found ? `<div style="font-size:10px;color:#7A7F82;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Un projet sera ajouté · compétences :</div>${okC}${newC}` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  box.innerHTML = `
+    <h3 style="font-size:16px;font-weight:800;margin-bottom:4px;">Aperçu avant enregistrement</h3>
+    <p style="color:#7A7F82;margin-bottom:14px;">Ces modifications seront ajoutées aux fiches maîtres sur le Drive, et l'administrateur sera notifié.</p>
+    <div style="padding:10px 12px;background:#F5F5F5;border:1px solid #e0e0e0;margin-bottom:12px;">
+      <strong>${esc(projet.designation||projet.id||'Projet')}</strong> — ${esc(projet.client||'')} · ${esc(projet.periode||'')}
+    </div>
+    <div style="font-size:11px;color:#7A7F82;margin-bottom:8px;">${found}/${membres.length} collaborateur(s) trouvé(s)</div>
+    ${membresHtml}
+    <div id="ingest-result" style="margin-top:6px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button id="ing-cancel" style="padding:8px 14px;border:1px solid #7A7F82;background:#fff;cursor:pointer;font-size:13px;">Annuler</button>
+      <button id="ing-dl" style="padding:8px 14px;border:1px solid #7A7F82;background:#fff;cursor:pointer;font-size:13px;">Télécharger le YAML</button>
+      <button id="ing-confirm" style="padding:8px 16px;border:none;background:#FF680A;color:#fff;cursor:pointer;font-weight:600;font-size:13px;" ${found===0?'disabled':''}>Confirmer et enregistrer</button>
+    </div>`;
+
+  box.querySelector('#ing-cancel').onclick = () => document.getElementById('ingest-overlay').remove();
+  box.querySelector('#ing-dl').onclick = () => downloadText(yamlText, 'fiche-fin-projet--' + slugify(projet.designation||projet.id||'projet') + '.yaml');
+  const cbtn = box.querySelector('#ing-confirm');
+  if (found > 0) cbtn.onclick = () => applyIngest(cbtn);
+}
+
+async function applyIngest(btn) {
+  if (!_ingestPreview) return;
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+  const res = document.getElementById('ingest-result');
+  try {
+    const r = await fetch('/api/fiche/apply', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(_ingestPreview),
+    });
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail || ('HTTP '+r.status)); }
+    const results = await r.json();
+    res.innerHTML = results.map(x=>`<div style="padding:8px 12px;border:1px solid #e0e0e0;margin-top:6px;color:${x.ok?'#2e7d32':'#c0392b'};"><strong>${esc(x.display||x.slug)}</strong> — ${esc(x.message)}</div>`).join('')
+      + '<div style="margin-top:10px;color:#2e7d32;font-weight:600;">✓ Fiche(s) mise(s) à jour sur le Drive. L\'administrateur a été notifié.</div>';
+    btn.textContent = 'Enregistré ✓';
+    document.getElementById('ing-cancel').textContent = 'Fermer';
+  } catch(e) {
+    res.innerHTML = `<div style="color:#c0392b;margin-top:8px;">Erreur : ${esc(e.message)}</div>`;
+    btn.disabled = false; btn.textContent = 'Confirmer et enregistrer';
+  }
+}
+
+function validateFicheForm() {
+  const errors = [];
+  const clearErr = id => document.getElementById(id)?.classList.remove('visible');
+  const showErr  = id => document.getElementById(id)?.classList.add('visible');
+
+  const nom = document.getElementById('fp-nom').value.trim();
+  clearErr('err-fp-nom'); if(!nom){showErr('err-fp-nom');errors.push('Nom du projet manquant');}
+  const client = document.getElementById('fp-client-ref').value.trim();
+  clearErr('err-fp-client-ref'); if(!client){showErr('err-fp-client-ref');errors.push('Client manquant');}
+  const periode = document.getElementById('fp-periode').value.trim();
+  clearErr('err-fp-periode'); if(!periode){showErr('err-fp-periode');errors.push('Période manquante');}
+  const contexte = document.getElementById('fp-contexte').value.trim();
+  clearErr('err-fp-contexte'); if(contexte.length<30){showErr('err-fp-contexte');errors.push('Contexte trop court (minimum 30 caractères)');}
+
+  clearErr('err-members');
+  if(!ficheSelectedIds.size){showErr('err-members');errors.push('Sélectionner au moins un membre de l\'équipe');}
+
+  ficheSelectedIds.forEach(id => {
+    const collab = ficheCollabs.find(c=>c.id===id);
+    const name = collab?.display || id;
+
+    const role = document.getElementById(`mf-${id}-role`)?.value.trim();
+    clearErr(`err-mf-${id}-role`);
+    if(!role){showErr(`err-mf-${id}-role`);errors.push(`${name} : rôle manquant`);}
+
+    const domChecked = [...(document.querySelectorAll(`#mf-${id}-domaines input:checked`))];
+    clearErr(`err-mf-${id}-domaines`);
+    if(!domChecked.length){showErr(`err-mf-${id}-domaines`);errors.push(`${name} : sélectionner au moins un domaine`);}
+
+    const comps = getSelectedComps(id);
+    const newComps = getNewComps(id);
+    clearErr(`err-mf-${id}-comps`);
+    if(!comps.length&&!newComps.length){showErr(`err-mf-${id}-comps`);errors.push(`${name} : sélectionner au moins une compétence`);}
+
+    // Nouvelle compétence hors référentiel : section OBLIGATOIRE (aucun fourre-tout)
+    document.querySelectorAll(`#mf-${id}-new-comps .new-comp-row`).forEach(row => {
+      const nomInput = row.querySelector('input[type="text"]');
+      const secSel = row.querySelector('select');
+      const nomVal = (nomInput?.value || '').trim();
+      if (secSel) secSel.style.borderColor = '';
+      if (nomVal && secSel && !secSel.value) {
+        secSel.style.borderColor = 'var(--red)';
+        errors.push(`${name} : choisir une section pour la compétence « ${nomVal} »`);
+      }
+    });
+
+    const reals = getRealisations(id);
+    clearErr(`err-mf-${id}-realisations`);
+    if(reals.length<3){showErr(`err-mf-${id}-realisations`);errors.push(`${name} : 3 réalisations minimum`);}
+  });
+
+  return errors;
+}
+
+function buildFicheYAML() {
+  const today = new Date().toISOString().split('T')[0];
+  const nom = document.getElementById('fp-nom').value.trim();
+  const client = document.getElementById('fp-client-ref').value.trim();
+  const sousEntite = document.getElementById('fp-sous-entite').value.trim();
+  const periode = document.getElementById('fp-periode').value.trim();
+  const secteur = document.querySelector('input[name="fp-secteur"]:checked')?.value || 'public';
+  const contexte = document.getElementById('fp-contexte').value.trim();
+  const projId = slugify(nom);
+
+  let yaml = `# Fiche fin de projet — Camptocamp
+# Générée le ${today}
+# Ingérée automatiquement dans l'app C2C Tenders (aperçu + confirmation)
+
+meta:
+  date_redaction: "${today}"
+
+projet:
+  id: ${projId}
+  designation: ${yamlStr(nom)}
+  client_ref: ${yamlStr(client)}${sousEntite ? `
+  sous_entite: ${yamlStr(sousEntite)}` : ''}
+  periode: ${yamlStr(periode)}
+  secteur: ${secteur}
+  contexte: >
+    ${contexte.replace(/\n/g, '\n    ')}
+
+membres:\n`;
+
+  ficheSelectedIds.forEach(id => {
+    const collab = ficheCollabs.find(c=>c.id===id);
+    const role = document.getElementById(`mf-${id}-role`)?.value.trim() || '';
+    const poids = document.getElementById(`mf-${id}-poids`)?.value || '3';
+    const domaines = [...document.querySelectorAll(`#mf-${id}-domaines input:checked`)].map(cb=>cb.value);
+    const comps = getSelectedComps(id);
+    const newComps = getNewComps(id);
+    const reals = getRealisations(id);
+
+    yaml += `- collaborateur: ${collab?.name || id}
+  role: ${yamlStr(role)}
+  domaines: [${domaines.join(', ')}]
+  poids: ${poids}
+  competences:\n`;
+    comps.forEach(c => { yaml += `    - ${yamlStr(c)}\n`; });
+    if (newComps.length) {
+      yaml += `  competences_nouvelles:\n`;
+      newComps.forEach(nc => { yaml += `    - nom: ${yamlStr(nc.nom)}\n      section: ${yamlStr(nc.section)}\n`; });
+    }
+    yaml += `  realisations:\n`;
+    reals.forEach(r => { yaml += `    - ${yamlStr(r)}\n`; });
+  });
+
+  return yaml;
+}
+
+function getRealisations(memberId) {
+  return [...document.querySelectorAll(`#mf-${memberId}-realisations input[type="text"]`)]
+    .map(i=>i.value.trim()).filter(Boolean);
+}
+
+function getSelectedComps(memberId) {
+  return [...(document.querySelectorAll(`#mf-${memberId}-comp-families input:checked`) || [])]
+    .map(cb=>cb.value);
+}
+
+function getNewComps(memberId) {
+  const list = document.getElementById(`mf-${memberId}-new-comps`);
+  if (!list) return [];
+  return [...list.querySelectorAll('.new-comp-row')].map(row => {
+    const n = row.id.split('-').pop();
+    const sectionKey = document.getElementById(`nc-${memberId}-${n}-section`)?.value || '';
+    const sectionFamily = ficheCompetences.find(f => f.key === sectionKey);
+    return {
+      nom: document.getElementById(`nc-${memberId}-${n}-nom`)?.value.trim() || '',
+      section: sectionKey,
+      section_label: sectionFamily?.label || sectionKey,
+    };
+  }).filter(nc => nc.nom && nc.section);
+}
+
+// ── Utilitaires ────────────────────────────────────────────────────────────
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escJs(s){if(!s)return'';return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function yamlStr(s){if(s===null||s===undefined)return'""';s=String(s);if(!s)return'""';if(/[:#,\[\]{}|>&*!'"@%`]/.test(s)||s.startsWith(' ')||s.endsWith(' ')||s.includes('\n'))return'"'+s.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')+'"';return s;}
+function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function downloadText(text, filename){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/yaml'}));a.download=filename;a.click();}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+loadCollaborateurs();
+loadFiltres();
+document.getElementById('membre-tabs').addEventListener('scroll', updateScrollButtons);
+
+// ══════════════════════════════════════════════════════
+// ADMIN — Éditer les fiches collaborateurs (CodeMirror + CRUD)
+// ══════════════════════════════════════════════════════
+let acEditor = null, acList = [], acFileId = null, acFilename = null, acLoaded = false;
+let acModel = null, acRawOpen = false, acRawEditing = false, acGapsOpen = false;
+let acRefDomaines = [], acRefCompFamilies = [], acRefClients = [];
+const AC_LOCALISATIONS = ['France', 'Suisse', 'Allemagne'];
+
+const AC_TEMPLATE = `# =====================================================================
+# FICHE COLLABORATEUR
+# =====================================================================
+identite:
+  prenom:
+  nom:
+  poste:
+  categorie_poste: developpeur
+  departement: Geospatial
+  annee_debut_carriere:
+  localisation: France
+  langues:
+  - {langue: Français, niveau: Langue maternelle}
+  - {langue: Anglais, niveau: Intermédiaire / technique}
+
+profil: >
+
+
+profils_cibles: {}
+
+competences:
+- categorie: Langages
+  domaines: [developpement]
+  items: []
+
+certifications: []
+
+projets:
+- id:
+  role:
+  client:
+  periode:
+  contexte: >
+
+  competences: []
+  realisations:
+  -
+  domaines: []
+  secteur: public
+  poids: 2
+
+parcours:
+- {periode: , poste: , employeur: Camptocamp}
+`;
+
+function initAdminCollabs(){
+  if(!acEditor){
+    acEditor = CodeMirror(document.getElementById('ac-editor-wrap'), {
+      mode:'yaml', theme:'neat', lineNumbers:true, indentUnit:2, tabSize:2,
+      indentWithTabs:false, lineWrapping:true, readOnly:true, extraKeys:{'Ctrl-S':acSave,'Cmd-S':acSave},
+    });
+    // Le brut n'est modifiable qu'en mode « Éditer le brut » : la dirtiness vient alors du CodeMirror.
+    acEditor.on('change', ()=>{ if(acRawEditing && acFileId) document.getElementById('ac-save').disabled=false; });
+    // Ferme les dropdowns multi-select au clic à l'extérieur.
+    document.addEventListener('click', e=>{
+      document.querySelectorAll('#ac-form .acms-wrap').forEach(w=>{ if(!w.contains(e.target)){ const dd=w.querySelector('.ms-dropdown'); if(dd) dd.classList.remove('open'); } });
+    });
+  }
+  if(!acLoaded){ acLoadRef(); acLoadList(); acLoaded=true; }
+}
+
+// ── Référentiel (suggestions de domaines & compétences) ─────────────────────
+async function acLoadRef(){
+  try{ const d = await (await fetch('/api/filtres')).json(); acRefDomaines = (d.domaines||[]).map(x=>({id:x.id, label:x.label, group:x.group})); }catch(e){}
+  try{ const d = await (await fetch('/api/competences')).json(); acRefCompFamilies = (d||[]).map(f=>({label:f.label, items:f.items||[]})); }catch(e){}
+  try{ const d = await (await fetch('/api/clients')).json(); acRefClients = (d||[]).map(c=>({id:c.label, label:c.label, group:c.group})); }catch(e){}
+  // Si une fiche est déjà affichée, régénère pour peupler les dropdowns.
+  if(acModel && document.getElementById('ac-form-wrap')) acRenderForm();
+}
+async function acLoadList(){
+  try{
+    const r = await fetch('/api/collaborateurs');
+    acList = await r.json();
+    acRenderList();
+  }catch(e){ document.getElementById('ac-list').innerHTML='<div class="loading-placeholder" style="padding:12px;">Erreur de chargement.</div>'; }
+}
+function acRenderList(){
+  // Même composant que la génération : liste groupée par catégorie (sélection simple).
+  const q = (document.getElementById('ac-search').value||'').toLowerCase();
+  const items = acList.filter(c => (c.display||c.title||'').toLowerCase().includes(q) || (c.filename||'').toLowerCase().includes(q));
+  const el = document.getElementById('ac-list');
+  if(!items.length){ el.innerHTML='<div class="loading-placeholder" style="padding:12px;">Aucun résultat</div>'; return; }
+  const groups = {};
+  items.forEach(c => { const k = normaliserCategorie(c.categorie); (groups[k] = groups[k] || []).push(c); });
+  const cats = [...CAT_ORDER.filter(k=>groups[k]), ...Object.keys(groups).filter(k=>!CAT_ORDER.includes(k)&&groups[k])];
+  el.innerHTML = cats.map(cat => {
+    const list = groups[cat]; const label = CAT_LABELS[cat] || cat || 'Autres';
+    return `<div class="cat-group" id="accat-${cat}">
+      <div class="cat-header" onclick="document.getElementById('accat-${cat}').classList.toggle('collapsed')">
+        <span class="cat-arrow">▾</span><span class="cat-title">${label}</span><span class="cat-count">${list.length}</span>
+      </div>
+      <div class="cat-body"><div class="cat-body-inner collab-list">
+        ${list.map(c => {
+          const lab = c.display||c.title||'?';
+          const ini = lab.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+          const sel = c.id===acFileId ? ' selected' : '';
+          return `<div class="collab-item${sel}" onclick="acLoadFile('${c.id}','${escJs(c.filename)}')">
+            <div class="avatar">${esc(ini)}</div><div class="collab-name">${esc(lab)}</div>
+          </div>`;
+        }).join('')}
+      </div></div></div>`;
+  }).join('');
+}
+async function acLoadFile(id, filename){
+  acFileId = id; acFilename = filename;
+  document.getElementById('ac-filename').textContent = filename;
+  acStatus('Chargement…','');
+  acRawEditing = false; acEditor.setOption('readOnly', true);
+  document.getElementById('ac-raw-edit').style.display = '';
+  document.getElementById('ac-raw-apply').style.display = 'none';
+  document.getElementById('ac-raw-hint').textContent = 'lecture seule — régénéré depuis le formulaire';
+  try{
+    const r = await fetch('/api/collaborateurs/'+encodeURIComponent(id));
+    const d = await r.json();
+    const raw = d.content||'';
+    let data;
+    try{ data = jsyaml.load(raw) || {}; }
+    catch(e){ data = {}; acStatus('⚠ YAML illisible — ouvre « Voir le brut » pour corriger','err'); }
+    acModel = acNormalize(data);
+    acRenderForm();
+    // Le brut affiche d'abord le fichier réel (fidèle), puis le régénéré après la 1re modif.
+    acEditor.setValue(raw); acEditor.clearHistory();
+    document.getElementById('ac-save').disabled = true;
+    document.getElementById('ac-del').disabled = false;
+    document.getElementById('ac-raw-btn').disabled = false;
+    document.getElementById('ac-gaps-btn').disabled = false;
+    acGapsOpen = false; acRefreshGapsBadge();
+    if(!acStatusIsErr()) acStatus('','');
+    acRenderList();
+  }catch(e){ acStatus('Erreur : '+e.message,'err'); }
+}
+async function acSave(){
+  if(!acFileId) return;
+  let content;
+  try{ content = acRawEditing ? acEditor.getValue() : acToYaml(acModel); }
+  catch(e){ acStatus('Erreur de sérialisation : '+e.message,'err'); return; }
+  acStatus('Sauvegarde…','');
+  try{
+    const r = await fetch('/api/collaborateurs/'+encodeURIComponent(acFileId), {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content}),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    document.getElementById('ac-save').disabled = true;
+    acStatus('✓ Enregistré (admin notifié)','ok');
+    if(!acRawEditing) acRefreshRaw();
+    acLoadList();
+  }catch(e){ acStatus('✗ '+e.message,'err'); }
+}
+async function acNew(){
+  let name = prompt('Nom du fichier (ex : prenom-nom.yaml)');
+  if(!name) return;
+  name = name.trim(); if(!name.endsWith('.yaml')) name += '.yaml';
+  try{
+    const r = await fetch('/api/collaborateurs', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({filename:name, content:AC_TEMPLATE}),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    const d = await r.json();
+    await acLoadList();
+    acLoadFile(d.file_id, name);
+  }catch(e){ acStatus('✗ '+e.message,'err'); }
+}
+async function acDelete(){
+  if(!acFileId) return;
+  if(!confirm('Supprimer '+acFilename+' ? (corbeille Drive)')) return;
+  try{
+    const r = await fetch('/api/collaborateurs/'+encodeURIComponent(acFileId), {method:'DELETE'});
+    if(!r.ok) throw new Error(await r.text());
+    acFileId=null; acFilename=null; acModel=null; acEditor.setValue(''); acRenderForm();
+    document.getElementById('ac-filename').textContent='Sélectionne une fiche à gauche';
+    ['ac-save','ac-del','ac-raw-btn','ac-gaps-btn'].forEach(id=>document.getElementById(id).disabled=true);
+    document.getElementById('ac-gaps-badge').style.display='none';
+    acLoadList();
+  }catch(e){ acStatus('✗ '+e.message,'err'); }
+}
+function acStatus(m,c){ const el=document.getElementById('ac-status'); el.textContent=m; el.className='admin-status'+(c?' '+c:''); }
+function acStatusIsErr(){ return document.getElementById('ac-status').classList.contains('err'); }
+
+// ════════════════════════════════════════════════════════════════════════════
+// ÉDITEUR PAR COMPOSANTS — modèle ↔ formulaire ↔ YAML
+// ════════════════════════════════════════════════════════════════════════════
+function acS(v){ return (v===null||v===undefined) ? '' : String(v); }
+function acNum(v){ if(v===''||v===null||v===undefined) return ''; const n=Number(v); return Number.isFinite(n)?n:v; }
+
+// YAML brut → modèle structuré (normalisé, trimé pour une re-sérialisation propre).
+function acNormalize(data){
+  data = data || {}; const id = data.identite || {};
+  const cibles = data.profils_cibles;
+  return {
+    identite: {
+      prenom: acS(id.prenom), nom: acS(id.nom), poste: acS(id.poste),
+      categorie_poste: acS(id.categorie_poste), departement: acS(id.departement),
+      annee_debut_carriere: acS(id.annee_debut_carriere), localisation: acS(id.localisation),
+      langues: (Array.isArray(id.langues)?id.langues:[]).map(l=>({langue:acS(l&&l.langue), niveau:acS(l&&l.niveau)})),
+    },
+    profil: acS(data.profil).trim(),
+    profils_cibles: (cibles && typeof cibles==='object' && !Array.isArray(cibles))
+      ? Object.entries(cibles).map(([k,v])=>({cle:acS(k), texte:acS(v).trim()})) : [],
+    competences: (Array.isArray(data.competences)?data.competences:[]).map(c=>({
+      categorie:acS(c.categorie), domaines:(c.domaines||[]).map(acS), items:(c.items||[]).map(acS) })),
+    certifications: (Array.isArray(data.certifications)?data.certifications:[]).map(c=>({
+      intitule:acS(c.intitule), organisme:acS(c.organisme), annee:acS(c.annee) })),
+    projets: (Array.isArray(data.projets)?data.projets:[]).map(p=>({
+      id:acS(p.id), role:acS(p.role), client:acS(p.client), periode:acS(p.periode),
+      contexte:acS(p.contexte).trim(), competences:(p.competences||[]).map(acS),
+      realisations:(p.realisations||[]).map(r=>acS(r).trim()), domaines:(p.domaines||[]).map(acS),
+      secteur:acS(p.secteur)||'public', poids:(p.poids===0||p.poids)?p.poids:2,
+      client_ref: Array.isArray(p.client_ref) ? p.client_ref.map(acS) : (p.client_ref ? [acS(p.client_ref)] : []),
+      sous_entite: acS(p.sous_entite||'') })),
+    parcours: (Array.isArray(data.parcours)?data.parcours:[]).map(x=>({
+      periode:acS(x.periode), poste:acS(x.poste), employeur:acS(x.employeur) })),
+  };
+}
+
+// Modèle → YAML brut (sérialisation canonique js-yaml + bannière régénérée).
+function acToYaml(m){
+  const id = m.identite;
+  const out = {
+    identite: {
+      prenom:id.prenom, nom:id.nom, poste:id.poste, categorie_poste:id.categorie_poste,
+      departement:id.departement, annee_debut_carriere:acNum(id.annee_debut_carriere),
+      localisation:id.localisation,
+      langues: id.langues.map(l=>({langue:l.langue, niveau:l.niveau})),
+    },
+    profil: m.profil,
+    profils_cibles: {},
+    competences: m.competences.map(c=>({categorie:c.categorie, domaines:[...c.domaines], items:[...c.items]})),
+    certifications: m.certifications.map(c=>{ const o={intitule:c.intitule, organisme:c.organisme}; const a=acNum(c.annee); if(a!=='') o.annee=a; return o; }),
+    projets: m.projets.map(p=>{
+      const o = { id:p.id, role:p.role, client:p.client, periode:p.periode, contexte:p.contexte,
+        competences:[...p.competences], realisations:[...p.realisations], domaines:[...p.domaines],
+        secteur:p.secteur||'public', poids:(acNum(p.poids)===''?2:acNum(p.poids)) };
+      if(p.client_ref && p.client_ref.length) o.client_ref = [...p.client_ref];
+      if(p.sous_entite) o.sous_entite = p.sous_entite;
+      return o;
+    }),
+    parcours: m.parcours.map(x=>({periode:x.periode, poste:x.poste, employeur:x.employeur})),
+  };
+  m.profils_cibles.forEach(pc=>{ const k=(pc.cle||'').trim(); if(k) out.profils_cibles[k]=pc.texte||''; });
+  const banner = "# =====================================================================\n"
+    + "# FICHE COLLABORATEUR — " + (id.prenom||'') + " " + (id.nom||'') + " (SOURCE UNIQUE)\n"
+    + "# Éditée via l'interface par composants — régénérée automatiquement.\n"
+    + "# =====================================================================\n";
+  return banner + jsyaml.dump(out, {indent:2, lineWidth:100, noRefs:true, sortKeys:false});
+}
+
+function acAfterChange(){
+  if(acFileId) document.getElementById('ac-save').disabled = false;
+  if(acRawOpen && !acRawEditing) acRefreshRaw();
+  acRefreshGapsBadge();
+  if(acGapsOpen) acRenderGaps();
+}
+function acRefreshRaw(){ try{ acEditor.setValue(acToYaml(acModel)); }catch(e){} }
+function acCount(ta,id){ const el=document.getElementById(id); if(!el)return; const n=ta.value.length; el.textContent=n+'/300'; el.classList.toggle('over', n>300); }
+
+// ── Rendu du formulaire ─────────────────────────────────────────────────────
+const MP_ICON_SVG = '<svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line class="mp-v" x1="12" y1="8" x2="12" y2="16"/></svg>';
+function feSec(key,title,body,count){
+  const badge = (count!==undefined && count!==null) ? `<span class="fe-sec-count">${count}</span>` : '';
+  return `<div class="fe-sec" id="fesec-${key}"><div class="fe-sec-head" onclick="acToggleSec('${key}')"><h3>${title}</h3>${badge}${MP_ICON_SVG}</div><div class="fe-sec-body" id="feb-${key}">${body}</div></div>`;
+}
+function acToggleSec(key){ const el=document.getElementById('fesec-'+key); if(el) el.classList.toggle('collapsed'); }
+function acReSec(key, body){ const el=document.getElementById('feb-'+key); if(el) el.innerHTML=body; }
+
+function acRenderForm(){
+  const w = document.getElementById('ac-form-wrap');
+  if(!w) return;
+  if(!acModel){ w.innerHTML='<div class="loading-placeholder" style="padding:20px;">Sélectionne une fiche à gauche pour l\'éditer.</div>'; return; }
+  const m = acModel;
+  w.innerHTML =
+    feSec('identite','Identité', buildIdentite())
+    + feSec('profils','Profils', buildProfils(), m.profils_cibles.length ? m.profils_cibles.length+1 : 1)
+    + feSec('comps','Compétences', buildComps(), m.competences.length)
+    + feSec('certs','Certifications & diplômes', buildCerts(), m.certifications.length)
+    + feSec('projets','Projets', buildProjets(), m.projets.length)
+    + feSec('parcours','Parcours professionnel', buildParcours(), m.parcours.length);
+}
+
+function buildIdentite(){
+  const id = acModel.identite;
+  const opts = CAT_ORDER.filter(k=>k).map(k=>`<option value="${k}" ${id.categorie_poste===k?'selected':''}>${CAT_LABELS[k]}</option>`).join('');
+  const other = (id.categorie_poste && !CAT_ORDER.includes(id.categorie_poste)) ? `<option value="${esc(id.categorie_poste)}" selected>${esc(id.categorie_poste)}</option>` : '';
+  return `
+  <div class="form-row">
+    <div class="form-field"><label class="field-label">Prénom</label><input type="text" value="${esc(id.prenom)}" oninput="acEditId('prenom',this.value)"></div>
+    <div class="form-field"><label class="field-label">Nom</label><input type="text" value="${esc(id.nom)}" oninput="acEditId('nom',this.value)"></div>
+  </div>
+  <div class="form-field"><label class="field-label">Poste</label><input type="text" value="${esc(id.poste)}" oninput="acEditId('poste',this.value)"></div>
+  <div class="form-row">
+    <div class="form-field"><label class="field-label">Catégorie de poste</label><select onchange="acEditId('categorie_poste',this.value)"><option value="">—</option>${opts}${other}</select></div>
+    <div class="form-field"><label class="field-label">Département</label><input type="text" value="${esc(id.departement)}" oninput="acEditId('departement',this.value)"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-field"><label class="field-label">Début de carrière (année)</label><input type="text" value="${esc(String(id.annee_debut_carriere))}" oninput="acEditId('annee_debut_carriere',this.value)"></div>
+    <div class="form-field"><label class="field-label">Localisation</label><select onchange="acEditId('localisation',this.value)"><option value="">—</option>${AC_LOCALISATIONS.map(l=>`<option value="${esc(l)}" ${id.localisation===l?'selected':''}>${esc(l)}</option>`).join('')}${id.localisation && !AC_LOCALISATIONS.includes(id.localisation)?`<option value="${esc(id.localisation)}" selected>${esc(id.localisation)}</option>`:''}</select></div>
+  </div>
+  <div class="form-field"><label class="field-label">Langues</label>
+    ${id.langues.map((l,i)=>`<div class="form-row" style="margin-bottom:8px">
+      <input type="text" value="${esc(l.langue)}" placeholder="Langue" oninput="acEditLangue(${i},'langue',this.value)">
+      <div style="display:flex;gap:8px;align-items:center"><input type="text" value="${esc(l.niveau)}" placeholder="Niveau" oninput="acEditLangue(${i},'niveau',this.value)"><button class="fe-del" onclick="acDelLangue(${i})">×</button></div>
+    </div>`).join('')}
+    <button class="fe-add" onclick="acAddLangue()">+ Ajouter une langue</button>
+  </div>`;
+}
+
+function buildProfils(){
+  const p = acModel.profil||'';
+  let html = `<div class="form-field">
+    <label class="field-label">Profil générique</label>
+    <textarea rows="4" maxlength="300" oninput="acEditProfil(this.value);acCount(this,'ac-cnt-profil')">${esc(p)}</textarea>
+    <div class="fe-counter ${p.length>300?'over':''}" id="ac-cnt-profil">${p.length}/300</div>
+  </div>
+  <div class="fe-sub">Profils cibles — paragraphe alternatif (désignation libre + texte) sélectionnable lors du ciblage d'un appel d'offre. La désignation devient la clé YAML.</div>`;
+  html += acModel.profils_cibles.map((c,i)=>{
+    const o = (c.texte||'').length>300;
+    return `<div class="fe-item">
+      <div class="fe-item-head"><span class="fe-item-title">${esc(c.cle||'Profil cible')}</span><button class="fe-del" onclick="acDelCible(${i})">Supprimer</button></div>
+      <div class="form-field"><label class="field-label">Désignation (ex : Profil SIG, Profil R&D, Profil geOrchestra…)</label><input type="text" value="${esc(c.cle)}" oninput="acEditCible(${i},'cle',this.value)"></div>
+      <div class="form-field"><label class="field-label">Paragraphe</label>
+        <textarea rows="4" maxlength="300" oninput="acEditCible(${i},'texte',this.value);acCount(this,'ac-cnt-cible-${i}')">${esc(c.texte)}</textarea>
+        <div class="fe-counter ${o?'over':''}" id="ac-cnt-cible-${i}">${(c.texte||'').length}/300</div>
+      </div>
+    </div>`;
+  }).join('');
+  html += `<button class="fe-add" onclick="acAddCible()">+ Ajouter un profil cible</button>`;
+  return html;
+}
+
+function buildComps(){
+  return acModel.competences.map((c,i)=>`<div class="fe-item">
+    <div class="fe-item-head"><span class="fe-item-title">${esc(c.categorie||'Catégorie de compétences')}</span><button class="fe-del" onclick="acDelComp(${i})">Supprimer</button></div>
+    <div class="form-field"><label class="field-label">Catégorie</label><input type="text" value="${esc(c.categorie)}" placeholder="ex : Langages, Backend, SIG & Géomatique…" oninput="acEditComp(${i},'categorie',this.value)"></div>
+    <div class="form-field"><label class="field-label">Domaines</label>${acMsHTML('comp:'+i+':domaines')}</div>
+    <div class="form-field"><label class="field-label">Items (technologies, outils…)</label>${acMsHTML('comp:'+i+':items')}</div>
+  </div>`).join('') + `<button class="fe-add" onclick="acAddComp()">+ Ajouter une catégorie de compétences</button>`;
+}
+
+function buildCerts(){
+  return acModel.certifications.map((c,i)=>`<div class="fe-item">
+    <div class="fe-item-head"><span class="fe-item-title">${esc(c.intitule||'Certification / diplôme')}</span><button class="fe-del" onclick="acDelCert(${i})">Supprimer</button></div>
+    <div class="form-field"><label class="field-label">Intitulé</label><input type="text" value="${esc(c.intitule)}" oninput="acEditCert(${i},'intitule',this.value)"></div>
+    <div class="form-row">
+      <div class="form-field"><label class="field-label">Organisme</label><input type="text" value="${esc(c.organisme)}" oninput="acEditCert(${i},'organisme',this.value)"></div>
+      <div class="form-field"><label class="field-label">Année (optionnel)</label><input type="text" value="${esc(String(c.annee||''))}" oninput="acEditCert(${i},'annee',this.value)"></div>
+    </div>
+  </div>`).join('') + `<button class="fe-add" onclick="acAddCert()">+ Ajouter une certification / un diplôme</button>`;
+}
+
+function buildProjets(){
+  return acModel.projets.map((p,i)=>{
+    const rc = p.realisations.filter(r=>(r||'').trim()).length;
+    return `<div class="fe-item">
+      <div class="fe-item-head"><span class="fe-item-title">${esc(p.client||p.id||'Projet')}</span><button class="fe-del" onclick="acDelProjet(${i})">Supprimer</button></div>
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Identifiant (id)</label><input type="text" value="${esc(p.id)}" placeholder="ex : dge-chatbot" oninput="acEditProjet(${i},'id',this.value)"></div>
+        <div class="form-field"><label class="field-label">Rôle</label><input type="text" value="${esc(p.role)}" oninput="acEditProjet(${i},'role',this.value)"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Client</label><input type="text" value="${esc(p.client)}" oninput="acEditProjet(${i},'client',this.value)"></div>
+        <div class="form-field"><label class="field-label">Période</label><input type="text" value="${esc(p.periode)}" placeholder="ex : 2023 – 2025" oninput="acEditProjet(${i},'periode',this.value)"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Client Camptocamp (référentiel)</label>${acMsHTML('proj:'+i+':client_ref')}</div>
+        <div class="form-field"><label class="field-label">Sous-entité</label><input type="text" value="${esc(p.sous_entite)}" oninput="acEditProjet(${i},'sous_entite',this.value)"></div>
+      </div>
+      <div class="form-field"><label class="field-label">Contexte</label><textarea rows="3" oninput="acEditProjet(${i},'contexte',this.value)">${esc(p.contexte)}</textarea></div>
+      <div class="form-field"><label class="field-label">Compétences mobilisées</label>${acMsHTML('proj:'+i+':competences')}</div>
+      <div class="form-field"><label class="field-label">Réalisations ${rc!==3?`<span style="color:var(--red);text-transform:none;letter-spacing:0">— ${rc}/3 (standard : exactement 3)</span>`:''}</label>
+        ${p.realisations.map((r,j)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start"><textarea rows="2" oninput="acEditReal(${i},${j},this.value)">${esc(r)}</textarea><button class="fe-del" onclick="acDelReal(${i},${j})">×</button></div>`).join('')}
+        <button class="fe-add" onclick="acAddReal(${i})">+ Ajouter une réalisation</button>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Secteur</label><select onchange="acEditProjet(${i},'secteur',this.value)">
+          <option value="public" ${p.secteur==='public'?'selected':''}>public</option>
+          <option value="prive" ${(p.secteur==='prive'||p.secteur==='privé')?'selected':''}>privé</option>
+        </select></div>
+        <div class="form-field"><label class="field-label">Poids (1 à 3)</label><input type="text" value="${esc(String(p.poids))}" oninput="acEditProjet(${i},'poids',this.value)"></div>
+      </div>
+      <div class="form-field"><label class="field-label">Domaines</label>${acMsHTML('proj:'+i+':domaines')}</div>
+    </div>`;
+  }).join('') + `<button class="fe-add" onclick="acAddProjet()">+ Ajouter un projet</button>`;
+}
+
+function buildParcours(){
+  return acModel.parcours.map((x,i)=>`<div class="fe-item">
+    <div class="fe-item-head"><span class="fe-item-title">${esc(x.employeur||'Étape de parcours')}</span><button class="fe-del" onclick="acDelParcours(${i})">Supprimer</button></div>
+    <div class="form-row">
+      <div class="form-field"><label class="field-label">Période</label><input type="text" value="${esc(x.periode)}" placeholder="ex : 2013 – aujourd'hui" oninput="acEditParcours(${i},'periode',this.value)"></div>
+      <div class="form-field"><label class="field-label">Employeur</label><input type="text" value="${esc(x.employeur)}" oninput="acEditParcours(${i},'employeur',this.value)"></div>
+    </div>
+    <div class="form-field"><label class="field-label">Poste</label><input type="text" value="${esc(x.poste)}" oninput="acEditParcours(${i},'poste',this.value)"></div>
+  </div>`).join('') + `<button class="fe-add" onclick="acAddParcours()">+ Ajouter une étape de parcours</button>`;
+}
+
+// ── Multi-select segmenté (recherche + dropdown groupé + chips) ─────────────
+// Même composant que les pages Génération/Déclaration, mais multi-instances
+// (une par bloc), branché directement sur le modèle via `scope`.
+function acTagArr(scope){ const [t,i,which]=scope.split(':'); const idx=+i; if(t==='comp') return acModel.competences[idx][which]; if(t==='proj') return acModel.projets[idx][which]; return []; }
+function acMsCid(scope){ return 'acms-'+scope.replace(/:/g,'-'); }
+function acMsIsDom(scope){ return scope.split(':')[2]==='domaines'; }
+function acMsIsClientRef(scope){ return scope.split(':')[2]==='client_ref'; }
+function acMsPh(scope){ return acMsIsDom(scope) ? 'Rechercher un domaine…' : acMsIsClientRef(scope) ? 'Rechercher un client…' : 'Rechercher une compétence…'; }
+function acMsSource(scope){
+  if(acMsIsDom(scope)){
+    const groups={};
+    acRefDomaines.forEach(d=>{ const g=d.group||'Autres'; (groups[g]=groups[g]||[]).push({val:d.id, label:d.label}); });
+    return Object.entries(groups).map(([name,items])=>({name,items}));
+  }
+  if(acMsIsClientRef(scope)){
+    const groups={};
+    acRefClients.forEach(c=>{ const g=c.group||'Autres'; (groups[g]=groups[g]||[]).push({val:c.id, label:c.label}); });
+    return Object.entries(groups).map(([name,items])=>({name,items}));
+  }
+  return acRefCompFamilies.map(f=>({name:f.label, items:(f.items||[]).map(i=>({val:i,label:i}))}));
+}
+function acMsLabel(scope,val){ if(acMsIsDom(scope)){ const d=acRefDomaines.find(x=>x.id===val); return d?d.label:val; } return val; }
+function acMsDropdownHTML(scope){
+  const arr=acTagArr(scope), src=acMsSource(scope);
+  if(!src.length) return '<div class="ms-empty">Chargement…</div>';
+  return src.map(g=>`<div class="ms-group-header">${esc(g.name)}</div>`
+    + g.items.map(it=>{
+        const chk = arr.includes(it.val) ? 'checked' : '';
+        return `<label class="ms-item" data-val="${esc(it.val)}"><input type="checkbox" ${chk} onchange="acMsToggle('${scope}','${escJs(it.val)}',this.checked)">${esc(it.label)}</label>`;
+      }).join('')
+  ).join('');
+}
+function acMsChipsHTML(scope){
+  return acTagArr(scope).map(val=>`<div class="ms-chip"><span>${esc(acMsLabel(scope,val))}</span><button type="button" onclick="acMsRemove('${scope}','${escJs(val)}')" title="Retirer">×</button></div>`).join('');
+}
+function acMsHTML(scope){
+  const cid=acMsCid(scope);
+  return `<div class="ms-wrap acms-wrap" id="${cid}">
+    <div style="position:relative;">
+      <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="ms-search" id="${cid}-search" placeholder="${acMsPh(scope)}" oninput="acMsFilter('${scope}',this.value)" onfocus="acMsOpen('${scope}')" autocomplete="off">
+    </div>
+    <div class="ms-dropdown" id="${cid}-dropdown">${acMsDropdownHTML(scope)}</div>
+    <div class="ms-chips" id="${cid}-chips">${acMsChipsHTML(scope)}</div>
+  </div>`;
+}
+function acMsOpen(scope){ const el=document.getElementById(acMsCid(scope)+'-dropdown'); if(el) el.classList.add('open'); }
+function acMsFilter(scope, q){
+  const el=document.getElementById(acMsCid(scope)+'-dropdown'); if(!el) return;
+  el.classList.add('open');
+  const lq=(q||'').toLowerCase(); let any=false;
+  el.querySelectorAll('.ms-item').forEach(it=>{ if(it.classList.contains('acms-freeadd')) return; const m=!lq||it.dataset.val.toLowerCase().includes(lq)||it.textContent.toLowerCase().includes(lq); it.classList.toggle('hidden',!m); if(m)any=true; });
+  el.querySelectorAll('.ms-group-header').forEach(h=>{ let n=h.nextElementSibling, vis=false; while(n && (n.classList.contains('ms-item')||n.classList.contains('ms-group-header'))){ if(n.classList.contains('ms-group-header')) break; if(!n.classList.contains('hidden')&&!n.classList.contains('acms-freeadd')) vis=true; n=n.nextElementSibling; } h.classList.toggle('hidden',!vis); });
+  // Option d'ajout libre si la saisie ne correspond à aucun item du référentiel
+  const fa=el.querySelector('.acms-freeadd'); if(fa) fa.remove();
+  const qt=(q||'').trim();
+  const exact = qt && acMsSource(scope).some(g=>g.items.some(i=>i.label.toLowerCase()===qt.toLowerCase()));
+  // client_ref doit toujours correspondre à une entrée exacte du référentiel clients
+  // (sinon la priorisation par client ne peut jamais matcher) — pas d'ajout libre ici.
+  if(qt && !exact && !acTagArr(scope).includes(qt) && !acMsIsClientRef(scope)){ el.insertAdjacentHTML('beforeend', `<div class="ms-item acms-freeadd" onmousedown="event.preventDefault()" onclick="acMsAddFree('${scope}')">+ Ajouter « ${esc(qt)} »</div>`); any=true; }
+  let empty=el.querySelector('.ms-empty'); if(empty){ empty.style.display=any?'none':'block'; } else if(!any){ el.insertAdjacentHTML('beforeend','<div class="ms-empty">Aucun résultat</div>'); }
+}
+function acMsToggle(scope, val, checked){
+  const arr=acTagArr(scope), i=arr.indexOf(val);
+  if(checked){ if(i<0) arr.push(val); } else if(i>=0){ arr.splice(i,1); }
+  acAfterChange(); acMsRenderChips(scope);
+}
+function acMsRemove(scope, val){
+  const arr=acTagArr(scope), i=arr.indexOf(val); if(i>=0) arr.splice(i,1);
+  acAfterChange();
+  const dd=document.getElementById(acMsCid(scope)+'-dropdown');
+  if(dd) dd.querySelectorAll('.ms-item').forEach(it=>{ if(it.dataset.val===val){ const cb=it.querySelector('input'); if(cb) cb.checked=false; } });
+  acMsRenderChips(scope);
+}
+function acMsAddFree(scope){
+  const inp=document.getElementById(acMsCid(scope)+'-search'); const v=(inp?inp.value:'').trim(); if(!v) return;
+  const arr=acTagArr(scope); if(!arr.includes(v)){ arr.push(v); acAfterChange(); }
+  if(inp) inp.value='';
+  const dd=document.getElementById(acMsCid(scope)+'-dropdown'); if(dd) dd.innerHTML=acMsDropdownHTML(scope);
+  acMsRenderChips(scope); acMsOpen(scope); if(inp) inp.focus();
+}
+function acMsRenderChips(scope){ const el=document.getElementById(acMsCid(scope)+'-chips'); if(el) el.innerHTML=acMsChipsHTML(scope); }
+
+// ── Handlers d'édition (mutation directe du modèle) ─────────────────────────
+function acEditId(f,v){ acModel.identite[f]=v; acAfterChange(); }
+function acEditLangue(i,f,v){ acModel.identite.langues[i][f]=v; acAfterChange(); }
+function acAddLangue(){ acModel.identite.langues.push({langue:'',niveau:''}); acReSec('identite',buildIdentite()); acAfterChange(); }
+function acDelLangue(i){ acModel.identite.langues.splice(i,1); acReSec('identite',buildIdentite()); acAfterChange(); }
+function acEditProfil(v){ acModel.profil=v; acAfterChange(); }
+function acEditCible(i,f,v){ acModel.profils_cibles[i][f]=v; acAfterChange(); }
+function acAddCible(){ acModel.profils_cibles.push({cle:'',texte:''}); acReSec('profils',buildProfils()); acAfterChange(); }
+function acDelCible(i){ acModel.profils_cibles.splice(i,1); acReSec('profils',buildProfils()); acAfterChange(); }
+function acEditComp(i,f,v){ acModel.competences[i][f]=v; acAfterChange(); }
+function acAddComp(){ acModel.competences.push({categorie:'',domaines:[],items:[]}); acReSec('comps',buildComps()); acAfterChange(); }
+function acDelComp(i){ acModel.competences.splice(i,1); acReSec('comps',buildComps()); acAfterChange(); }
+function acEditCert(i,f,v){ acModel.certifications[i][f]=v; acAfterChange(); }
+function acAddCert(){ acModel.certifications.push({intitule:'',organisme:'',annee:''}); acReSec('certs',buildCerts()); acAfterChange(); }
+function acDelCert(i){ acModel.certifications.splice(i,1); acReSec('certs',buildCerts()); acAfterChange(); }
+function acEditProjet(i,f,v){ acModel.projets[i][f]=v; acAfterChange(); }
+function acAddProjet(){ acModel.projets.push({id:'',role:'',client:'',periode:'',contexte:'',competences:[],realisations:['','',''],domaines:[],secteur:'public',poids:2,client_ref:[],sous_entite:''}); acReSec('projets',buildProjets()); acAfterChange(); }
+function acDelProjet(i){ acModel.projets.splice(i,1); acReSec('projets',buildProjets()); acAfterChange(); }
+function acAddReal(i){ acModel.projets[i].realisations.push(''); acReSec('projets',buildProjets()); acAfterChange(); }
+function acEditReal(i,j,v){ acModel.projets[i].realisations[j]=v; acAfterChange(); }
+function acDelReal(i,j){ acModel.projets[i].realisations.splice(j,1); acReSec('projets',buildProjets()); acAfterChange(); }
+function acEditParcours(i,f,v){ acModel.parcours[i][f]=v; acAfterChange(); }
+function acAddParcours(){ acModel.parcours.push({periode:'',poste:'',employeur:'Camptocamp'}); acReSec('parcours',buildParcours()); acAfterChange(); }
+function acDelParcours(i){ acModel.parcours.splice(i,1); acReSec('parcours',buildParcours()); acAfterChange(); }
+
+// ── Panneau brut (lecture seule + échappatoire d'édition) ───────────────────
+function acToggleRaw(){
+  acRawOpen = !acRawOpen;
+  document.getElementById('ac-raw-panel').classList.toggle('open', acRawOpen);
+  document.getElementById('ac-raw-btn').textContent = acRawOpen ? 'Masquer le brut' : 'Voir le brut';
+  if(acRawOpen){ if(!acRawEditing) acRefreshRaw(); setTimeout(()=>acEditor.refresh(), 30); }
+}
+function acToggleRawEdit(){
+  acRawEditing = !acRawEditing;
+  acEditor.setOption('readOnly', !acRawEditing);
+  document.getElementById('ac-raw-edit').style.display = acRawEditing ? 'none' : '';
+  document.getElementById('ac-raw-apply').style.display = acRawEditing ? '' : 'none';
+  document.getElementById('ac-raw-hint').textContent = acRawEditing
+    ? 'édition libre — pense à « Appliquer au formulaire »'
+    : 'lecture seule — régénéré depuis le formulaire';
+  if(acRawEditing){ if(!acRawOpen) acToggleRaw(); acEditor.focus(); }
+}
+function acApplyRaw(){
+  let data;
+  try{ data = jsyaml.load(acEditor.getValue()); }
+  catch(e){ acStatus('YAML invalide : '+e.message,'err'); return; }
+  acModel = acNormalize(data||{});
+  acRenderForm();
+  acRawEditing = false; acEditor.setOption('readOnly', true);
+  document.getElementById('ac-raw-edit').style.display = '';
+  document.getElementById('ac-raw-apply').style.display = 'none';
+  document.getElementById('ac-raw-hint').textContent = 'lecture seule — régénéré depuis le formulaire';
+  acAfterChange();
+  acStatus('✓ Formulaire mis à jour depuis le brut','ok');
+}
+
+// ── Analyseur de manques ────────────────────────────────────────────────────
+function acComputeGaps(){
+  const g=[]; if(!acModel) return g;
+  const id=acModel.identite;
+  [['prenom','Prénom'],['nom','Nom'],['poste','Poste'],['categorie_poste','Catégorie de poste'],['departement','Département'],['annee_debut_carriere','Début de carrière'],['localisation','Localisation']]
+    .forEach(([k,l])=>{ if(!acS(id[k]).trim()) g.push({sec:'identite',cat:'Identité',msg:l+' vide'}); });
+  if(!id.langues.length) g.push({sec:'identite',cat:'Identité',msg:'Aucune langue renseignée'});
+  else id.langues.forEach((l,i)=>{ if(!acS(l.langue).trim()||!acS(l.niveau).trim()) g.push({sec:'identite',cat:'Identité',msg:`Langue #${i+1} incomplète`}); });
+  if(!acModel.profil.trim()) g.push({sec:'profils',cat:'Profil',msg:'Profil générique vide'});
+  else if(acModel.profil.length>300) g.push({sec:'profils',cat:'Profil',msg:`Profil générique trop long (${acModel.profil.length}/300)`});
+  acModel.profils_cibles.forEach((c,i)=>{
+    if(!acS(c.cle).trim()) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible #${i+1} sans désignation`});
+    if(!acS(c.texte).trim()) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible « ${c.cle||('#'+(i+1))} » sans texte`});
+    else if(c.texte.length>300) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible « ${c.cle||('#'+(i+1))} » trop long (${c.texte.length}/300)`});
+  });
+  if(!acModel.competences.length) g.push({sec:'comps',cat:'Compétences',msg:'Aucune compétence'});
+  acModel.competences.forEach((c,i)=>{
+    if(!acS(c.categorie).trim()) g.push({sec:'comps',cat:'Compétences',msg:`Bloc #${i+1} sans catégorie`});
+    if(!c.items.length) g.push({sec:'comps',cat:'Compétences',msg:`« ${c.categorie||('Bloc '+(i+1))} » sans aucun item`});
+  });
+  acModel.certifications.forEach((c,i)=>{ if(!acS(c.intitule).trim()) g.push({sec:'certs',cat:'Certifications',msg:`Certification #${i+1} sans intitulé`}); });
+  if(!acModel.projets.length) g.push({sec:'projets',cat:'Projets',msg:'Aucun projet'});
+  acModel.projets.forEach((p,i)=>{
+    const nm=p.client||p.id||('Projet '+(i+1));
+    [['id','id'],['role','rôle'],['client','client'],['periode','période'],['contexte','contexte']]
+      .forEach(([k,l])=>{ if(!acS(p[k]).trim()) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : ${l} manquant`}); });
+    if(!p.competences.length) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : aucune compétence`});
+    if(!p.domaines.length) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : aucun domaine`});
+    if(!p.client_ref.length) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : client_ref manquant (référentiel clients)`});
+    const rc=p.realisations.filter(r=>acS(r).trim()).length;
+    if(rc!==3) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : ${rc} réalisation(s) au lieu de 3`});
+  });
+  if(!acModel.parcours.length) g.push({sec:'parcours',cat:'Parcours',msg:'Aucune étape de parcours'});
+  acModel.parcours.forEach((x,i)=>{ if(!acS(x.poste).trim()||!acS(x.employeur).trim()||!acS(x.periode).trim()) g.push({sec:'parcours',cat:'Parcours',msg:`Étape #${i+1} incomplète`}); });
+  return g;
+}
+function acRefreshGapsBadge(){
+  const badge=document.getElementById('ac-gaps-badge');
+  if(!acModel){ badge.style.display='none'; return; }
+  const n=acComputeGaps().length;
+  badge.style.display=''; badge.textContent=n; badge.classList.toggle('zero', n===0);
+}
+function acToggleGaps(){ acGapsOpen=!acGapsOpen; acRenderGaps(); if(acGapsOpen) document.getElementById('ac-form').scrollTop=0; }
+function acRenderGaps(){
+  const wrap=document.getElementById('ac-form-wrap');
+  const existing=document.getElementById('ac-gaps-panel');
+  if(!acGapsOpen || !acModel){ if(existing) existing.remove(); return; }
+  const gaps=acComputeGaps();
+  const html=`<div class="fe-gaps" id="ac-gaps-panel"><div class="fe-gaps-head"><strong>${gaps.length?gaps.length+' point(s) à compléter':'Fiche complète'}</strong><button class="fe-del" onclick="acToggleGaps()">Fermer</button></div>`
+    + (gaps.length ? '<ul>'+gaps.map(g=>`<li onclick="acJump('${g.sec}')"><span class="fe-gap-sec">${esc(g.cat)}</span><span>${esc(g.msg)}</span></li>`).join('')+'</ul>'
+                   : '<div class="fe-gaps-none">Aucun champ vide détecté. 🎉</div>')
+    + `</div>`;
+  if(existing) existing.outerHTML=html; else wrap.insertAdjacentHTML('afterbegin', html);
+}
+function acJump(sec){ const el=document.getElementById('fesec-'+sec); if(!el) return; el.classList.remove('collapsed'); el.scrollIntoView({behavior:'smooth',block:'start'}); el.classList.remove('fe-flash'); void el.offsetWidth; el.classList.add('fe-flash'); }
+
+// ══════════════════════════════════════════════════════
+// ADMIN — Éditer les données communes projets (référentiel)
+// ══════════════════════════════════════════════════════
+let adEditor = null, adLoaded = false;
+
+function initDonnees(){
+  if(!adEditor){
+    adEditor = CodeMirror(document.getElementById('ad-editor-wrap'), {
+      mode:'yaml', theme:'neat', lineNumbers:true, indentUnit:2, tabSize:2,
+      indentWithTabs:false, lineWrapping:true, extraKeys:{'Ctrl-S':adSave,'Cmd-S':adSave},
+    });
+    adEditor.on('change', ()=>{ document.getElementById('ad-save').disabled = false; });
+  }
+  if(!adLoaded){ adLoad(); adLoaded=true; }
+  setTimeout(()=>adEditor.refresh(), 50);
+}
+async function adLoad(){
+  adStatus('Chargement…','');
+  try{
+    const r = await fetch('/api/competences/raw');
+    if(!r.ok) throw new Error('HTTP '+r.status+' — redémarre le serveur pour charger /api/competences/raw');
+    const d = await r.json();
+    adEditor.setValue(d.content||'');
+    adEditor.clearHistory();
+    document.getElementById('ad-save').disabled = true;   // rien de modifié après chargement
+    adStatus('','');
+  }catch(e){ adStatus('Erreur : '+e.message,'err'); }
+}
+async function adSave(){
+  adStatus('Sauvegarde…','');
+  try{
+    const r = await fetch('/api/competences/raw', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content: adEditor.getValue()}),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    document.getElementById('ad-save').disabled = true;
+    adStatus('✓ Sauvegardé (admin notifié)','ok');
+  }catch(e){ adStatus('✗ '+e.message,'err'); }
+}
+function adStatus(m,c){ const el=document.getElementById('ad-status'); el.textContent=m; el.className='admin-status'+(c?' '+c:''); }
+
+// ══════════════════════════════════════════════════════
+// ADMIN 3 — ÉDITER LES CLIENTS CAMPTOCAMP
+// Un seul fichier (_clients.yaml, clé `clients: [...]`) édité comme la fiche
+// collaborateur : composants structurés dessus, avec échappatoire brut.
+// ══════════════════════════════════════════════════════
+let cliModel = null, cliList = [], cliSelected = -1;
+let cliLoaded = false, cliEditor = null, cliRawOpen = false, cliRawEditing = false;
+
+function initAdminClients(){
+  if(!cliEditor){
+    cliEditor = CodeMirror(document.getElementById('cli-editor-wrap'), {
+      mode:'yaml', theme:'neat', lineNumbers:true, indentUnit:2, tabSize:2,
+      indentWithTabs:false, lineWrapping:true, readOnly:true,
+    });
+    cliEditor.on('change', ()=>{ if(cliRawEditing) document.getElementById('cli-save').disabled=false; });
+  }
+  if(!cliLoaded){ cliLoad(); cliLoaded=true; }
+  setTimeout(()=>cliEditor.refresh(), 50);
+}
+function cliNormalizeOne(c){
+  c = c||{};
+  return {
+    nom: acS(c.nom), pays: acS(c.pays), secteur: acS(c.secteur)||'public',
+    open_source: c.open_source!==false,
+    sous_entites: (Array.isArray(c.sous_entites)?c.sous_entites:[]).map(acS),
+    alias: (Array.isArray(c.alias)?c.alias:[]).map(acS),
+  };
+}
+async function cliLoad(){
+  cliStatus('Chargement…','');
+  try{
+    const r = await fetch('/api/clients/raw');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    let data = {};
+    try{ data = jsyaml.load(d.content||'') || {}; }catch(e){ data = {}; }
+    cliModel = (Array.isArray(data.clients)?data.clients:[]).map(cliNormalizeOne);
+    cliSelected = cliModel.length ? 0 : -1;
+    cliRenderList(); cliRenderForm(); cliRefreshRaw();
+    document.getElementById('cli-save').disabled = true;
+    cliStatus('','');
+  }catch(e){ cliStatus('Erreur : '+e.message,'err'); }
+}
+function cliRenderList(){
+  const q = (document.getElementById('cli-search').value||'').toLowerCase();
+  const el = document.getElementById('cli-list');
+  if(!cliModel){ el.innerHTML='<div class="loading-placeholder" style="padding:12px;">Chargement…</div>'; return; }
+  const items = cliModel.map((c,i)=>({c,i})).filter(({c})=>(c.nom||'').toLowerCase().includes(q));
+  if(!items.length){ el.innerHTML='<div class="loading-placeholder" style="padding:12px;">Aucun résultat</div>'; return; }
+  const groups = {};
+  items.forEach(({c,i}) => { const g = c.pays || 'Autres'; (groups[g] = groups[g] || []).push({c,i}); });
+  el.innerHTML = Object.keys(groups).sort().map(pays => {
+    const list = groups[pays];
+    return `<div class="cat-group" id="clicat-${esc(pays)}">
+      <div class="cat-header" onclick="document.getElementById('clicat-${esc(pays)}').classList.toggle('collapsed')">
+        <span class="cat-arrow">▾</span><span class="cat-title">${esc(pays)}</span><span class="cat-count">${list.length}</span>
+      </div>
+      <div class="cat-body"><div class="cat-body-inner collab-list">
+        ${list.map(({c,i}) => {
+          const ini = (c.nom||'?').split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+          const sel = i===cliSelected ? ' selected' : '';
+          return `<div class="collab-item${sel}" onclick="cliSelect(${i})">
+            <div class="avatar">${esc(ini)}</div><div class="collab-name">${esc(c.nom||'(sans nom)')}</div>
+          </div>`;
+        }).join('')}
+      </div></div></div>`;
+  }).join('');
+}
+function cliSelect(i){ cliSelected = i; cliRenderList(); cliRenderForm(); }
+function cliNew(){
+  if(!cliModel) return;
+  cliModel.push(cliNormalizeOne({nom:'Nouveau client', pays:'France', secteur:'public', open_source:true, sous_entites:[], alias:[]}));
+  cliSelected = cliModel.length-1;
+  cliRenderList(); cliRenderForm(); cliAfterChange();
+}
+function cliDelete(){
+  if(cliSelected<0 || !cliModel) return;
+  const c = cliModel[cliSelected];
+  if(!confirm('Supprimer « '+(c.nom||'ce client')+' » du référentiel ?')) return;
+  cliModel.splice(cliSelected,1);
+  cliSelected = cliModel.length ? Math.min(cliSelected, cliModel.length-1) : -1;
+  cliRenderList(); cliRenderForm(); cliAfterChange();
+}
+function cliEdit(field, value){
+  if(cliSelected<0) return;
+  cliModel[cliSelected][field] = value;
+  if(field==='nom' || field==='pays') cliRenderList();
+  cliAfterChange();
+}
+function cliEditTags(field, value){
+  if(cliSelected<0) return;
+  cliModel[cliSelected][field] = value.split(',').map(s=>s.trim()).filter(Boolean);
+  cliAfterChange();
+}
+function cliRenderForm(){
+  const wrap = document.getElementById('cli-form-wrap');
+  document.getElementById('cli-del').disabled = cliSelected<0;
+  if(cliSelected<0 || !cliModel){
+    document.getElementById('cli-filename').textContent = 'Sélectionne un client à gauche';
+    wrap.innerHTML = '<div class="loading-placeholder" style="padding:20px;">Sélectionne un client à gauche pour l\'éditer (ou « + Ajouter un client »).</div>';
+    return;
+  }
+  const c = cliModel[cliSelected];
+  document.getElementById('cli-filename').textContent = c.nom || '(sans nom)';
+  wrap.innerHTML = `<div class="fe-item">
+    <div class="form-row">
+      <div class="form-field"><label class="field-label">Nom (libellé canonique)</label><input type="text" value="${esc(c.nom)}" oninput="cliEdit('nom',this.value)"></div>
+      <div class="form-field"><label class="field-label">Pays</label><input type="text" value="${esc(c.pays)}" list="cli-pays-list" oninput="cliEdit('pays',this.value)"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label class="field-label">Secteur</label><select onchange="cliEdit('secteur',this.value)">
+        <option value="public" ${c.secteur==='public'?'selected':''}>public</option>
+        <option value="prive" ${c.secteur==='prive'?'selected':''}>privé</option>
+        <option value="communautaire" ${c.secteur==='communautaire'?'selected':''}>communautaire</option>
+        <option value="mixte" ${c.secteur==='mixte'?'selected':''}>mixte</option>
+      </select></div>
+      <div class="form-field"><label class="field-label">Open source</label>
+        <div style="margin-top:8px;"><input type="checkbox" ${c.open_source?'checked':''} style="accent-color:var(--orange);width:15px;height:15px;" onchange="cliEdit('open_source',this.checked)"> commande / contribue à de l'open source</div>
+      </div>
+    </div>
+    <div class="form-field"><label class="field-label">Sous-entités <span class="field-hint">— séparées par des virgules</span></label>
+      <input type="text" value="${esc((c.sous_entites||[]).join(', '))}" oninput="cliEditTags('sous_entites',this.value)"></div>
+    <div class="form-field"><label class="field-label">Alias <span class="field-hint">— variantes de libellé rencontrées dans les fiches, séparées par des virgules</span></label>
+      <input type="text" value="${esc((c.alias||[]).join(', '))}" oninput="cliEditTags('alias',this.value)"></div>
+  </div>
+  <datalist id="cli-pays-list">${[...new Set((cliModel||[]).map(x=>x.pays).filter(Boolean))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`;
+}
+function cliToYamlString(){
+  const out = { clients: (cliModel||[]).map(c=>({
+    nom:c.nom, pays:c.pays, secteur:c.secteur, open_source:!!c.open_source,
+    sous_entites:[...(c.sous_entites||[])], alias:[...(c.alias||[])],
+  })) };
+  return jsyaml.dump(out, {indent:2, lineWidth:100, noRefs:true, sortKeys:false});
+}
+function cliAfterChange(){
+  document.getElementById('cli-save').disabled = false;
+  if(cliRawOpen && !cliRawEditing) cliRefreshRaw();
+}
+function cliRefreshRaw(){ try{ cliEditor.setValue(cliToYamlString()); cliEditor.clearHistory(); }catch(e){} }
+async function cliSave(){
+  let content;
+  try{ content = cliRawEditing ? cliEditor.getValue() : cliToYamlString(); }
+  catch(e){ cliStatus('Erreur de sérialisation : '+e.message,'err'); return; }
+  cliStatus('Sauvegarde…','');
+  try{
+    const r = await fetch('/api/clients/raw', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content}),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    document.getElementById('cli-save').disabled = true;
+    cliStatus('✓ Enregistré (admin notifié)','ok');
+    if(!cliRawEditing) cliRefreshRaw();
+  }catch(e){ cliStatus('✗ '+e.message,'err'); }
+}
+function cliStatus(m,c){ const el=document.getElementById('cli-status'); el.textContent=m; el.className='admin-status'+(c?' '+c:''); }
+function cliToggleRaw(){
+  cliRawOpen = !cliRawOpen;
+  document.getElementById('cli-raw-panel').classList.toggle('open', cliRawOpen);
+  document.getElementById('cli-raw-btn').textContent = cliRawOpen ? 'Masquer le brut' : 'Voir le brut';
+  if(cliRawOpen){ if(!cliRawEditing) cliRefreshRaw(); setTimeout(()=>cliEditor.refresh(), 30); }
+}
+function cliToggleRawEdit(){
+  cliRawEditing = !cliRawEditing;
+  cliEditor.setOption('readOnly', !cliRawEditing);
+  document.getElementById('cli-raw-edit').style.display = cliRawEditing ? 'none' : '';
+  document.getElementById('cli-raw-apply').style.display = cliRawEditing ? '' : 'none';
+  document.getElementById('cli-raw-hint').textContent = cliRawEditing
+    ? 'édition libre — pense à « Appliquer au formulaire »'
+    : 'lecture seule — régénéré depuis le formulaire';
+  if(cliRawEditing){ if(!cliRawOpen) cliToggleRaw(); cliEditor.focus(); }
+}
+function cliApplyRaw(){
+  let data;
+  try{ data = jsyaml.load(cliEditor.getValue()); }
+  catch(e){ cliStatus('YAML invalide : '+e.message,'err'); return; }
+  cliModel = (Array.isArray((data||{}).clients)?data.clients:[]).map(cliNormalizeOne);
+  cliSelected = cliModel.length ? 0 : -1;
+  cliRenderList(); cliRenderForm();
+  cliRawEditing = false; cliEditor.setOption('readOnly', true);
+  document.getElementById('cli-raw-edit').style.display = '';
+  document.getElementById('cli-raw-apply').style.display = 'none';
+  document.getElementById('cli-raw-hint').textContent = 'lecture seule — régénéré depuis le formulaire';
+  document.getElementById('cli-save').disabled = false;
+  cliStatus('✓ Formulaire mis à jour depuis le brut','ok');
+}
+
+// Compat : /admin redirige vers #admin-collabs → ouvre directement cette section.
+if (location.hash === '#admin-collabs') switchTab('admin-collabs');
+</script>
+</body>
+</html>
