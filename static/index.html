@@ -168,6 +168,7 @@
     .result-list { display:flex; flex-direction:column; gap:8px; }
     .result-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--grey-light); }
     .result-item.ok { border-color:var(--green); background:var(--white); }
+    .result-item.warn { border-color:var(--orange); background:var(--white); }
     .result-item.error { border-color:var(--red); background:var(--white); }
     .result-info { flex:1; min-width:0; }
     .result-name { font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1229,11 +1230,25 @@ async function generate(){
     if(!r.ok){const e=await r.json().catch(()=>({detail:'Erreur inconnue'}));throw new Error(e.detail);}
     const ct=r.headers.get('content-type')||'',disp=r.headers.get('content-disposition')||'';
     const fn=(disp.match(/filename="(.+?)"/)||[])[1]||'cvs.zip';
+    const warnHeader=r.headers.get('x-cv-warning'),warnHeaderMulti=r.headers.get('x-cv-warnings');
+    const warnings=warnHeaderMulti?JSON.parse(decodeURIComponent(warnHeaderMulti)):{};
     const blob=await r.blob(),url=URL.createObjectURL(blob);
     bar.style.width='100%';lbl.textContent='Terminé !';res.style.display='block';
     res.scrollIntoView({behavior:'smooth',block:'center'});
-    if(ct.includes('zip')){const dl=document.getElementById('btn-dl-all');dl.href=url;dl.download=fn;document.getElementById('results-actions').style.display='block';rl.innerHTML=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${ids.length} CVs générés</div><div class="result-detail">Téléchargez le ZIP ci-dessus</div></div></div>`;}
-    else{document.getElementById('results-actions').style.display='none';const a=document.createElement('a');a.href=url;a.download=fn;a.click();const c=collaborateurs.find(c=>ids[0]===c.id);rl.innerHTML=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${c?.display||fn}</div></div><div class="result-actions"><a href="${url}" download="${fn}" class="btn-dl">⬇ Re-télécharger</a></div></div>`;}
+    if(ct.includes('zip')){
+      const dl=document.getElementById('btn-dl-all');dl.href=url;dl.download=fn;document.getElementById('results-actions').style.display='block';
+      let html=`<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${ids.length} CVs générés</div><div class="result-detail">Téléchargez le ZIP ci-dessus</div></div></div>`;
+      for(const [fname,msg] of Object.entries(warnings)){
+        html+=`<div class="result-item warn"><div>⚠️</div><div class="result-info"><div class="result-name">${fname}</div><div class="result-detail">${msg}</div></div></div>`;
+      }
+      rl.innerHTML=html;
+    }
+    else{
+      document.getElementById('results-actions').style.display='none';const a=document.createElement('a');a.href=url;a.download=fn;a.click();const c=collaborateurs.find(c=>ids[0]===c.id);
+      const itemClass=warnHeader?'warn':'ok',icon=warnHeader?'⚠️':'✅';
+      const detail=warnHeader?`<div class="result-detail">${decodeURIComponent(warnHeader)}</div>`:'';
+      rl.innerHTML=`<div class="result-item ${itemClass}"><div>${icon}</div><div class="result-info"><div class="result-name">${c?.display||fn}</div>${detail}</div><div class="result-actions"><a href="${url}" download="${fn}" class="btn-dl">⬇ Re-télécharger</a></div></div>`;
+    }
   }catch(e){bar.style.width='100%';bar.style.background='var(--red)';lbl.textContent='Erreur';showError('Erreur : '+e.message);}
   finally{btn.disabled=false;updateGenerateBtn();setTimeout(()=>{prog.style.display='none';bar.style.width='0%';bar.style.background='';},2000);}
 }

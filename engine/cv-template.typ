@@ -22,6 +22,7 @@
 #let cv = yaml(data-path)
 #let id = cv.at("identite")
 #let font_reduction_val = cv.at("font_reduction", default: 0) * 0.5pt
+#let leading_val = 0.55em - cv.at("interligne_reduction", default: 0) * 0.05em
 
 // --- Document --------------------------------------------------------
 #set document(
@@ -30,7 +31,7 @@
 )
 #set text(font: c2c-font, size: 8.5pt - font_reduction_val, fill: c2c-ink, lang: "fr")
 #show link: it => text(fill: c2c-ink)[#it.body]  // neutralise la coloration automatique des URLs
-#set par(justify: false, leading: 0.55em, spacing: 0.65em)
+#set par(justify: false, leading: leading_val, spacing: 0.65em)
 
 // --- Page : ecran, pas d'impression ---------------------------------
 #set page(

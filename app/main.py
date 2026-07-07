@@ -6,6 +6,7 @@ import json
 import zipfile
 from pathlib import Path
 from typing import Annotated, Optional, List
+from urllib.parse import quote
 
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")  # charge le .env de l'app quel que soit le cwd
@@ -132,6 +133,7 @@ async def generate_cvs(
         ao_stem = "generique"
 
     pdfs: dict[str, bytes] = {}
+    warnings: dict[str, str] = {}
 
     for file_id in collaborateurs:
         try:
@@ -155,21 +157,26 @@ async def generate_cvs(
             raise HTTPException(status_code=500, detail=f"Erreur scoring ({collab_stem}) : {e}")
 
         try:
-            pdf_bytes, _ = renderer.render_cv_to_bytes(data, max_projets=max_projets, max_pages=max_pages)
+            pdf_bytes, _, warning = renderer.render_cv_to_bytes(data, max_projets=max_projets, max_pages=max_pages)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Erreur rendu ({collab_stem}) : {e}")
 
         pdfs[pdf_filename] = pdf_bytes
+        if warning:
+            warnings[pdf_filename] = warning
 
     if not pdfs:
         raise HTTPException(status_code=500, detail="Aucun PDF généré.")
 
     if len(pdfs) == 1:
         filename, pdf_bytes = next(iter(pdfs.items()))
+        headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+        if warnings:
+            headers["X-CV-Warning"] = quote(next(iter(warnings.values())))
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+            headers=headers,
         )
 
     buf = io.BytesIO()
@@ -177,10 +184,13 @@ async def generate_cvs(
         for fname, fbytes in pdfs.items():
             zf.writestr(fname, fbytes)
     buf.seek(0)
+    headers = {"Content-Disposition": f'attachment; filename="cvs-{ao_stem}.zip"'}
+    if warnings:
+        headers["X-CV-Warnings"] = quote(json.dumps(warnings, ensure_ascii=False))
     return StreamingResponse(
         buf,
         media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="cvs-{ao_stem}.zip"'},
+        headers=headers,
     )
 
 
