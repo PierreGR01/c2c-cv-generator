@@ -1,5 +1,5 @@
-# Credentials — ne jamais committer les valeurs renseignées
-.env
+# Secrets réels — jamais committés (client_secret.json, tokens OAuth).
+# .env est versionné : il ne contient que des IDs Drive, pas de secret.
 *.json
 !package.json
 # Token OAuth utilisateur (si stocké dans le repo via GOOGLE_OAUTH_TOKEN_FILE)
