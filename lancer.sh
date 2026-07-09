@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/codebase"
 
 # Vérifie que Python est disponible
 if ! command -v python3 &> /dev/null; then

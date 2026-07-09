@@ -1,5 +1,5 @@
 @echo off
-cd /d "%~dp0"
+cd /d "%~dp0codebase"
 
 :: Verifie que Python est disponible
 python --version >nul 2>&1

@@ -1,18 +1,3 @@
-# Secrets réels — jamais committés (client_secret.json, tokens OAuth).
-# .env est versionné : il ne contient que des IDs Drive, pas de secret.
-*.json
-!package.json
-# Token OAuth utilisateur (si stocké dans le repo via GOOGLE_OAUTH_TOKEN_FILE)
-token-*.json
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-venv/
-
-# Sorties temporaires
-sorties/
-*.pdf
-
+# Raccourci personnel (chemin absolu propre à chaque poste) et config locale Claude Code
+*.lnk
+.claude/
