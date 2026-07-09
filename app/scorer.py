@@ -69,37 +69,37 @@ def score_projet(projet: dict, cible: dict) -> float:
 
 
 def resolve_client_display(p: dict) -> str:
-    """Résout le libellé 'client' affiché sur le CV à partir de client/client_ref/sous_entite.
+    """Résout le libellé 'client' affiché sur le CV à partir de client_custom/client_ref/sous_entite.
 
-    - Plusieurs client_ref (mission transversale) -> "Clients divers".
-    - client_ref + sous_entite renseignés : si client diffère du client_ref, on privilégie
-      le libellé 'client' (déjà curé/précis) ; sinon (identiques, cas standard des projets
-      créés via le formulaire) on affiche la sous-entité, plus informative.
-    - Sinon : client tel quel, ou le client_ref à défaut.
+    - Par défaut : client_ref (plusieurs valeurs jointes par ", "), avec la sous-entité
+      ajoutée sous la forme "client_ref — sous-entité" si un seul client_ref est renseigné.
+    - client_custom, s'il est renseigné, se substitue entièrement à ce libellé par défaut.
     """
-    client = p.get("client", "") or ""
+    custom = (p.get("client_custom") or "").strip()
+    if custom:
+        return custom
     refs = p.get("client_ref") or []
     if isinstance(refs, str):
         refs = [refs]
-    if len(refs) > 1:
-        return "Clients divers"
-    sous_entite = p.get("sous_entite", "") or ""
-    ref = refs[0] if refs else ""
-    if ref and sous_entite:
-        return client if (client and client != ref) else sous_entite
-    return client or ref
+    sous_entite = (p.get("sous_entite") or "").strip()
+    if len(refs) == 1 and sous_entite:
+        return f"{refs[0]} — {sous_entite}"
+    return ", ".join(refs)
 
 
-def sans_meta(p: dict) -> dict:
+def sans_meta(p: dict, hide_designation: bool = False) -> dict:
     # "technologies" est l'ancien nom du champ, remplacé par "competences" — on l'exclut
     # pour éviter qu'il ne soit transmis au template si les deux coexistent.
-    # "client_ref"/"sous_entite" sont des méta-champs de ciblage/résolution, pas transmis
-    # tels quels : seul le "client" résolu (resolve_client_display) l'est.
+    # "client_custom"/"client_ref"/"sous_entite" sont des méta-champs de ciblage/résolution,
+    # pas transmis tels quels : seul le "client" résolu (resolve_client_display) l'est.
     result = {
         k: v for k, v in p.items()
-        if k not in ("id", "domaines", "secteur", "poids", "technologies", "client_ref", "sous_entite")
+        if k not in ("id", "domaines", "secteur", "poids", "technologies",
+                     "client_custom", "client_ref", "sous_entite")
     }
     result["client"] = resolve_client_display(p)
+    if hide_designation:
+        result.pop("designation", None)
     # Normalise periode en string — YAML peut parser "2026" comme entier
     # ce qui ferait planter la comparaison periode != "" dans le template Typst
     if "periode" in result:
@@ -149,6 +149,7 @@ def projeter_cible(master: dict, cible: dict) -> dict:
     max_p = cible.get("max_projets", 4)
     annee_min = cible.get("annee_min") or 0
 
+    hide_designation = bool(cible.get("masquer_designations"))
     candidats = [p for p in projets if p.get("id") not in exclure]
     # Filtre par année minimum (exclut les projets trop anciens)
     if annee_min:
@@ -192,7 +193,7 @@ def projeter_cible(master: dict, cible: dict) -> dict:
         "profil": profil,
         "competences": comps,
         "certifications": master.get("certifications", []),
-        "projets": [sans_meta(p) for p in selection],
+        "projets": [sans_meta(p, hide_designation) for p in selection],
         "parcours": parcours,
     }
     if "comp_items_font" in master:
@@ -239,5 +240,5 @@ def projeter_simple(master: dict, max_p: int = 4, annee_min: int = 0) -> dict:
 def scorer_projets(master: dict, cible: dict) -> list[dict]:
     """Retourne la liste des projets avec leur score, triés."""
     projets = master.get("projets", [])
-    scored = [{"id": p.get("id"), "client": p.get("client"), "score": score_projet(p, cible)} for p in projets]
+    scored = [{"id": p.get("id"), "client_custom": p.get("client_custom"), "score": score_projet(p, cible)} for p in projets]
     return sorted(scored, key=lambda x: x["score"], reverse=True)

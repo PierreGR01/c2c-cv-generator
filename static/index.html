@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>C2C Tenders — Camptocamp</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -17,14 +19,18 @@
     :root {
       --orange: #FF680A;
       --grey: #7A7F82;
-      --grey-light: #F5F5F5;
+      --grey-dark: #5C6166;
+      --border: #D9D9D9;
+      --surface-tint: #F5F5F5;
+      --surface-focus: #E7E7E8;
+      --bg-page: #F2F2F2;
       --ink: #1A1A1A;
       --white: #FFFFFF;
       --red: #D7263D;
       --green: #2E7D4F;
-      --hover: #F5F5F5;
+      --field-h: 34px;
     }
-    body { font-family:'Inter',system-ui,sans-serif; font-size:14px; color:var(--ink); background:var(--hover); min-height:100vh; }
+    body { font-family:'Inter',system-ui,sans-serif; font-size:14px; color:var(--ink); background:var(--bg-page); min-height:100vh; }
 
     /* Header */
     header { background:var(--white); border-bottom:2px solid var(--orange); padding:0 32px; height:52px; display:flex; align-items:center; gap:0; position:sticky; top:0; z-index:100; }
@@ -39,11 +45,12 @@
     .tab-section.active { display:block; }
 
     /* Cards */
-    .card { background:var(--white); border:1px solid var(--grey-light); overflow:hidden; }
-    .card-header { padding:12px 20px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:10px; }
-    .card-header h2 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); flex:1; }
+    .card { background:var(--white); border:1px solid var(--border); overflow:hidden; }
+    .card-header { padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .card-header h2 { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); flex:1; }
     .card-header .badge { background:var(--orange); color:white; font-size:11px; font-weight:700; padding:2px 8px; min-width:20px; text-align:center; }
-    .card-header .tag-opt { font-size:11px; font-weight:600; color:var(--grey); background:var(--grey-light); padding:2px 8px; }
+    .card-header .tag-opt { font-size:11px; font-weight:600; color:var(--grey-dark); background:var(--surface-tint); padding:2px 8px; }
+    .card-header .tag-opt:empty { display:none; }
     .card-body { padding:16px 20px; }
 
     /* Buttons */
@@ -51,14 +58,14 @@
     .btn:disabled { opacity:.35; cursor:not-allowed; }
     .btn-primary { background:var(--orange); color:#fff; }
     .btn-primary:hover:not(:disabled) { opacity:.88; }
-    .btn-ghost { background:transparent; color:var(--ink); border:1px solid var(--grey-light); }
-    .btn-ghost:hover { background:var(--hover); }
+    .btn-ghost { background:transparent; color:var(--ink); border:1px solid var(--border); }
+    .btn-ghost:hover { background:var(--surface-tint); }
     .btn-full { width:100%; justify-content:center; }
     .btn-sm { padding:5px 10px; font-size:12px; }
 
     /* Form controls */
     input[type="text"], input[type="search"], textarea, select {
-      width:100%; border:1px solid var(--grey-light); padding:8px 11px; font-size:13px; color:var(--ink); background:var(--white); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s;
+      width:100%; border:1px solid var(--border); padding:8px 11px; font-size:13px; color:var(--ink); background:var(--white); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s;
     }
     input[type="text"]:focus, input[type="search"]:focus, textarea:focus, select:focus { border-color:var(--orange); }
     /* Supprime les décorations natives des champs search (loupe, croix Chrome/Safari) */
@@ -67,8 +74,9 @@
     input[type="search"]::-webkit-search-cancel-button,
     input[type="search"]::-webkit-search-results-button { display:none; }
     textarea { resize:vertical; line-height:1.55; }
-    label.field-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); margin-bottom:5px; }
+    label.field-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey-dark); margin-bottom:5px; }
     .field-hint { font-size:11px; color:var(--grey); margin-top:4px; }
+    .field-hint-tiny { font-size:9.5px; font-weight:400; text-transform:none; letter-spacing:normal; color:var(--grey); }
     .field-error { font-size:11px; color:var(--red); margin-top:4px; display:none; }
     .field-error.visible { display:block; }
     .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
@@ -76,7 +84,7 @@
     .form-field:last-child { margin-bottom:0; }
 
     /* Spinner */
-    .spinner { width:14px; height:14px; border:2px solid var(--grey-light); border-top-color:var(--orange); animation:spin .6s linear infinite; display:inline-block; vertical-align:middle; }
+    .spinner { width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--orange); animation:spin .6s linear infinite; display:inline-block; vertical-align:middle; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
     /* ───────────────────────────────────────────────
@@ -89,27 +97,27 @@
     #col-actions { grid-column:3; grid-row:1; display:flex; flex-direction:column; gap:16px; }
     .collab-list { display:flex; flex-direction:column; }
     .collab-item { display:flex; align-items:center; gap:10px; padding:7px 12px; cursor:pointer; transition:background .12s; user-select:none; }
-    .collab-item:hover { background:var(--hover); }
-    .collab-item.selected { background:var(--hover); border-left:2px solid var(--orange); }
+    .collab-item:hover { background:var(--surface-tint); }
+    .collab-item.selected { background:var(--surface-tint); border-left:2px solid var(--orange); }
     .collab-item.selected .collab-name { color:var(--orange); font-weight:600; }
     .collab-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
-    .collab-item .avatar { width:24px; height:24px; background:var(--grey-light); color:var(--grey); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; transition:background .12s; }
+    .collab-item .avatar { width:24px; height:24px; background:var(--surface-tint); color:var(--grey); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; transition:background .12s; }
     .collab-item.selected .avatar, .collab-item:hover .avatar { background:var(--orange); color:white; }
     .collab-item .collab-name { font-size:13px; font-weight:500; flex:1; }
     .loading-placeholder { color:var(--grey); font-style:italic; padding:8px 0; }
-    .cat-group { border-bottom:1px solid var(--grey-light); }
+    .cat-group { border-bottom:1px solid var(--border); }
     .cat-group:last-child { border-bottom:none; }
     .cat-header { display:flex; align-items:center; gap:8px; padding:9px 12px; cursor:pointer; user-select:none; transition:background .12s; }
-    .cat-header:hover { background:var(--hover); }
+    .cat-header:hover { background:var(--surface-tint); }
     .cat-arrow { font-size:10px; color:var(--grey); transition:transform .2s; width:12px; text-align:center; flex-shrink:0; }
     .cat-group.collapsed .cat-arrow { transform:rotate(-90deg); }
-    .cat-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); flex:1; }
-    .cat-count { font-size:10px; font-weight:700; color:var(--grey); background:var(--grey-light); padding:1px 7px; }
+    .cat-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey-dark); flex:1; }
+    .cat-count { font-size:10px; font-weight:700; color:var(--grey-dark); background:var(--surface-tint); padding:1px 7px; }
     .cat-sel-link { font-size:10px; color:var(--orange); text-decoration:underline; cursor:pointer; opacity:0; transition:opacity .15s; }
     .cat-header:hover .cat-sel-link { opacity:1; }
     .cat-group.collapsed .cat-body { display:none; }
     .cat-body-inner { padding:2px 0 6px; display:grid; grid-template-columns:1fr 1fr; }
-    .collab-tabs-row { display:flex; align-items:stretch; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--grey-light); }
+    .collab-tabs-row { display:flex; align-items:stretch; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--border); }
     .collab-country-tabs { display:flex; flex:1; gap:4px; }
     .collab-country-tab { flex:1; padding:7px 4px; font-size:12px; font-weight:600; color:var(--grey); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; font-family:'Inter',sans-serif; transition:color .12s; text-align:center; }
     .collab-country-tab:hover { color:var(--ink); }
@@ -123,50 +131,50 @@
     /* ── Filtres AO ── */
     .filter-field { margin-bottom:14px; }
     .filter-field:last-child { margin-bottom:0; }
-    .filter-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); margin-bottom:6px; }
+    .filter-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey-dark); margin-bottom:6px; }
     .filter-radio { display:flex; gap:16px; margin-top:2px; }
     .filter-radio label { display:flex; align-items:center; gap:6px; font-size:12.5px; cursor:pointer; }
     .filter-radio input[type="radio"] { accent-color:var(--orange); width:13px; height:13px; }
-    .filter-select { width:100%; border:1px solid var(--grey-light); padding:7px 10px; font-size:13px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; }
+    .filter-select { width:100%; border:1px solid var(--border); padding:7px 10px; font-size:13px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; }
     .filter-select:focus { border-color:var(--orange); }
 
     /* Multi-select dropdown */
     .ms-wrap { position:relative; }
     /* input.ms-search : spécificité (0,1,1) = même niveau que input[type="text"] (0,1,1), mais placé après → cascade gagne */
-    input.ms-search { width:100%; border:1px solid var(--grey-light); padding:7px 10px 7px 30px; font-size:12.5px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s; }
+    input.ms-search { width:100%; border:1px solid var(--border); padding:7px 10px 7px 30px; font-size:12.5px; color:var(--ink); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s; }
     input.ms-search:focus { border-color:var(--orange); }
     .ms-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--grey); pointer-events:none; }
-    .ms-dropdown { border:1px solid var(--grey-light); border-top:none; max-height:220px; overflow-y:auto; display:none; background:var(--white); }
+    .ms-dropdown { border:1px solid var(--border); border-top:none; max-height:220px; overflow-y:auto; display:none; background:var(--white); }
     .ms-dropdown.open { display:block; }
-    .ms-group-header { padding:5px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); background:#F5F5F5; border-bottom:1px solid var(--grey-light); position:sticky; top:0; }
+    .ms-group-header { padding:5px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey-dark); background:var(--surface-tint); border-bottom:1px solid var(--border); position:sticky; top:0; }
     .ms-item { display:flex; align-items:center; gap:8px; padding:5px 10px; cursor:pointer; font-size:12.5px; transition:background .1s; }
-    .ms-item:hover { background:var(--hover); }
+    .ms-item:hover { background:var(--surface-tint); }
     .ms-item input[type="checkbox"] { accent-color:var(--orange); width:13px; height:13px; flex-shrink:0; }
     .ms-item.hidden { display:none; }
     .ms-empty { padding:10px; font-size:12px; color:var(--grey); font-style:italic; }
     .ms-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; min-height:0; }
-    .ms-chip { display:flex; align-items:center; gap:4px; padding:3px 8px; background:var(--hover); border:1px solid var(--grey-light); font-size:11px; font-weight:500; }
+    .ms-chip { display:flex; align-items:center; gap:4px; padding:3px 8px; background:var(--surface-tint); border:1px solid var(--border); font-size:11px; font-weight:500; }
     .ms-chip button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:12px; line-height:1; padding:0 1px; }
     .ms-chip button:hover { color:var(--red); }
 
     #ao-generic-notice { margin-top:8px; font-size:11px; color:var(--grey); text-align:center; }
-    #btn-clear-filters { width:100%; padding:6px; background:none; border:1px solid var(--grey-light); font-size:11px; color:var(--grey); cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; display:none; }
+    #btn-clear-filters { width:100%; padding:6px; background:none; border:1px solid var(--border); font-size:11px; color:var(--grey); cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; display:none; }
     #btn-clear-filters:hover { border-color:var(--red); color:var(--red); }
     .options-grid { display:flex; flex-direction:column; gap:10px; }
     .option-row { display:flex; align-items:center; justify-content:space-between; }
     .option-row label { font-size:12px; color:var(--grey); font-weight:500; }
-    .option-row select { width:auto; border:1.5px solid var(--grey-light); padding:5px 8px; font-size:12px; }
+    .option-row select { width:auto; border:1.5px solid var(--border); padding:5px 8px; font-size:12px; }
     .option-row input[type="checkbox"] { accent-color:var(--orange); width:15px; height:15px; }
     #btn-generate { width:100%; padding:13px; background:var(--orange); color:white; border:none; font-size:14px; font-weight:700; cursor:pointer; transition:opacity .15s; font-family:'Inter',sans-serif; }
     #btn-generate:hover:not(:disabled) { opacity:.88; }
     #btn-generate:disabled { opacity:.35; cursor:not-allowed; }
     #progress-section { display:none; }
-    .progress-bar-wrap { background:var(--grey-light); height:4px; overflow:hidden; margin:10px 0 4px; }
+    .progress-bar-wrap { background:var(--surface-tint); height:4px; overflow:hidden; margin:10px 0 4px; }
     .progress-bar { height:100%; background:var(--orange); transition:width .4s; width:0%; }
     .progress-label { font-size:12px; color:var(--grey); }
     #results-section { display:none; }
     .result-list { display:flex; flex-direction:column; gap:8px; }
-    .result-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--grey-light); }
+    .result-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--border); }
     .result-item.ok { border-color:var(--green); background:var(--white); }
     .result-item.warn { border-color:var(--orange); background:var(--white); }
     .result-item.error { border-color:var(--red); background:var(--white); }
@@ -180,12 +188,12 @@
     /* ───────────────────────────────────────────────
        ONGLET 2 — FICHE FIN DE PROJET
     ─────────────────────────────────────────────── */
-    #section-fiche { background:var(--hover); }
-    .fiche-layout { background:transparent; } /* layout réel défini dans le bloc <style> plus bas (identique à #section-cv main) */
+    #section-fiche { background:var(--bg-page); }
+    .fiche-layout { background:transparent; } /* layout réel défini dans le bloc <style> plus bas (grille 3 colonnes, cf #section-cv main) */
 
     /* Sections numérotées */
-    .fiche-section { background:var(--white); border:1px solid var(--grey-light); }
-    .fiche-section-header { padding:14px 20px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:12px; }
+    .fiche-section { background:var(--white); border:1px solid var(--border); }
+    .fiche-section-header { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
     .fiche-section-num { width:24px; height:24px; background:var(--orange); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .fiche-section-title { font-size:13px; font-weight:700; flex:1; }
     .fiche-section-body { padding:20px; }
@@ -196,14 +204,14 @@
     .radio-group input[type="radio"] { accent-color:var(--orange); width:15px; height:15px; }
 
     /* Grille collaborateurs dans tab fiche */
-    .fiche-collab-grid { border:1px solid var(--grey-light); max-height:320px; overflow-y:auto; }
-    .fiche-collab-item { display:flex; align-items:center; gap:10px; padding:8px 14px; cursor:pointer; transition:background .1s; user-select:none; border-bottom:1px solid var(--grey-light); }
+    .fiche-collab-grid { border:1px solid var(--border); max-height:320px; overflow-y:auto; }
+    .fiche-collab-item { display:flex; align-items:center; gap:10px; padding:8px 14px; cursor:pointer; transition:background .1s; user-select:none; border-bottom:1px solid var(--border); }
     .fiche-collab-item:last-child { border-bottom:none; }
-    .fiche-collab-item:hover { background:var(--hover); }
-    .fiche-collab-item.selected { background:var(--hover); border-left:3px solid var(--orange); }
+    .fiche-collab-item:hover { background:var(--surface-tint); }
+    .fiche-collab-item.selected { background:var(--surface-tint); border-left:3px solid var(--orange); }
     .fiche-collab-item.selected .fca-name { color:var(--orange); font-weight:600; }
     .fiche-collab-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
-    .fca-avatar { width:28px; height:28px; background:var(--grey-light); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--grey); flex-shrink:0; }
+    .fca-avatar { width:28px; height:28px; background:var(--surface-tint); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--grey); flex-shrink:0; }
     .fiche-collab-item.selected .fca-avatar { background:var(--orange); color:white; }
     .fca-info { flex:1; min-width:0; }
     .fca-name { font-size:13px; font-weight:500; }
@@ -212,7 +220,7 @@
 
     /* ── Tabs membres ─────────────────────────────── */
     .membre-tabs-bar {
-      border-bottom: 1px solid var(--grey-light);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: stretch;
       overflow: hidden;
@@ -229,7 +237,7 @@
     .tabs-scroll-btn {
       background: var(--white);
       border: none;
-      border-right: 1px solid var(--grey-light);
+      border-right: 1px solid var(--border);
       cursor: pointer;
       padding: 0 10px;
       font-size: 16px;
@@ -240,8 +248,8 @@
       align-items: center;
       transition: background .1s, color .1s;
     }
-    .tabs-scroll-btn:hover { background: var(--hover); color: var(--dark); }
-    .tabs-scroll-btn.right { border-right: none; border-left: 1px solid var(--grey-light); }
+    .tabs-scroll-btn:hover { background: var(--surface-tint); color: var(--ink); }
+    .tabs-scroll-btn.right { border-right: none; border-left: 1px solid var(--border); }
     .membre-tab {
       display: flex;
       align-items: center;
@@ -268,7 +276,7 @@
     }
     .tab-avatar {
       width: 22px; height: 22px;
-      background: var(--grey-light);
+      background: var(--surface-tint);
       color: var(--grey);
       font-size: 9px; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
@@ -292,7 +300,7 @@
       display: flex;
       align-items: center;
       padding: 0 12px;
-      border-left: 1px solid var(--grey-light);
+      border-left: 1px solid var(--border);
       flex-shrink: 0;
     }
     #btn-sync-mode {
@@ -330,10 +338,10 @@
 
     /* Domaines checkboxes */
     .domaines-grid { display:flex; flex-wrap:wrap; gap:8px; }
-    .domaine-chip { display:flex; align-items:center; gap:6px; padding:5px 12px; border:1px solid var(--grey-light); cursor:pointer; font-size:12px; font-weight:500; user-select:none; transition:all .12s; }
+    .domaine-chip { display:flex; align-items:center; gap:6px; padding:5px 12px; border:1px solid var(--border); cursor:pointer; font-size:12px; font-weight:500; user-select:none; transition:all .12s; }
     .domaine-chip input[type="checkbox"] { accent-color:var(--orange); width:13px; height:13px; }
     .domaine-chip.checked { border-color:var(--orange); background:var(--white); color:var(--orange); }
-    .domaine-group-label { width:100%; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); margin-top:10px; }
+    .domaine-group-label { width:100%; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey-dark); margin-top:10px; }
     .domaine-group-label:first-child { margin-top:0; }
 
     /* Poids */
@@ -348,30 +356,30 @@
     .comp-search-wrap { position:relative; margin-bottom:12px; }
     .comp-search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--grey); pointer-events:none; }
     input.comp-search { padding-left:32px; }
-    .comp-families { border:1px solid var(--grey-light); max-height:360px; overflow-y:auto; }
+    .comp-families { border:1px solid var(--border); max-height:360px; overflow-y:auto; }
     /* Méta-catégorie (niveau 1) */
-    .comp-meta { border-bottom:1px solid var(--grey-light); }
+    .comp-meta { border-bottom:1px solid var(--border); }
     .comp-meta:last-child { border-bottom:none; }
-    .comp-meta-header { display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; user-select:none; background:var(--grey-light); border-bottom:1px solid var(--grey-light); transition:background .1s; }
-    .comp-meta-header:hover { background:var(--hover); }
+    .comp-meta-header { display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; user-select:none; background:var(--surface-tint); border-bottom:1px solid var(--border); transition:background .1s; }
+    .comp-meta-header:hover { background:var(--border); }
     .comp-meta-arrow { font-size:10px; color:var(--orange); transition:transform .2s; }
     .comp-meta.collapsed .comp-meta-arrow { transform:rotate(-90deg); }
     .comp-meta.collapsed .comp-meta-body { display:none; }
     .comp-meta-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); flex:1; }
-    .comp-meta-count { font-size:10px; color:var(--grey); background:var(--white); padding:1px 6px; border:1px solid var(--grey-light); }
+    .comp-meta-count { font-size:10px; color:var(--grey-dark); background:var(--white); padding:1px 6px; border:1px solid var(--border); }
     /* Famille (niveau 2) */
-    .comp-family { border-bottom:1px solid var(--grey-light); }
+    .comp-family { border-bottom:1px solid var(--border); }
     .comp-family:last-child { border-bottom:none; }
-    .comp-family-header { display:flex; align-items:center; gap:8px; padding:7px 12px 7px 20px; cursor:pointer; user-select:none; background:var(--hover); transition:background .1s; }
-    .comp-family-header:hover { background:var(--grey-light); }
+    .comp-family-header { display:flex; align-items:center; gap:8px; padding:7px 12px 7px 20px; cursor:pointer; user-select:none; background:var(--surface-tint); transition:background .1s; }
+    .comp-family-header:hover { background:var(--border); }
     .comp-family-arrow { font-size:10px; color:var(--grey); transition:transform .2s; }
     .comp-family.collapsed .comp-family-arrow { transform:rotate(-90deg); }
     .comp-family.collapsed .comp-family-items { display:none; }
-    .comp-family-label { font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--grey); flex:1; }
-    .comp-family-count { font-size:10px; color:var(--grey); background:var(--grey-light); padding:1px 6px; }
+    .comp-family-label { font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--grey-dark); flex:1; }
+    .comp-family-count { font-size:10px; color:var(--grey-dark); background:var(--surface-tint); padding:1px 6px; }
     .comp-family-items { padding:4px 0; display:flex; flex-wrap:wrap; }
     .comp-item-label { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 28px; cursor:pointer; font-size:12px; transition:background .1s; min-width:180px; }
-    .comp-item-label:hover { background:var(--hover); }
+    .comp-item-label:hover { background:var(--surface-tint); }
     .comp-item-label input { accent-color:var(--orange); width:13px; height:13px; flex-shrink:0; }
     .comp-item-label.hidden { display:none; }
     .comp-family.all-hidden { display:none; }
@@ -379,7 +387,7 @@
 
     /* Chips compétences sélectionnées */
     .comp-chips-selected { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:20px; }
-    .comp-chip-selected { display:flex; align-items:center; gap:5px; padding:4px 10px; background:var(--hover); border:1px solid var(--grey-light); font-size:11px; font-weight:500; }
+    .comp-chip-selected { display:flex; align-items:center; gap:5px; padding:4px 10px; background:var(--surface-tint); border:1px solid var(--border); font-size:11px; font-weight:500; }
     .comp-chip-selected button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:13px; line-height:1; padding:0; }
     .comp-chip-selected button:hover { color:var(--red); }
 
@@ -387,7 +395,7 @@
     .new-comp-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
     .new-comp-row { display:grid; grid-template-columns:1fr 2fr auto; gap:8px; align-items:end; }
     .new-comp-row .form-field { margin-bottom:0; }
-    .btn-remove { padding:8px 10px; background:none; border:1px solid var(--grey-light); color:var(--grey); cursor:pointer; font-size:13px; font-family:'Inter',sans-serif; }
+    .btn-remove { padding:8px 10px; background:none; border:1px solid var(--border); color:var(--ink); cursor:pointer; font-size:13px; font-family:'Inter',sans-serif; }
     .btn-remove:hover { border-color:var(--red); color:var(--red); }
 
     /* Zone d'erreur + bouton générer */
@@ -398,6 +406,10 @@
     #btn-generate-fiche:hover:not(:disabled) { opacity:.88; }
     #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
     .fiche-success { background:var(--white); border:1px solid var(--green); padding:14px 18px; display:none; font-size:13px; color:var(--green); }
+
+    /* Toast d'avertissement générique (ex : champ trop long) */
+    #app-toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--ink); color:var(--white); padding:11px 20px; font-size:13px; font-weight:600; font-family:'Inter',sans-serif; box-shadow:0 4px 18px rgba(0,0,0,.28); z-index:2000; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; border-left:4px solid var(--orange); }
+    #app-toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
 
     @media(max-width:768px) {
       #section-cv main { grid-template-columns:1fr; }
@@ -453,6 +465,7 @@
         <a onclick="switchTab('admin-collabs')">Éditer les fiches collaborateurs</a>
         <a onclick="switchTab('admin-donnees')">Éditer les données communes projets</a>
         <a onclick="switchTab('admin-clients')">Éditer les clients Camptocamp</a>
+        <a onclick="switchTab('admin-corbeille')">Corbeille</a>
       </div>
     </div>
   </nav>
@@ -499,7 +512,7 @@
 
         <div class="filter-field">
           <label class="filter-label">Projets à partir de</label>
-          <select class="filter-select" id="f-annee-min" onchange="onFilterChange()">
+          <select class="filter-select" id="f-annee-min" onchange="onFilterChange();markCvDirty()">
             <option value="0">Toutes années</option>
             <option value="2019">2019</option>
             <option value="2020">2020</option>
@@ -514,9 +527,9 @@
         <div class="filter-field">
           <label class="filter-label">Secteur</label>
           <div class="filter-radio">
-            <label><input type="radio" name="f-secteur" value="" checked onchange="onFilterChange()"> Tous</label>
-            <label><input type="radio" name="f-secteur" value="public" onchange="onFilterChange()"> Public</label>
-            <label><input type="radio" name="f-secteur" value="prive" onchange="onFilterChange()"> Privé</label>
+            <label><input type="radio" name="f-secteur" value="" checked onchange="onFilterChange();markCvDirty()"> Tous</label>
+            <label><input type="radio" name="f-secteur" value="public" onchange="onFilterChange();markCvDirty()"> Public</label>
+            <label><input type="radio" name="f-secteur" value="prive" onchange="onFilterChange();markCvDirty()"> Privé</label>
           </div>
         </div>
 
@@ -568,14 +581,17 @@
       <div class="card-body">
         <div class="options-grid">
           <div class="option-row"><label for="max-projets">Projets max</label>
-            <select id="max-projets"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="0">Tous</option></select></div>
+            <select id="max-projets" onchange="markCvDirty()"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="0">Tous</option></select></div>
           <div class="option-row"><label for="max-pages">Pages max</label>
-            <select id="max-pages"><option value="1" selected>1 page</option><option value="2">2 pages</option><option value="0">Sans limite</option></select></div>
+            <select id="max-pages" onchange="markCvDirty()"><option value="1" selected>1 page</option><option value="2">2 pages</option><option value="0">Sans limite</option></select></div>
           <div class="option-row"><label for="inclure-parcours">Parcours professionnel</label>
-            <div><input type="checkbox" id="inclure-parcours" checked style="accent-color:var(--orange);width:15px;height:15px;"></div></div>
+            <div><input type="checkbox" id="inclure-parcours" checked style="accent-color:var(--orange);width:15px;height:15px;" onchange="markCvDirty()"></div></div>
+          <div class="option-row"><label for="masquer-designations" title="Rendre le CV avec uniquement le nom du client, sans les désignations de projet">Masquer les désignations de projet</label>
+            <div><input type="checkbox" id="masquer-designations" style="accent-color:var(--orange);width:15px;height:15px;" onchange="markCvDirty()"></div></div>
         </div>
       </div>
     </div>
+    <button id="btn-reset-cv" class="btn btn-ghost btn-full" onclick="resetCvForm()" disabled style="margin-bottom:8px;">Réinitialiser</button>
     <button id="btn-generate" onclick="generate()" disabled>Générer les CVs</button>
     <div id="progress-section" class="card">
       <div class="card-body">
@@ -626,7 +642,7 @@
     <div id="fiche-membres-section" class="card" style="display:none;margin-top:16px;">
       <div class="card-header">
         <h2>Sélection de l'équipe — informations par membre</h2>
-        <span id="sync-counter" style="font-size:12px;color:var(--grey);font-weight:500;"></span>
+        <span id="sync-counter" class="tag-opt"></span>
       </div>
 
       <!-- Tabs bar -->
@@ -655,45 +671,65 @@
 
   </div><!-- /#fiche-col-left -->
 
-  <!-- COLONNE DROITE : informations projet + valider -->
-  <div id="fiche-col-right">
+  <!-- COLONNE CENTRALE : informations projet -->
+  <div id="fiche-col-mid">
     <div class="card" id="fiche-s1">
       <div class="card-header"><h2>Informations projet</h2></div>
       <div class="card-body">
         <div class="form-field">
           <label class="field-label" for="fp-nom">Désignation du projet *</label>
-          <input type="text" id="fp-nom" oninput="updateFicheBtn()" placeholder="Plateforme d'ingestion des données">
+          <input type="text" id="fp-nom" maxlength="50" oninput="updateFicheBtn();markFicheDirty()" placeholder="Plateforme d'ingestion des données">
           <div class="field-error" id="err-fp-nom">Champ obligatoire</div>
         </div>
         <div class="form-field">
+          <label class="field-label" for="fp-contexte">Contexte du projet</label>
+          <textarea id="fp-contexte" rows="5" maxlength="180" oninput="updateFicheBtn();acCount(this,'fp-cnt-contexte',180);markFicheDirty()" placeholder="Décrivez le projet : objectif, périmètre technique, résultat livré, impact client."></textarea>
+          <div class="fe-counter" id="fp-cnt-contexte">0/180</div>
+        </div>
+        <div class="form-field">
           <label class="field-label" for="fp-client-ref">Client *</label>
-          <select id="fp-client-ref" onchange="onFpClientChange()">
+          <select id="fp-client-ref" onchange="onFpClientChange();markFicheDirty()">
             <option value="">— Sélectionner un client —</option>
           </select>
           <div class="field-error" id="err-fp-client-ref">Champ obligatoire</div>
         </div>
         <div class="form-field">
           <label class="field-label" for="fp-sous-entite">Sous-entité</label>
-          <input type="text" id="fp-sous-entite" list="fp-sous-entite-list" oninput="updateFicheBtn()" placeholder="Sélectionnez d'abord un client" disabled>
+          <input type="text" id="fp-sous-entite" list="fp-sous-entite-list" oninput="updateFicheBtn();markFicheDirty()" placeholder="Sélectionnez d'abord un client" disabled>
           <datalist id="fp-sous-entite-list"></datalist>
         </div>
         <div class="form-field">
-          <label class="field-label" for="fp-periode">Période *</label>
-          <input type="text" id="fp-periode" oninput="updateFicheBtn()" placeholder="2024 – 2025">
-          <div class="field-error" id="err-fp-periode">Champ obligatoire</div>
+          <label class="field-label">Période *</label>
+          <div class="periode-range">
+            <select id="fp-periode-debut" onchange="updateFicheBtn();markFicheDirty()"></select>
+            <span class="periode-sep">–</span>
+            <select id="fp-periode-fin" onchange="updateFicheBtn();markFicheDirty()"></select>
+          </div>
+          <div class="field-error" id="err-fp-periode">Année de début obligatoire</div>
         </div>
         <div class="form-field">
-          <label class="field-label">Secteur *</label>
+          <label class="field-label">Secteur</label>
           <div style="display:flex;gap:16px;margin-top:8px;">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="public" checked style="accent-color:var(--orange);"> Public</label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="prive" style="accent-color:var(--orange);"> Privé</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="public" checked style="accent-color:var(--orange);" onchange="markFicheDirty()"> Public</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="prive" style="accent-color:var(--orange);" onchange="markFicheDirty()"> Privé</label>
           </div>
         </div>
-        <div class="form-field">
-          <label class="field-label" for="fp-contexte">Contexte du projet *</label>
-          <textarea id="fp-contexte" rows="5" oninput="updateFicheBtn()" placeholder="Décrivez le projet en 3 à 5 phrases : objectif, périmètre technique, résultat livré, impact client."></textarea>
-          <div class="field-error" id="err-fp-contexte">Minimum 3 mots</div>
-        </div>
+      </div>
+    </div>
+  </div><!-- /#fiche-col-mid -->
+
+  <!-- COLONNE DROITE : champs à compléter + valider (calée sur la hauteur dispo, scroll interne à la liste) -->
+  <div id="fiche-col-right">
+    <div class="fe-gaps fiche-checklist" id="fiche-checklist">
+      <div class="fe-gaps-head"><strong>Champs à compléter</strong><span class="fe-badge" id="fiche-checklist-badge">0</span></div>
+      <ul id="fiche-checklist-list"></ul>
+      <div class="fc-done-group" id="fc-done-group" style="display:none;">
+        <button type="button" class="fc-done-toggle" id="fc-done-toggle" onclick="toggleFicheDoneGroup()">
+          <svg class="fc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>Complétés</span>
+          <span class="fe-badge fc-done-badge" id="fc-done-badge">0</span>
+        </button>
+        <div class="fc-done-chips" id="fc-done-chips"></div>
       </div>
     </div>
 
@@ -702,6 +738,11 @@
       <ul id="fiche-errors-list"></ul>
     </div>
 
+    <button id="btn-reset-fiche" class="btn btn-ghost btn-full" onclick="resetFicheForm()" disabled style="margin-bottom:8px;">Réinitialiser</button>
+    <button id="btn-preview-fiche" class="btn btn-ghost btn-full" onclick="openFichePreview()" disabled title="Sélectionner au moins un membre de l'équipe" style="margin-bottom:8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:7px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+      Prévisualiser la référence projet
+    </button>
     <button id="btn-generate-fiche" onclick="generateFiche()" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg>
       Valider et documenter les fiches
@@ -718,20 +759,21 @@
   .nav-admin { position:relative; display:flex; align-items:stretch; }
   .admin-menu { position:absolute; top:100%; right:0; background:var(--white); border:1.5px solid var(--grey); min-width:270px; display:none; z-index:200; }
   .admin-menu.open { display:block; }
-  .admin-menu a { display:block; padding:11px 14px; font-size:13px; color:var(--ink); cursor:pointer; text-decoration:none; border-bottom:1px solid var(--grey-light); }
+  .admin-menu a { display:block; padding:11px 14px; font-size:13px; color:var(--ink); cursor:pointer; text-decoration:none; border-bottom:1px solid var(--border); }
   .admin-menu a:last-child { border-bottom:none; }
-  .admin-menu a:hover { background:var(--hover); color:var(--orange); }
+  .admin-menu a:hover { background:var(--surface-tint); color:var(--orange); }
 
   /* ── Éditeurs admin (fiches collaborateurs + données communes) ── */
   #section-admin-collabs.tab-section.active,
   #section-admin-donnees.tab-section.active,
-  #section-admin-clients.tab-section.active { display:flex; }
+  #section-admin-clients.tab-section.active,
+  #section-admin-corbeille.tab-section.active { display:flex; }
   .admin-editor { display:flex; width:100%; height:calc(100vh - 53px); }
-  .admin-side { width:280px; border-right:1px solid var(--grey-light); display:flex; flex-direction:column; flex-shrink:0; background:var(--white); }
-  .admin-side-top { padding:12px; border-bottom:1px solid var(--grey-light); display:flex; flex-direction:column; gap:8px; }
+  .admin-side { width:280px; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; background:var(--white); }
+  .admin-side-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
   .admin-side .collab-list { overflow-y:auto; flex:1; }
   .admin-main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-  .admin-toolbar { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--grey-light); flex-shrink:0; }
+  .admin-toolbar { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--border); flex-shrink:0; }
   .admin-filename { font-size:13px; font-weight:700; flex:1; color:var(--ink); }
   .admin-status { font-size:12px; color:var(--grey); }
   .admin-status.ok { color:var(--green); font-weight:600; }
@@ -743,16 +785,40 @@
   #collab-grid, #fiche-collab-grid { max-height:360px; overflow-y:auto; }
 
   /* ── Déclaration : 2 colonnes comme la génération (wrappers gauche/droite) ── */
-  .fiche-layout { max-width:1100px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start; background:transparent; }
+  .fiche-layout { max-width:1446px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px 360px; gap:20px; align-items:start; background:transparent; }
   #fiche-col-left { grid-column:1; min-width:0; }
-  #fiche-col-right { grid-column:2; display:flex; flex-direction:column; gap:16px; }
+  #fiche-col-mid { grid-column:2; min-width:0; }
+  /* Colonne "champs à compléter" : jamais plus large que la 1ère colonne (360px fixe
+     face à un 1fr toujours ≥ 360px ici). Sa hauteur reste naturelle (selon le nombre de
+     champs listés) ; seul un plafond (propriété `max-height` posée en JS par
+     syncFicheColRightHeight, cf. <script>) la borne à la hauteur de la colonne voisine
+     "Informations projet" sans jamais dépasser le viewport — le contenu qui dépasse ce
+     plafond ne fait défiler que la liste, le bouton Valider restant toujours visible sans
+     scroll de page. Le max-height CSS ci-dessous ne sert que de garde-fou avant le
+     premier calcul JS. */
+  #fiche-col-right { grid-column:3; min-width:0; display:flex; flex-direction:column; gap:16px; position:sticky; top:32px; max-height:calc(100vh - 64px); }
+  #fiche-col-right .fiche-checklist { overflow:hidden; }
+  /* max-height posé en JS (syncFicheColRightHeight) : un flex-grow ne suffit pas à faire
+     grandir la liste jusqu'au plafond dans un conteneur parent en hauteur "auto". */
+  #fiche-col-right .fiche-checklist ul { overflow-y:auto; }
+  /* Groupe replié des champs déjà complétés : sort de la liste à scroller, tags gris
+     empilés horizontalement (comme du texte) avec retour à la ligne. Replié par défaut. */
+  .fc-done-group { flex-shrink:0; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; }
+  .fc-done-toggle { display:flex; align-items:center; gap:7px; width:100%; background:none; border:none; padding:2px 0; cursor:pointer; font-size:12px; font-weight:600; color:var(--grey-dark); font-family:'Inter',sans-serif; }
+  .fc-done-toggle:hover { color:var(--ink); }
+  .fc-done-toggle .fc-chevron { flex-shrink:0; transition:transform .15s; }
+  .fc-done-group.open .fc-chevron { transform:rotate(90deg); }
+  .fc-done-badge.fe-badge { background:var(--grey); margin-left:0; }
+  .fc-done-chips { display:none; flex-wrap:wrap; gap:6px; margin-top:8px; max-height:160px; overflow-y:auto; }
+  .fc-done-group.open .fc-done-chips { display:flex; }
+  .fc-done-chip { display:inline-flex; align-items:center; padding:3px 9px; background:var(--surface-tint); border:1px solid var(--border); font-size:11px; font-weight:500; color:var(--grey-dark); white-space:nowrap; }
   #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
   /* La barre d'onglets ne doit jamais élargir la colonne : elle occupe l'espace dispo et scrolle */
   #fiche-membres-section, .membre-tabs-bar, .membre-tabs { min-width:0; }
   /* Réserver la gouttière de scrollbar → aucun décalage quand le scroll apparaît */
   html { scrollbar-gutter: stable; }
   /* Onglets membres : état actif bien visible (fond gris clair + orange vif) */
-  .membre-tab.active { background:var(--hover); font-weight:700; }
+  .membre-tab.active { background:var(--surface-tint); font-weight:700; }
   /* Domaines par membre : conteneur en bloc pour accueillir le dropdown de recherche */
   .domaines-grid { display:block; }
   /* Compétences par membre : dropdown identique aux domaines (conteneur .ms-dropdown + items .ms-item) */
@@ -760,7 +826,7 @@
   .ms-group-header.hidden { display:none; }
   /* Réduction du composant Collaborateurs (déclaration) : en-tête cliquable iso à l'éditeur de fiche */
   .fiche-collab-head { cursor:pointer; user-select:none; transition:background .12s; }
-  .fiche-collab-head:hover { background:var(--hover); }
+  .fiche-collab-head:hover { background:var(--surface-tint); }
   .fiche-collab-head:hover .mp-icon { color:var(--orange); }
   #fiche-s2.collapsed .card-body { display:none; }
   #fiche-s2.collapsed .card-header { border-bottom:none; }
@@ -768,17 +834,29 @@
   .comp-chips-selected:empty { display:none; }
   .ms-chips:empty { display:none; }
 
+  /* Période : deux dropdowns côte à côte (début obligatoire / fin optionnelle) */
+  .periode-range { display:flex; align-items:center; gap:8px; }
+  .periode-range select { flex:1; min-width:0; height:var(--field-h); }
+  .periode-fin:has(option:checked[value=""]) { color:var(--grey); }
+  .periode-sep { color:var(--grey); font-weight:600; }
+
+  /* Checklist « champs à compléter » (déclaration de projet) */
+  .fiche-checklist { display:block; }
+  .fiche-checklist ul { max-height:none; }
+  .fiche-checklist li { cursor:default; }
+  .fiche-checklist li .fc-icon { display:inline-flex; flex-shrink:0; }
+
   /* ── Éditeur des fiches : liste collaborateurs plus large ── */
   .admin-side { width:560px; }
 
   /* ── Éditeur de fiche par composants (form-based) ── */
-  .fe-scroll { flex:1; overflow-y:auto; padding:20px 24px 60px; background:var(--hover); }
+  .fe-scroll { flex:1; overflow-y:auto; padding:20px 24px 60px; background:var(--bg-page); }
   .fe-wrap { max-width:880px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
-  .fe-sec { background:var(--white); border:1px solid var(--grey-light); }
-  .fe-sec-head { padding:12px 18px; border-bottom:1px solid var(--grey-light); display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; transition:background .12s; }
-  .fe-sec-head:hover { background:var(--hover); }
-  .fe-sec-head h3 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--grey); flex:1; }
-  .fe-sec-count { font-size:10px; font-weight:700; color:var(--grey); background:var(--grey-light); padding:1px 7px; }
+  .fe-sec { background:var(--white); border:1px solid var(--border); }
+  .fe-sec-head { padding:12px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; transition:background .12s; }
+  .fe-sec-head:hover { background:var(--surface-tint); }
+  .fe-sec-head h3 { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); flex:1; }
+  .fe-sec-count { font-size:10px; font-weight:700; color:var(--grey-dark); background:var(--surface-tint); padding:1px 7px; }
   .fe-sec.collapsed .fe-sec-head { border-bottom:none; }
   .fe-sec.collapsed .fe-sec-body { display:none; }
   .fe-sec-body { padding:16px 18px; }
@@ -787,12 +865,37 @@
   .mp-icon { width:17px; height:17px; color:var(--grey); flex-shrink:0; transition:color .12s; }
   .mp-icon .mp-v { display:none; }
   .collapsed .mp-icon .mp-v { display:block; }
-  .fe-item { border:1px solid var(--grey-light); padding:14px; margin-bottom:12px; background:var(--white); }
+  .fe-item { border:1px solid var(--border); padding:14px; margin-bottom:12px; background:var(--white); }
   .fe-item:last-of-type { margin-bottom:12px; }
-  .fe-item-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-  .fe-item-title { font-size:12px; font-weight:700; color:var(--ink); flex:1; }
-  .fe-del { background:none; border:1px solid var(--grey-light); color:var(--grey); font-size:11px; padding:3px 9px; cursor:pointer; font-family:'Inter',sans-serif; }
+  /* Bande d'en-tête teintée, en bordure perdue (bleed) pour distinguer chaque bloc répétable sans ombre ni rayon */
+  .fe-item-head { display:flex; align-items:center; gap:8px; margin:-14px -14px 10px; padding:10px 14px; background:var(--surface-tint); border-bottom:1px solid var(--border); }
+  .fe-item-title { font-size:13px; font-weight:700; color:var(--ink); flex:1; }
+  .fe-del { background:none; border:1px solid var(--border); color:var(--ink); font-size:11px; padding:3px 9px; cursor:pointer; font-family:'Inter',sans-serif; flex-shrink:0; height:var(--field-h); display:inline-flex; align-items:center; }
   .fe-del:hover { border-color:var(--red); color:var(--red); }
+  /* Bloc sans bande d'en-tête séparée (ex : compétences) : le bloc entier porte la teinte. */
+  .fe-item-flat { background:var(--surface-tint); }
+  /* Bloc « focus » client.s en tête de chaque projet : bandeau teinté plus
+     sombre que la carte, séparé du reste par un filet 1px (même bleed que .fe-item-head). */
+  .proj-focus { margin:-14px -14px 14px; padding:12px 14px; background:var(--surface-focus); border-bottom:1px solid var(--border); }
+  /* Supprimer le projet est une action distincte de « ajouter un client/sous-entité » :
+     sortie du groupe de boutons, alignée à droite du titre pour éviter toute confusion. */
+  .proj-focus-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .proj-focus-head .field-label { margin-bottom:0; }
+  .proj-focus-fields { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .proj-focus-fields .ms-chips { margin-top:0; }
+  /* Badge à la même hauteur que les boutons voisins (34px), pas sa hauteur "compacte" habituelle. */
+  .proj-focus-fields .ms-chip { background:var(--white); height:var(--field-h); padding:0 8px; box-sizing:border-box; }
+  .proj-focus-fields .ms-wrap { width:240px; }
+  .proj-focus-fields input[type="text"] { min-width:160px; }
+  .proj-client-custom-input { max-width:340px; }
+  /* Boutons "+ Ajouter..." / de fermeture : neutres, jamais de rouge (réservé à Supprimer).
+     Texte assombri (--ink) pour un contraste suffisant sur le fond --surface-focus. */
+  .btn-add-inline, .btn-close-inline {
+    background:none; border:1px solid var(--border); color:var(--ink); font-size:11px; padding:3px 9px;
+    cursor:pointer; font-family:'Inter',sans-serif; flex-shrink:0; height:var(--field-h); display:inline-flex; align-items:center;
+  }
+  .btn-add-inline:hover, .btn-close-inline:hover { border-color:var(--grey-dark); background:var(--surface-tint); }
+  .btn-close-inline { padding:3px 8px; color:var(--grey); }
   .fe-add { background:transparent; border:1px dashed var(--grey); color:var(--grey); font-size:12px; font-weight:600; padding:9px; cursor:pointer; width:100%; font-family:'Inter',sans-serif; transition:all .12s; }
   .fe-add:hover { border-color:var(--orange); color:var(--orange); }
   .fe-counter { font-size:11px; color:var(--grey); text-align:right; margin-top:4px; }
@@ -805,23 +908,89 @@
   /* panneau brut (lecture seule + échappatoire) */
   .fe-raw { border-top:2px solid var(--orange); display:none; flex-direction:column; flex-shrink:0; height:46%; }
   .fe-raw.open { display:flex; }
-  .fe-raw-bar { display:flex; align-items:center; gap:10px; padding:7px 16px; background:#F5F5F5; border-bottom:1px solid var(--grey-light); }
-  .fe-raw-bar .fe-raw-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey); }
+  .fe-raw-bar { display:flex; align-items:center; gap:10px; padding:7px 16px; background:var(--surface-tint); border-bottom:1px solid var(--border); }
+  .fe-raw-bar .fe-raw-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--grey-dark); }
   .fe-raw-bar .field-hint { flex:1; margin:0; }
   .fe-raw .admin-cm { flex:1; overflow:hidden; }
   /* analyseur de manques */
   .fe-gaps { background:var(--white); border:1px solid var(--orange); margin-bottom:4px; }
-  .fe-gaps-head { padding:10px 16px; display:flex; align-items:center; gap:10px; background:#FFF4EC; border-bottom:1px solid var(--grey-light); }
+  .fe-gaps-head { padding:10px 16px; display:flex; align-items:center; gap:10px; background:#FFF4EC; border-bottom:1px solid var(--border); }
   .fe-gaps-head strong { font-size:12px; color:var(--orange); flex:1; }
   .fe-gaps ul { list-style:none; padding:6px 0; margin:0; max-height:240px; overflow-y:auto; }
   .fe-gaps li { padding:5px 16px; font-size:12.5px; color:var(--ink); cursor:pointer; display:flex; gap:10px; align-items:baseline; }
-  .fe-gaps li:hover { background:var(--hover); }
-  .fe-gaps li .fe-gap-sec { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--grey); min-width:96px; flex-shrink:0; }
+  .fe-gaps li:hover { background:var(--surface-tint); }
+  .fe-gaps li .fe-gap-sec { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--grey-dark); min-width:96px; flex-shrink:0; }
   .fe-gaps-none { padding:12px 16px; font-size:12.5px; color:var(--green); font-weight:600; }
   .fe-badge { background:var(--orange); color:#fff; font-size:10px; font-weight:700; padding:1px 7px; margin-left:6px; }
   .fe-badge.zero { background:var(--green); }
+
+  /* ── Corbeille ── */
+  .crb-sel-badge { font-size:11px; font-weight:700; color:var(--grey-dark); background:var(--surface-tint); padding:3px 9px; }
+  .crb-group { margin-bottom:26px; }
+  .crb-group:last-child { margin-bottom:0; }
+  .crb-group-head { display:flex; align-items:center; gap:8px; padding:6px 2px 10px; border-bottom:2px solid var(--border); margin-bottom:14px; }
+  .crb-group-head h3 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); margin:0; }
+  .crb-group-count { font-size:11px; font-weight:700; color:var(--grey-dark); background:var(--surface-tint); padding:1px 8px; }
+  .crb-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:14px; }
+  .crb-card { border:1px solid var(--border); background:var(--white); padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+  .crb-card.selected { border-color:var(--orange); box-shadow:0 0 0 1px var(--orange) inset; }
+  .crb-card-head { display:flex; align-items:flex-start; gap:9px; }
+  .crb-card-head input[type=checkbox] { margin-top:3px; accent-color:var(--orange); width:15px; height:15px; flex-shrink:0; cursor:pointer; }
+  .crb-card-titles { flex:1; min-width:0; }
+  .crb-card-title { font-size:13px; font-weight:700; color:var(--ink); }
+  .crb-card-subtitle { font-size:12px; color:var(--grey); }
+  .crb-card-meta { font-size:10.5px; color:var(--grey); }
+  .crb-card-body { font-size:12px; color:var(--ink); line-height:1.55; }
+  .crb-card-body div { margin-bottom:2px; }
+  .crb-card-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
+  .crb-card-actions .fe-del:hover { border-color:var(--red); color:var(--red); }
+  .crb-yaml { width:100%; min-height:220px; font-family:'JetBrains Mono','Cascadia Code',monospace; font-size:12px; line-height:1.5; padding:8px; border:1px solid var(--border); resize:vertical; box-sizing:border-box; }
+  .crb-empty { padding:40px 0; text-align:center; color:var(--grey); font-size:13px; }
   .fe-flash { animation:feflash 1.3s ease; }
   @keyframes feflash { 0%,100%{ outline:2px solid transparent; outline-offset:2px; } 25%{ outline:2px solid var(--orange); outline-offset:2px; } }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     PRÉVISUALISATION — RÉFÉRENCE PROJET (réplique fidèle de cv-template.typ)
+  ══════════════════════════════════════════════════════════════════════ */
+  @font-face { font-family:'Messina Sans'; src:url('/cv-fonts/MessinaSans-Regular.otf') format('opentype'); font-weight:400; font-style:normal; }
+  @font-face { font-family:'Messina Sans'; src:url('/cv-fonts/MessinaSans-SemiBold.otf') format('opentype'); font-weight:600; font-style:normal; }
+  @font-face { font-family:'Messina Sans'; src:url('/cv-fonts/MessinaSans-Bold.otf') format('opentype'); font-weight:700; font-style:normal; }
+
+  #fp-preview-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:1000; display:flex; align-items:center; justify-content:center; padding:24px; }
+  #fp-preview-box { background:var(--white); max-width:760px; width:100%; max-height:88vh; overflow:auto; border-top:3px solid var(--orange); display:flex; flex-direction:column; }
+  .fpp-head { padding:18px 24px 14px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; border-bottom:1px solid var(--border); }
+  .fpp-head h3 { font-size:16px; font-weight:800; margin-bottom:3px; }
+  .fpp-head p { font-size:12.5px; color:var(--grey-dark); }
+  .fpp-close { background:none; border:1px solid var(--border); color:var(--ink); font-size:13px; padding:6px 12px; cursor:pointer; flex-shrink:0; font-family:'Inter',sans-serif; }
+  .fpp-close:hover { border-color:var(--grey); }
+
+  .fpp-tabs { display:flex; overflow-x:auto; scrollbar-width:none; background:var(--surface-tint); border-bottom:1px solid var(--border); flex-shrink:0; }
+  .fpp-tabs::-webkit-scrollbar { display:none; }
+  .fpp-tab { display:flex; align-items:center; gap:7px; padding:11px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; color:var(--grey-dark); background:none; border:none; border-bottom:2px solid transparent; white-space:nowrap; transition:color .12s; }
+  .fpp-tab:hover { color:var(--ink); }
+  .fpp-tab.active { color:var(--orange); border-bottom-color:var(--orange); background:var(--white); }
+  .fpp-tab-avatar { width:20px; height:20px; border-radius:50%; background:var(--grey); color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .fpp-tab.active .fpp-tab-avatar { background:var(--orange); }
+
+  .fpp-body { padding:22px 24px; background:var(--surface-tint); }
+  .fpp-empty { font-family:'Inter',sans-serif; font-size:13px; color:var(--grey-dark); text-align:center; padding:30px 10px; }
+
+  /* Carte "extraite du CV" : cadre pointillé + libellé de contexte, hors charte CV volontairement */
+  .fpp-cv-frame { border:1.5px dashed var(--border); background:var(--white); padding:18pt 20pt; position:relative; }
+  .fpp-cv-frame::before { content:'Aperçu — mise en page CV final'; position:absolute; top:-9px; left:14px; background:var(--surface-tint); padding:0 6px; font-family:'Inter',sans-serif; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--grey); }
+
+  /* ── Réplique du bloc "Projets de référence" (cv-template.typ, section PROJETS) ── */
+  .cv-ref { font-family:'Messina Sans','Inter',sans-serif; color:#1A1A1A; }
+  .cv-ref-head { display:flex; align-items:baseline; justify-content:space-between; gap:10pt; }
+  .cv-ref-client { font-weight:700; font-size:9.5pt; color:#434648; }
+  .cv-ref-periode-role { font-weight:600; font-size:8pt; color:#B84B07; white-space:nowrap; flex-shrink:0; }
+  .cv-ref-designation { margin-top:1pt; font-weight:600; font-size:8pt; color:#7A7F82; }
+  .cv-ref-contexte { margin-top:2pt; font-weight:400; font-size:8.5pt; line-height:1.35; }
+  .cv-ref-box { margin-top:3pt; background:#EEEFEF; padding:6pt 8pt; }
+  .cv-ref-realisations { list-style:none; }
+  .cv-ref-realisations li { display:flex; gap:5pt; font-size:8.5pt; line-height:1.35; }
+  .cv-ref-realisations li + li { margin-top:0.45em; }
+  .cv-ref-realisations li::before { content:'›'; color:#FF680A; font-size:10pt; font-weight:700; line-height:1.35; flex-shrink:0; }
 </style>
 
 <!-- ══════════════════════════════════════════════════════
@@ -843,6 +1012,7 @@
         <button class="btn btn-ghost btn-sm" id="ac-gaps-btn" onclick="acToggleGaps()" disabled>Analyser les manques<span class="fe-badge" id="ac-gaps-badge" style="display:none">0</span></button>
         <button class="btn btn-ghost btn-sm" id="ac-raw-btn" onclick="acToggleRaw()" disabled>Voir le brut</button>
         <button class="btn btn-ghost btn-sm" id="ac-del" onclick="acDelete()" disabled>Supprimer</button>
+        <button class="btn btn-ghost btn-sm" id="ac-reset" onclick="acReset()" disabled>Annuler</button>
         <button class="btn btn-primary btn-sm" id="ac-save" onclick="acSave()" disabled>Enregistrer</button>
       </div>
       <div class="fe-scroll" id="ac-form">
@@ -897,6 +1067,7 @@
         <span class="admin-status" id="cli-status"></span>
         <button class="btn btn-ghost btn-sm" id="cli-raw-btn" onclick="cliToggleRaw()">Voir le brut</button>
         <button class="btn btn-ghost btn-sm" id="cli-del" onclick="cliDelete()" disabled>Supprimer</button>
+        <button class="btn btn-ghost btn-sm" id="cli-reset" onclick="cliReset()" disabled>Annuler</button>
         <button class="btn btn-primary btn-sm" id="cli-save" onclick="cliSave()" disabled>Enregistrer</button>
       </div>
       <div class="fe-scroll" id="cli-form">
@@ -917,23 +1088,48 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════
+     ADMIN 4 — CORBEILLE
+══════════════════════════════════════════════════════ -->
+<div id="section-admin-corbeille" class="tab-section">
+  <div class="admin-editor">
+    <div class="admin-main">
+      <div class="admin-toolbar" style="flex-wrap:wrap;">
+        <span class="admin-filename">Corbeille</span>
+        <span class="crb-sel-badge" id="crb-sel-badge">0 sélectionné(s)</span>
+        <button class="btn btn-ghost btn-sm" onclick="crbSelectAll()">Tout sélectionner</button>
+        <button class="btn btn-ghost btn-sm" onclick="crbSelectNone()">Tout désélectionner</button>
+        <button class="btn btn-ghost btn-sm" id="crb-restore-sel" onclick="crbRestoreSelected()" disabled>Restaurer la sélection</button>
+        <button class="btn btn-ghost btn-sm" id="crb-purge-sel" onclick="crbPurgeSelected()" disabled>Supprimer définitivement la sélection</button>
+        <span class="admin-status" id="crb-status"></span>
+      </div>
+      <div class="fe-scroll" id="crb-scroll">
+        <div class="fe-wrap" id="crb-wrap">
+          <div class="loading-placeholder" style="padding:20px;">Chargement…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════
 // Navigation principale
 // ══════════════════════════════════════════════════════
 function switchTab(tab) {
-  ['cv','fiche','admin-collabs','admin-donnees','admin-clients'].forEach(t => {
+  ['cv','fiche','admin-collabs','admin-donnees','admin-clients','admin-corbeille'].forEach(t => {
     const s = document.getElementById('section-'+t);
     if (s) s.classList.toggle('active', t===tab);
   });
   document.getElementById('tab-cv').classList.toggle('active', tab==='cv');
   document.getElementById('tab-fiche').classList.toggle('active', tab==='fiche');
-  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-clients');
+  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-clients' || tab==='admin-corbeille');
   closeAdminMenu();
   if (tab==='fiche' && !ficheDataLoaded) loadFicheData();
   if (tab==='admin-collabs') initAdminCollabs();
   if (tab==='admin-donnees') initDonnees();
   if (tab==='admin-clients') initAdminClients();
+  if (tab==='admin-corbeille') initCorbeille();
 }
 function toggleAdminMenu(e){ e.stopPropagation(); document.getElementById('admin-menu').classList.toggle('open'); }
 function closeAdminMenu(){ const m=document.getElementById('admin-menu'); if(m) m.classList.remove('open'); }
@@ -1054,6 +1250,7 @@ function toggleCollabSelectAll() {
   });
   updateCount();
   updateGenerateBtn();
+  markCvDirty();
 }
 
 function switchCollabCountry(country) {
@@ -1096,12 +1293,30 @@ function renderCollabGrid() {
 }
 
 function toggleCat(cat){document.getElementById('cat-'+cat).classList.toggle('collapsed');}
-function selectCat(cat){const g=document.getElementById('cat-'+cat);const any=[...g.querySelectorAll('input[type="checkbox"]')].some(cb=>!cb.checked);g.querySelectorAll('.collab-item').forEach(el=>{el.querySelector('input').checked=any;el.classList.toggle('selected',any);});updateCount();updateGenerateBtn();}
-function toggleCollab(id,el){const cb=document.getElementById('cb-'+id);cb.checked=!cb.checked;el.classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();}
-function toggleCollabCheckbox(cb){cb.closest('.collab-item').classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();}
+function selectCat(cat){const g=document.getElementById('cat-'+cat);const any=[...g.querySelectorAll('input[type="checkbox"]')].some(cb=>!cb.checked);g.querySelectorAll('.collab-item').forEach(el=>{el.querySelector('input').checked=any;el.classList.toggle('selected',any);});updateCount();updateGenerateBtn();markCvDirty();}
+function toggleCollab(id,el){const cb=document.getElementById('cb-'+id);cb.checked=!cb.checked;el.classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();markCvDirty();}
+function toggleCollabCheckbox(cb){cb.closest('.collab-item').classList.toggle('selected',cb.checked);updateCount();updateGenerateBtn();markCvDirty();}
 function getSelectedIds(){return[...document.querySelectorAll('.collab-item input:checked')].map(cb=>cb.value);}
 function updateCount(){document.getElementById('selected-count').textContent=getSelectedIds().length;syncProfilTabs();refreshCollabCountryTabs();}
 function updateGenerateBtn(){const btn=document.getElementById('btn-generate');const n=getSelectedIds().length;const cible=hasFilters();btn.disabled=n===0;btn.textContent=n===0?'Générer les CVs':cible?`Générer ${n>1?n+' CVs ciblés':'le CV ciblé'}`:`Générer ${n>1?n+' CVs génériques':'le CV générique'}`;}
+
+// ── Bouton « Réinitialiser » — annule toutes les actions faites sur ce formulaire ──
+function markCvDirty(){ const b=document.getElementById('btn-reset-cv'); if(b) b.disabled=false; }
+function resetCvForm(){
+  document.querySelectorAll('#collab-grid .collab-item.selected').forEach(el=>{
+    el.classList.remove('selected');
+    const cb=el.querySelector('input[type="checkbox"]'); if(cb) cb.checked=false;
+  });
+  clearFilters();
+  document.getElementById('max-projets').value='4';
+  document.getElementById('max-pages').value='1';
+  document.getElementById('inclure-parcours').checked=true;
+  document.getElementById('masquer-designations').checked=false;
+  cvProfilSelection={};
+  updateCount();
+  updateGenerateBtn();
+  document.getElementById('btn-reset-cv').disabled=true;
+}
 
 function msValOf(type, it) { return (type === 'domaines') ? it.id : it.label; }
 
@@ -1150,7 +1365,7 @@ function openMsDropdown(type) { document.getElementById(`ms-${type}-dropdown`).c
 function toggleMs(type, val, cb) {
   const selected = msSelected(type);
   if (cb.checked) selected.add(val); else selected.delete(val);
-  renderMsChips(type); onFilterChange();
+  renderMsChips(type); onFilterChange(); markCvDirty();
 }
 
 function renderMsChips(type) {
@@ -1169,7 +1384,7 @@ function removeMs(type, val) {
   selected.delete(val);
   const all = document.querySelectorAll(`#ms-${type}-dropdown .ms-item`);
   all.forEach(item => { if (item.dataset.val === val) item.querySelector('input').checked = false; });
-  renderMsChips(type); onFilterChange();
+  renderMsChips(type); onFilterChange(); markCvDirty();
 }
 
 function hasFilters() {
@@ -1216,6 +1431,7 @@ async function generate(){
   fd.append('max_projets',document.getElementById('max-projets').value);
   fd.append('max_pages',document.getElementById('max-pages').value);
   fd.append('inclure_parcours',document.getElementById('inclure-parcours').checked?'true':'false');
+  fd.append('masquer_designations',document.getElementById('masquer-designations').checked?'true':'false');
   fd.append('annee_min',document.getElementById('f-annee-min').value||'0');
   fd.append('secteur',document.querySelector('input[name="f-secteur"]:checked')?.value||'');
   [...msDomainesSelected].forEach(d=>fd.append('domaines',d));
@@ -1310,7 +1526,7 @@ function addProfilTab(collab) {
   panel.innerHTML = `
     <div class="form-field">
       <label class="field-label">Profil affiché sur le CV</label>
-      <select id="profilsel-${id}" onchange="cvProfilSelection['${id}']=this.value">
+      <select id="profilsel-${id}" onchange="cvProfilSelection['${id}']=this.value;markCvDirty()">
         <option value="">Profil générique</option>
         <option value="__loading">Chargement…</option>
       </select>
@@ -1453,12 +1669,13 @@ const DOMAINES_FALLBACK = [
 ];
 
 const POIDS_OPTIONS = [
-  {value:1, label:'1 — Projet secondaire'},
-  {value:2, label:'2 — Rôle limité'},
-  {value:3, label:'3 — Projet standard'},
-  {value:4, label:'4 — Rôle important'},
-  {value:5, label:'5 — Projet phare'},
+  {value:1, label:'1'},
+  {value:2, label:'2'},
+  {value:3, label:'3'},
 ];
+// Barème 1-3 (ancien barème 1-5 : 1|2→1, 3→2, 4|5→3). Ramène toute valeur
+// hors-plage (fiche pas encore migrée, saisie invalide) dans [1,3].
+function poidsClamp(v){ v = Number(v); if(!Number.isFinite(v)) return 2; return Math.min(3, Math.max(1, Math.round(v))); }
 
 async function loadFicheData() {
   ficheDataLoaded = true;
@@ -1467,6 +1684,7 @@ async function loadFicheData() {
   ficheCompetences = await fetch('/api/competences').then(r=>r.json()).catch(()=>[]);
   renderFicheCollabGrid(ficheCollabs);
   renderFpClientOptions();
+  renderFpPeriodeOptions();
   updateFicheBtn();
 }
 
@@ -1589,6 +1807,7 @@ function toggleFicheCollab(id, el) {
     if (collab) addMemberTab(collab);
   }
   updateFicheMembersBadge();
+  markFicheDirty();
 }
 
 function updateFicheMembersBadge() {
@@ -1601,16 +1820,170 @@ function updateFicheMembersBadge() {
   refreshFicheCollabCountryTabs();
 }
 
+// ── Toast d'avertissement + limites de caractères ───────────────────────────
+let appToastTimer = null;
+function showToast(message) {
+  let el = document.getElementById('app-toast');
+  if (!el) { el = document.createElement('div'); el.id = 'app-toast'; document.body.appendChild(el); }
+  el.textContent = message;
+  el.classList.add('visible');
+  clearTimeout(appToastTimer);
+  appToastTimer = setTimeout(() => el.classList.remove('visible'), 3000);
+}
+// Le `maxlength` HTML bloque déjà la saisie/le collage au-delà de `max` : on ne
+// peut donc pas détecter un dépassement après coup, seulement la TENTATIVE —
+// touche tapée alors que la limite est déjà atteinte, ou collage qui l'aurait dépassée.
+function warnOnMaxLength(el, max) {
+  if (!el) return;
+  el.addEventListener('keydown', (e) => {
+    const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
+    if (isPrintable && el.selectionStart === el.selectionEnd && el.value.length >= max) {
+      showToast(`Attention, trop long : max ${max} caractères`);
+    }
+  });
+  el.addEventListener('paste', (e) => {
+    const clip = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+    const wouldBe = el.value.length - (el.selectionEnd - el.selectionStart) + clip.length;
+    if (wouldBe > max) showToast(`Attention, trop long : max ${max} caractères`);
+  });
+}
+
 // Bouton « Valider » actif seulement si le minimum est atteint :
-// ≥1 membre + désignation + client + période + contexte d'au moins 3 mots.
+// ≥1 membre (chacun avec rôle + au moins 1 réalisation) + désignation + client + période (début).
 function updateFicheBtn() {
   const val = id => (document.getElementById(id)?.value || '').trim();
-  const ctx = val('fp-contexte');
-  const words = ctx ? ctx.split(/\s+/).filter(Boolean).length : 0;
-  const ok = ficheSelectedIds.size >= 1 && val('fp-nom') && val('fp-client-ref') && val('fp-periode') && words >= 3;
+  const membresOk = ficheSelectedIds.size >= 1 && [...ficheSelectedIds].every(id =>
+    val(`mf-${id}-role`) && getRealisations(id).length >= 1
+  );
+  const ok = membresOk && val('fp-nom') && val('fp-client-ref') && val('fp-periode-debut');
   const btn = document.getElementById('btn-generate-fiche');
   if (btn) btn.disabled = !ok;
+  const btnPreview = document.getElementById('btn-preview-fiche');
+  if (btnPreview) btnPreview.disabled = ficheSelectedIds.size < 1;
+  updateFicheChecklist();
 }
+
+// ── Bouton « Réinitialiser » — annule toutes les actions faites sur ce formulaire ──
+function markFicheDirty(){ const b=document.getElementById('btn-reset-fiche'); if(b) b.disabled=false; }
+function resetFicheForm(){
+  document.getElementById('fp-nom').value='';
+  document.getElementById('fp-contexte').value='';
+  acCount(document.getElementById('fp-contexte'),'fp-cnt-contexte',180);
+  document.getElementById('fp-client-ref').value='';
+  onFpClientChange();
+  document.getElementById('fp-periode-debut').value='';
+  document.getElementById('fp-periode-fin').value='';
+  const secteurPublic = document.querySelector('input[name="fp-secteur"][value="public"]');
+  if (secteurPublic) secteurPublic.checked = true;
+  [...ficheSelectedIds].forEach(id => {
+    const el = document.querySelector(`#fiche-collab-grid .collab-item[data-id="${id}"]`);
+    if (el) toggleFicheCollab(id, el);
+  });
+  if (ficheSyncMode) toggleSyncMode();
+  ['err-fp-nom','err-fp-client-ref','err-fp-periode','err-members'].forEach(id => document.getElementById(id)?.classList.remove('visible'));
+  document.getElementById('fiche-errors').style.display = 'none';
+  updateFicheBtn();
+  document.getElementById('btn-reset-fiche').disabled = true;
+}
+
+// Année de référence des dropdowns Période : 2014 → année en cours.
+function renderFpPeriodeOptions() {
+  const debut = document.getElementById('fp-periode-debut');
+  const fin = document.getElementById('fp-periode-fin');
+  if (!debut || !fin || debut.dataset.filled) return;
+  const currentYear = new Date().getFullYear();
+  let years = '';
+  for (let y = 2014; y <= currentYear; y++) years += `<option value="${y}">${y}</option>`;
+  debut.innerHTML = '<option value="">— Début —</option>' + years;
+  fin.innerHTML = '<option value="">— Fin (optionnel) —</option>' + years;
+  debut.dataset.filled = '1';
+}
+
+function buildPeriodeStr() {
+  const debut = document.getElementById('fp-periode-debut')?.value || '';
+  const fin = document.getElementById('fp-periode-fin')?.value || '';
+  if (!debut) return '';
+  return fin ? `${debut} – ${fin}` : debut;
+}
+
+// Checklist « champs à compléter » : reflète exactement les conditions d'activation du bouton.
+// Les items validés sortent de la liste (qui sinon ne ferait que grandir) et rejoignent un
+// groupe « Complétés » replié, sous forme de badges gris empilés horizontalement.
+function updateFicheChecklist() {
+  const list = document.getElementById('fiche-checklist-list');
+  const badge = document.getElementById('fiche-checklist-badge');
+  if (!list) return;
+  const val = id => (document.getElementById(id)?.value || '').trim();
+
+  const items = [
+    { label: 'Désignation du projet', done: !!val('fp-nom') },
+    { label: 'Client', done: !!val('fp-client-ref') },
+    { label: 'Période — année de début', done: !!val('fp-periode-debut') },
+    { label: 'Au moins un membre de l\'équipe', done: ficheSelectedIds.size >= 1 },
+  ];
+  ficheSelectedIds.forEach(id => {
+    const collab = ficheCollabs.find(c => c.id === id);
+    const name = collab?.display || id;
+    items.push({ label: `${name} — rôle sur le projet`, done: !!val(`mf-${id}-role`) });
+    items.push({ label: `${name} — au moins une réalisation`, done: getRealisations(id).length >= 1 });
+  });
+
+  const todo = items.filter(i => !i.done);
+  const done = items.filter(i => i.done);
+  if (badge) { badge.textContent = todo.length; badge.classList.toggle('zero', todo.length === 0); }
+
+  const todoIcon = '<svg class="fc-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+  list.innerHTML = todo.map(i => `<li>${todoIcon}<span>${esc(i.label)}</span></li>`).join('');
+
+  const doneGroup = document.getElementById('fc-done-group');
+  const doneBadge = document.getElementById('fc-done-badge');
+  const doneChips = document.getElementById('fc-done-chips');
+  if (doneGroup) {
+    doneGroup.style.display = done.length ? '' : 'none';
+    if (doneBadge) doneBadge.textContent = done.length;
+    if (doneChips) doneChips.innerHTML = done.map(i => `<span class="fc-done-chip">${esc(i.label)}</span>`).join('');
+  }
+  syncFicheColRightHeight();
+}
+function toggleFicheDoneGroup() {
+  document.getElementById('fc-done-group')?.classList.toggle('open');
+}
+
+// Cale la hauteur de la colonne « champs à compléter » sur celle de la colonne voisine
+// « Informations projet », sans jamais dépasser la hauteur du viewport (cf. #fiche-col-right
+// en position:sticky, top:32px) : le composant grandit tant qu'il y a de la place, et ne
+// bascule en scroll interne (sur la liste) qu'au-delà de ce qui tient réellement à l'écran.
+function syncFicheColRightHeight() {
+  const mid = document.getElementById('fiche-col-mid');
+  const right = document.getElementById('fiche-col-right');
+  const checklist = document.getElementById('fiche-checklist');
+  const ul = document.getElementById('fiche-checklist-list');
+  if (!mid || !right || !checklist || !ul) return;
+
+  // Plafond, pas une hauteur imposée : le composant garde sa hauteur naturelle
+  // (selon le nombre de champs listés) et ne se cale sur ce maximum — colonne
+  // voisine plafonnée par le viewport — que si son contenu le dépasse réellement.
+  const midH = mid.getBoundingClientRect().height;
+  const availH = window.innerHeight - 32 /* top sticky */ - 32 /* marge basse */;
+  const cap = Math.max(0, Math.min(midH, availH));
+  right.style.maxHeight = cap + 'px';
+
+  // Un flex-grow ne suffit pas à faire remonter la liste jusqu'à ce plafond tant
+  // que le conteneur parent est en hauteur "auto" (il ne se clampe qu'une fois le
+  // contenu déjà en dépassement, sans redistribuer l'espace restant à la liste).
+  // On calcule donc directement la hauteur max de la <ul> elle-même : le plafond
+  // moins tout ce qui garde une taille fixe autour (en-tête, groupe "Complétés",
+  // bloc d'erreurs, bouton, marges).
+  const h = el => el ? el.getBoundingClientRect().height : 0;
+  const head = checklist.querySelector('.fe-gaps-head');
+  const doneGroup = document.getElementById('fc-done-group');
+  const errors = document.getElementById('fiche-errors');
+  const btn = document.getElementById('btn-generate-fiche');
+  const gaps = 16 * 2; // gap entre .fiche-checklist / #fiche-errors / bouton
+  const reserved = h(head) + h(doneGroup) + h(errors) + h(btn) + gaps;
+  ul.style.maxHeight = Math.max(60, cap - reserved) + 'px';
+}
+window.addEventListener('resize', syncFicheColRightHeight);
 
 // ── Tab management ────────────────────────────────────────────────────────
 
@@ -1894,31 +2267,30 @@ function addMemberPanel(collab) {
       <div class="form-row" style="margin-bottom:0;">
         <div class="form-field" style="margin-bottom:0;">
           <label class="field-label">Rôle sur ce projet *</label>
-          <input type="text" id="mf-${id}-role" placeholder="Ex : Développeur backend principal"
-            oninput="syncTextField('${id}','role',this.value)">
+          <input type="text" id="mf-${id}-role" maxlength="30" placeholder="Ex : Développeur backend principal"
+            oninput="syncTextField('${id}','role',this.value);updateFicheBtn()">
           <div class="field-error" id="err-mf-${id}-role">Champ obligatoire</div>
         </div>
         <div class="form-field" style="margin-bottom:0;">
-          <label class="field-label">Importance du projet *</label>
+          <label class="field-label">Importance du projet</label>
           <select id="mf-${id}-poids" class="poids-select"
             onchange="syncSelectField('${id}','poids',this.value)">
-            ${POIDS_OPTIONS.map(o=>`<option value="${o.value}"${o.value===3?' selected':''}>${o.label}</option>`).join('')}
+            ${POIDS_OPTIONS.map(o=>`<option value="${o.value}"${o.value===2?' selected':''}>${o.label}</option>`).join('')}
           </select>
         </div>
       </div>
 
       <!-- Domaines -->
       <div class="form-field" style="margin-bottom:0;">
-        <label class="field-label">Domaines *</label>
+        <label class="field-label">Domaines</label>
         <div class="domaines-grid" id="mf-${id}-domaines">
           ${renderDomainesForMember(id)}
         </div>
-        <div class="field-error" id="err-mf-${id}-domaines">Sélectionner au moins un domaine</div>
       </div>
 
       <!-- Compétences (même dropdown de recherche que les domaines) -->
       <div class="form-field" style="margin-bottom:0;">
-        <label class="field-label">Compétences mobilisées *</label>
+        <label class="field-label">Compétences mobilisées</label>
         <div class="ms-wrap member-comp-wrap">
           <div class="comp-search-wrap" style="margin-bottom:0;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1930,7 +2302,6 @@ function addMemberPanel(collab) {
           </div>
         </div>
         <div class="comp-chips-selected" id="mf-${id}-chips"></div>
-        <div class="field-error" id="err-mf-${id}-comps">Sélectionner au moins une compétence</div>
         <!-- Hors référentiel : bouton seul, même espacement que « + Ajouter une réalisation » -->
         <div class="new-comp-list" id="mf-${id}-new-comps"></div>
         <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="addNewComp('${id}')">+ Ajouter une compétence hors référentiel</button>
@@ -1938,21 +2309,23 @@ function addMemberPanel(collab) {
 
       <!-- Réalisations -->
       <div class="form-field" style="margin-bottom:0;">
-        <label class="field-label">Réalisations (3 minimum) *</label>
+        <label class="field-label">Réalisations *</label>
         <div class="realisations-list" id="mf-${id}-realisations">
           ${[0,1,2].map(n=>`
             <div class="realisation-row">
               <span class="realisation-num">${n+1}.</span>
-              <input type="text" id="mf-${id}-real-${n+1}" placeholder="Verbe d'action + résultat concret et mesurable"
-                oninput="syncRealisationField('${id}',${n},this.value)">
+              <input type="text" id="mf-${id}-real-${n+1}" maxlength="150" placeholder="Verbe d'action + résultat concret et mesurable"
+                oninput="syncRealisationField('${id}',${n},this.value);updateFicheBtn()">
             </div>`).join('')}
         </div>
-        <div class="field-error" id="err-mf-${id}-realisations">Renseigner au moins 3 réalisations</div>
+        <div class="field-error" id="err-mf-${id}-realisations">Renseigner au moins 1 réalisation</div>
         <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="addRealisation('${id}')">+ Ajouter une réalisation</button>
       </div>
 
     </div>`;
   container.appendChild(div);
+  warnOnMaxLength(document.getElementById(`mf-${id}-role`), 30);
+  [1, 2, 3].forEach(n => warnOnMaxLength(document.getElementById(`mf-${id}-real-${n}`), 150));
 }
 
 // Mapping méta-catégories
@@ -2054,10 +2427,11 @@ function addRealisation(memberId) {
   const row = document.createElement('div');
   row.className = 'realisation-row';
   row.innerHTML = `<span class="realisation-num">${n+1}.</span>
-    <input type="text" id="mf-${memberId}-real-${n+1}" placeholder="Verbe d'action + résultat concret"
-      oninput="syncRealisationField('${memberId}',${n},this.value)">
-    <button class="btn-remove" onclick="this.closest('.realisation-row').remove(); renumberRealisations('${memberId}')">×</button>`;
+    <input type="text" id="mf-${memberId}-real-${n+1}" maxlength="150" placeholder="Verbe d'action + résultat concret"
+      oninput="syncRealisationField('${memberId}',${n},this.value);updateFicheBtn()">
+    <button class="btn-remove" onclick="this.closest('.realisation-row').remove(); renumberRealisations('${memberId}'); updateFicheBtn()">×</button>`;
   list.appendChild(row);
+  warnOnMaxLength(document.getElementById(`mf-${memberId}-real-${n+1}`), 150);
 }
 
 function renumberRealisations(memberId) {
@@ -2141,7 +2515,7 @@ function _ingModal() {
   ov = document.createElement('div');
   ov.id = 'ingest-overlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;';
-  ov.innerHTML = '<div id="ingest-box" style="background:#fff;max-width:720px;width:100%;max-height:85vh;overflow:auto;border-top:3px solid #FF680A;padding:22px 24px;font-family:Inter,system-ui,sans-serif;font-size:13.5px;color:#1A1A1A;"></div>';
+  ov.innerHTML = '<div id="ingest-box" style="background:var(--white);max-width:720px;width:100%;max-height:85vh;overflow:auto;border-top:3px solid var(--orange);padding:22px 24px;font-family:Inter,system-ui,sans-serif;font-size:13.5px;color:var(--ink);"></div>';
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
   document.body.appendChild(ov);
   return ov;
@@ -2156,36 +2530,36 @@ function showIngestPreview(preview, yamlText) {
 
   const membresHtml = membres.map(m => {
     const badge = m.found
-      ? '<span style="background:#2e7d32;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;">Trouvé</span>'
-      : '<span style="background:#c0392b;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;">Introuvable</span>';
-    const okC = (m.competences_ok||[]).map(c=>`<span style="border:1px solid #2e7d32;color:#2e7d32;padding:1px 6px;margin:2px;display:inline-block;font-size:11px;">${esc(c)}</span>`).join('');
-    const newC = (m.new_competences_for_collab||[]).map(c=>`<span style="border:1px solid #FF680A;color:#FF680A;padding:1px 6px;margin:2px;display:inline-block;font-size:11px;">${esc(c.nom)}</span>`).join('');
-    const warns = (m.warnings||[]).map(w=>`<div style="color:#e65100;font-size:12px;margin-top:4px;">⚠ ${esc(w)}</div>`).join('');
-    return `<div style="border:1px solid #e0e0e0;margin-bottom:10px;">
+      ? '<span style="background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;">Trouvé</span>'
+      : '<span style="background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;">Introuvable</span>';
+    const okC = (m.competences_ok||[]).map(c=>`<span style="border:1px solid var(--green);color:var(--green);padding:1px 6px;margin:2px;display:inline-block;font-size:11px;">${esc(c)}</span>`).join('');
+    const newC = (m.new_competences_for_collab||[]).map(c=>`<span style="border:1px solid var(--orange);color:var(--orange);padding:1px 6px;margin:2px;display:inline-block;font-size:11px;">${esc(c.nom)}</span>`).join('');
+    const warns = (m.warnings||[]).map(w=>`<div style="color:var(--orange);font-size:12px;margin-top:4px;">⚠ ${esc(w)}</div>`).join('');
+    return `<div style="border:1px solid var(--border);margin-bottom:10px;">
       <div style="background:rgba(255,104,10,.07);padding:8px 12px;display:flex;gap:8px;align-items:center;">
         <strong style="flex:1;">${esc(m.display||m.slug)}</strong>
-        <span style="font-size:11px;color:#7A7F82;">${esc(m.slug)}</span>${badge}
+        <span style="font-size:11px;color:var(--grey-dark);">${esc(m.slug)}</span>${badge}
       </div>
       <div style="padding:10px 12px;">
         ${warns}
-        ${m.found ? `<div style="font-size:10px;color:#7A7F82;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Un projet sera ajouté · compétences :</div>${okC}${newC}` : ''}
+        ${m.found ? `<div style="font-size:10px;color:var(--grey-dark);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Un projet sera ajouté · compétences :</div>${okC}${newC}` : ''}
       </div>
     </div>`;
   }).join('');
 
   box.innerHTML = `
     <h3 style="font-size:16px;font-weight:800;margin-bottom:4px;">Aperçu avant enregistrement</h3>
-    <p style="color:#7A7F82;margin-bottom:14px;">Ces modifications seront ajoutées aux fiches maîtres sur le Drive, et l'administrateur sera notifié.</p>
-    <div style="padding:10px 12px;background:#F5F5F5;border:1px solid #e0e0e0;margin-bottom:12px;">
-      <strong>${esc(projet.designation||projet.id||'Projet')}</strong> — ${esc(projet.client||'')} · ${esc(projet.periode||'')}
+    <p style="color:var(--grey-dark);margin-bottom:14px;">Ces modifications seront ajoutées aux fiches maîtres sur le Drive, et l'administrateur sera notifié.</p>
+    <div style="padding:10px 12px;background:var(--surface-tint);border:1px solid var(--border);margin-bottom:12px;">
+      <strong>${esc(projet.designation||projet.id||'Projet')}</strong> — ${esc(projet.client_ref||'')} · ${esc(projet.periode||'')}
     </div>
-    <div style="font-size:11px;color:#7A7F82;margin-bottom:8px;">${found}/${membres.length} collaborateur(s) trouvé(s)</div>
+    <div style="font-size:11px;color:var(--grey-dark);margin-bottom:8px;">${found}/${membres.length} collaborateur(s) trouvé(s)</div>
     ${membresHtml}
     <div id="ingest-result" style="margin-top:6px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
-      <button id="ing-cancel" style="padding:8px 14px;border:1px solid #7A7F82;background:#fff;cursor:pointer;font-size:13px;">Annuler</button>
-      <button id="ing-dl" style="padding:8px 14px;border:1px solid #7A7F82;background:#fff;cursor:pointer;font-size:13px;">Télécharger le YAML</button>
-      <button id="ing-confirm" style="padding:8px 16px;border:none;background:#FF680A;color:#fff;cursor:pointer;font-weight:600;font-size:13px;" ${found===0?'disabled':''}>Confirmer et enregistrer</button>
+      <button id="ing-cancel" style="padding:8px 14px;border:1px solid var(--grey);background:var(--white);cursor:pointer;font-size:13px;">Annuler</button>
+      <button id="ing-dl" style="padding:8px 14px;border:1px solid var(--grey);background:var(--white);cursor:pointer;font-size:13px;">Télécharger le YAML</button>
+      <button id="ing-confirm" style="padding:8px 16px;border:none;background:var(--orange);color:#fff;cursor:pointer;font-weight:600;font-size:13px;" ${found===0?'disabled':''}>Confirmer et enregistrer</button>
     </div>`;
 
   box.querySelector('#ing-cancel').onclick = () => document.getElementById('ingest-overlay').remove();
@@ -2205,12 +2579,12 @@ async function applyIngest(btn) {
     });
     if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail || ('HTTP '+r.status)); }
     const results = await r.json();
-    res.innerHTML = results.map(x=>`<div style="padding:8px 12px;border:1px solid #e0e0e0;margin-top:6px;color:${x.ok?'#2e7d32':'#c0392b'};"><strong>${esc(x.display||x.slug)}</strong> — ${esc(x.message)}</div>`).join('')
-      + '<div style="margin-top:10px;color:#2e7d32;font-weight:600;">✓ Fiche(s) mise(s) à jour sur le Drive. L\'administrateur a été notifié.</div>';
+    res.innerHTML = results.map(x=>`<div style="padding:8px 12px;border:1px solid var(--border);margin-top:6px;color:${x.ok?'var(--green)':'var(--red)'};"><strong>${esc(x.display||x.slug)}</strong> — ${esc(x.message)}</div>`).join('')
+      + '<div style="margin-top:10px;color:var(--green);font-weight:600;">✓ Fiche(s) mise(s) à jour sur le Drive. L\'administrateur a été notifié.</div>';
     btn.textContent = 'Enregistré ✓';
     document.getElementById('ing-cancel').textContent = 'Fermer';
   } catch(e) {
-    res.innerHTML = `<div style="color:#c0392b;margin-top:8px;">Erreur : ${esc(e.message)}</div>`;
+    res.innerHTML = `<div style="color:var(--red);margin-top:8px;">Erreur : ${esc(e.message)}</div>`;
     btn.disabled = false; btn.textContent = 'Confirmer et enregistrer';
   }
 }
@@ -2224,10 +2598,8 @@ function validateFicheForm() {
   clearErr('err-fp-nom'); if(!nom){showErr('err-fp-nom');errors.push('Nom du projet manquant');}
   const client = document.getElementById('fp-client-ref').value.trim();
   clearErr('err-fp-client-ref'); if(!client){showErr('err-fp-client-ref');errors.push('Client manquant');}
-  const periode = document.getElementById('fp-periode').value.trim();
-  clearErr('err-fp-periode'); if(!periode){showErr('err-fp-periode');errors.push('Période manquante');}
-  const contexte = document.getElementById('fp-contexte').value.trim();
-  clearErr('err-fp-contexte'); if(contexte.length<30){showErr('err-fp-contexte');errors.push('Contexte trop court (minimum 30 caractères)');}
+  const periodeDebut = document.getElementById('fp-periode-debut').value.trim();
+  clearErr('err-fp-periode'); if(!periodeDebut){showErr('err-fp-periode');errors.push('Période : année de début manquante');}
 
   clearErr('err-members');
   if(!ficheSelectedIds.size){showErr('err-members');errors.push('Sélectionner au moins un membre de l\'équipe');}
@@ -2239,15 +2611,6 @@ function validateFicheForm() {
     const role = document.getElementById(`mf-${id}-role`)?.value.trim();
     clearErr(`err-mf-${id}-role`);
     if(!role){showErr(`err-mf-${id}-role`);errors.push(`${name} : rôle manquant`);}
-
-    const domChecked = [...(document.querySelectorAll(`#mf-${id}-domaines input:checked`))];
-    clearErr(`err-mf-${id}-domaines`);
-    if(!domChecked.length){showErr(`err-mf-${id}-domaines`);errors.push(`${name} : sélectionner au moins un domaine`);}
-
-    const comps = getSelectedComps(id);
-    const newComps = getNewComps(id);
-    clearErr(`err-mf-${id}-comps`);
-    if(!comps.length&&!newComps.length){showErr(`err-mf-${id}-comps`);errors.push(`${name} : sélectionner au moins une compétence`);}
 
     // Nouvelle compétence hors référentiel : section OBLIGATOIRE (aucun fourre-tout)
     document.querySelectorAll(`#mf-${id}-new-comps .new-comp-row`).forEach(row => {
@@ -2263,7 +2626,7 @@ function validateFicheForm() {
 
     const reals = getRealisations(id);
     clearErr(`err-mf-${id}-realisations`);
-    if(reals.length<3){showErr(`err-mf-${id}-realisations`);errors.push(`${name} : 3 réalisations minimum`);}
+    if(reals.length<1){showErr(`err-mf-${id}-realisations`);errors.push(`${name} : 1 réalisation minimum`);}
   });
 
   return errors;
@@ -2274,7 +2637,7 @@ function buildFicheYAML() {
   const nom = document.getElementById('fp-nom').value.trim();
   const client = document.getElementById('fp-client-ref').value.trim();
   const sousEntite = document.getElementById('fp-sous-entite').value.trim();
-  const periode = document.getElementById('fp-periode').value.trim();
+  const periode = buildPeriodeStr();
   const secteur = document.querySelector('input[name="fp-secteur"]:checked')?.value || 'public';
   const contexte = document.getElementById('fp-contexte').value.trim();
   const projId = slugify(nom);
@@ -2349,6 +2712,108 @@ function getNewComps(memberId) {
   }).filter(nc => nc.nom && nc.section);
 }
 
+// ── Prévisualisation « référence projet » ───────────────────────────────────
+// Réplique côté navigateur du rendu Typst (engine/cv-template.typ, section
+// "Projets de référence") pour un aperçu instantané, membre par membre,
+// avant écriture sur les fiches maîtres. Les champs "technologies" n'existent
+// pas dans ce formulaire (déclaratif côté chef de projet) : la colonne "Tech"
+// du template ne s'affiche donc jamais ici, comme dans le template lui-même
+// quand elle est vide.
+let fpPreviewActiveId = null;
+
+function fpClientDisplay() {
+  const clientRef = document.getElementById('fp-client-ref').value.trim();
+  const sousEntite = document.getElementById('fp-sous-entite').value.trim();
+  if (!clientRef) return '';
+  return sousEntite ? `${clientRef} — ${sousEntite}` : clientRef;
+}
+
+function _fpPreviewModal() {
+  let ov = document.getElementById('fp-preview-overlay');
+  if (ov) return ov;
+  ov = document.createElement('div');
+  ov.id = 'fp-preview-overlay';
+  ov.innerHTML = `
+    <div id="fp-preview-box">
+      <div class="fpp-head">
+        <div>
+          <h3>Prévisualisation — référence projet</h3>
+          <p>Aperçu de la référence projet telle qu'elle apparaîtra sur le CV final, pour chaque membre de l'équipe.</p>
+        </div>
+        <button class="fpp-close" onclick="closeFichePreview()">Fermer</button>
+      </div>
+      <div class="fpp-tabs" id="fpp-tabs"></div>
+      <div class="fpp-body"><div id="fpp-cv-body"></div></div>
+    </div>`;
+  ov.addEventListener('click', e => { if (e.target === ov) closeFichePreview(); });
+  document.body.appendChild(ov);
+  return ov;
+}
+
+function closeFichePreview() {
+  document.getElementById('fp-preview-overlay')?.remove();
+}
+
+function openFichePreview() {
+  if (!ficheSelectedIds.size) return;
+  _fpPreviewModal();
+  const tabsEl = document.getElementById('fpp-tabs');
+  tabsEl.innerHTML = [...ficheSelectedIds].map(id => {
+    const collab = ficheCollabs.find(c => c.id === id);
+    const display = collab?.display || id;
+    const ini = display.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return `<button class="fpp-tab" id="fpp-tab-${id}" onclick="switchFpPreviewTab('${id}')">
+      <span class="fpp-tab-avatar">${ini}</span><span>${esc(display)}</span>
+    </button>`;
+  }).join('');
+  const first = (fpPreviewActiveId && ficheSelectedIds.has(fpPreviewActiveId)) ? fpPreviewActiveId : [...ficheSelectedIds][0];
+  switchFpPreviewTab(first);
+}
+
+function switchFpPreviewTab(id) {
+  fpPreviewActiveId = id;
+  document.querySelectorAll('.fpp-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('fpp-tab-' + id)?.classList.add('active');
+  renderFpPreviewCard(id);
+}
+
+function renderFpPreviewCard(id) {
+  const body = document.getElementById('fpp-cv-body');
+  if (!body) return;
+
+  const designation = document.getElementById('fp-nom').value.trim();
+  const client = fpClientDisplay();
+  const periode = buildPeriodeStr();
+  const role = document.getElementById(`mf-${id}-role`)?.value.trim() || '';
+  const contexte = document.getElementById('fp-contexte').value.trim();
+  const reals = getRealisations(id);
+
+  if (!client && !designation && !role && !contexte && !reals.length) {
+    body.innerHTML = '<div class="fpp-empty">Aucune information renseignée pour l\'instant pour ce membre.</div>';
+    return;
+  }
+
+  const periodeRole = [periode, role].filter(Boolean).join(periode && role ? ' · ' : '');
+
+  body.innerHTML = `
+    <div class="fpp-cv-frame">
+      <div class="cv-ref">
+        <div class="cv-ref-head">
+          <span class="cv-ref-client">${esc(client)}</span>
+          <span class="cv-ref-periode-role">${esc(periodeRole)}</span>
+        </div>
+        ${designation ? `<div class="cv-ref-designation">${esc(designation)}</div>` : ''}
+        ${contexte ? `<div class="cv-ref-contexte">${esc(contexte)}</div>` : ''}
+        ${reals.length ? `
+        <div class="cv-ref-box">
+          <ul class="cv-ref-realisations">
+            ${reals.map(r => `<li>${esc(r)}</li>`).join('')}
+          </ul>
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+
 // ── Utilitaires ────────────────────────────────────────────────────────────
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escJs(s){if(!s)return'';return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
@@ -2360,12 +2825,23 @@ function downloadText(text, filename){const a=document.createElement('a');a.href
 loadCollaborateurs();
 loadFiltres();
 document.getElementById('membre-tabs').addEventListener('scroll', updateScrollButtons);
+warnOnMaxLength(document.getElementById('fp-nom'), 50);
+
+// Recalcule la hauteur de la colonne « champs à compléter » dès que la colonne voisine
+// change de taille pour une raison qui ne passe pas par updateFicheChecklist (ex : la
+// textarea Contexte redimensionnée à la main par l'utilisateur).
+if (window.ResizeObserver) {
+  const ficheColMidEl = document.getElementById('fiche-col-mid');
+  if (ficheColMidEl) new ResizeObserver(syncFicheColRightHeight).observe(ficheColMidEl);
+}
+syncFicheColRightHeight();
 
 // ══════════════════════════════════════════════════════
 // ADMIN — Éditer les fiches collaborateurs (CodeMirror + CRUD)
 // ══════════════════════════════════════════════════════
 let acEditor = null, acList = [], acFileId = null, acFilename = null, acLoaded = false;
 let acModel = null, acRawOpen = false, acRawEditing = false, acGapsOpen = false;
+let acOriginalModel = null, acOriginalRaw = '';
 let acRefDomaines = [], acRefCompFamilies = [], acRefClients = [];
 const AC_LOCALISATIONS = ['France', 'Suisse', 'Allemagne'];
 
@@ -2421,7 +2897,7 @@ function initAdminCollabs(){
       indentWithTabs:false, lineWrapping:true, readOnly:true, extraKeys:{'Ctrl-S':acSave,'Cmd-S':acSave},
     });
     // Le brut n'est modifiable qu'en mode « Éditer le brut » : la dirtiness vient alors du CodeMirror.
-    acEditor.on('change', ()=>{ if(acRawEditing && acFileId) document.getElementById('ac-save').disabled=false; });
+    acEditor.on('change', ()=>{ if(acRawEditing && acFileId){ document.getElementById('ac-save').disabled=false; document.getElementById('ac-reset').disabled=false; } });
     // Ferme les dropdowns multi-select au clic à l'extérieur.
     document.addEventListener('click', e=>{
       document.querySelectorAll('#ac-form .acms-wrap').forEach(w=>{ if(!w.contains(e.target)){ const dd=w.querySelector('.ms-dropdown'); if(dd) dd.classList.remove('open'); } });
@@ -2488,10 +2964,13 @@ async function acLoadFile(id, filename){
     try{ data = jsyaml.load(raw) || {}; }
     catch(e){ data = {}; acStatus('⚠ YAML illisible — ouvre « Voir le brut » pour corriger','err'); }
     acModel = acNormalize(data);
+    acOriginalModel = JSON.parse(JSON.stringify(acModel));
+    acOriginalRaw = raw;
     acRenderForm();
     // Le brut affiche d'abord le fichier réel (fidèle), puis le régénéré après la 1re modif.
     acEditor.setValue(raw); acEditor.clearHistory();
     document.getElementById('ac-save').disabled = true;
+    document.getElementById('ac-reset').disabled = true;
     document.getElementById('ac-del').disabled = false;
     document.getElementById('ac-raw-btn').disabled = false;
     document.getElementById('ac-gaps-btn').disabled = false;
@@ -2512,24 +2991,109 @@ async function acSave(){
     });
     if(!r.ok) throw new Error(await r.text());
     document.getElementById('ac-save').disabled = true;
+    document.getElementById('ac-reset').disabled = true;
+    acOriginalModel = JSON.parse(JSON.stringify(acModel));
+    acOriginalRaw = content;
     acStatus('✓ Enregistré (admin notifié)','ok');
     if(!acRawEditing) acRefreshRaw();
     acLoadList();
   }catch(e){ acStatus('✗ '+e.message,'err'); }
 }
-async function acNew(){
-  let name = prompt('Nom du fichier (ex : prenom-nom.yaml)');
-  if(!name) return;
-  name = name.trim(); if(!name.endsWith('.yaml')) name += '.yaml';
+// ── Modale « Nouveau collaborateur » ────────────────────────────────────────
+function _acNewOverlay(){
+  let ov = document.getElementById('acnew-overlay');
+  if(ov) return ov;
+  ov = document.createElement('div');
+  ov.id = 'acnew-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;';
+  ov.addEventListener('click', e => { if(e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+  return ov;
+}
+function acNew(){
+  const ov = _acNewOverlay();
+  const catOpts = CAT_ORDER.filter(k=>k).map(k=>`<option value="${k}">${esc(CAT_LABELS[k])}</option>`).join('');
+  const locOpts = AC_LOCALISATIONS.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('');
+  ov.innerHTML = `<div class="card" style="max-width:480px;width:100%;border:none;border-top:3px solid var(--orange);">
+    <div class="card-body">
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:4px;">Nouvelle fiche collaborateur</h3>
+      <p style="color:var(--grey-dark);font-size:12.5px;margin-bottom:16px;">Ces informations pré-remplissent la fiche et la placent au bon endroit dans la liste du staff. Le reste se complète juste après, dans la fiche.</p>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="field-label">Prénom</label>
+          <input type="text" id="acnew-prenom" placeholder="Ex : Camille">
+          <div class="field-error" id="acnew-err-prenom">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label">Nom</label>
+          <input type="text" id="acnew-nom" placeholder="Ex : Dupont">
+          <div class="field-error" id="acnew-err-nom">Champ obligatoire</div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="field-label">Nom de fichier</label>
+        <div id="acnew-filename" style="font-size:12.5px;color:var(--grey-dark);padding:8px 11px;background:var(--surface-tint);border:1px solid var(--border);">—</div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="field-label">Catégorie de poste</label>
+          <select id="acnew-categorie"><option value="" disabled selected>— Sélectionner —</option>${catOpts}</select>
+          <div class="field-error" id="acnew-err-categorie">Champ obligatoire</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label">Localisation</label>
+          <select id="acnew-localisation"><option value="" disabled selected>— Sélectionner —</option>${locOpts}</select>
+          <div class="field-error" id="acnew-err-localisation">Champ obligatoire</div>
+        </div>
+      </div>
+      <div class="field-error" id="acnew-err-global" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-ghost" id="acnew-cancel" type="button">Annuler</button>
+        <button class="btn btn-primary" id="acnew-create" type="button">Créer la fiche</button>
+      </div>
+    </div>
+  </div>`;
+  const pIn = ov.querySelector('#acnew-prenom'), nIn = ov.querySelector('#acnew-nom'), fnEl = ov.querySelector('#acnew-filename');
+  const updateFn = () => { const p=slugify(pIn.value), n=slugify(nIn.value); fnEl.textContent = (p||n) ? (p+(p&&n?'-':'')+n+'.yaml') : '—'; };
+  pIn.addEventListener('input', updateFn); nIn.addEventListener('input', updateFn);
+  ov.querySelector('#acnew-cancel').onclick = () => ov.remove();
+  ov.querySelector('#acnew-create').onclick = () => acNewSubmit(ov);
+  pIn.focus();
+}
+async function acNewSubmit(ov){
+  const prenom = ov.querySelector('#acnew-prenom').value.trim();
+  const nom = ov.querySelector('#acnew-nom').value.trim();
+  const categorie = ov.querySelector('#acnew-categorie').value;
+  const localisation = ov.querySelector('#acnew-localisation').value;
+  const setErr = (id,show) => ov.querySelector('#acnew-err-'+id).classList.toggle('visible', !!show);
+  setErr('prenom', !prenom); setErr('nom', !nom); setErr('categorie', !categorie); setErr('localisation', !localisation);
+  const globalErr = ov.querySelector('#acnew-err-global'); globalErr.textContent = '';
+  if(!prenom || !nom || !categorie || !localisation) return;
+  const filename = slugify(prenom) + '-' + slugify(nom) + '.yaml';
+  if(acList.some(c => (c.filename||'').toLowerCase() === filename.toLowerCase())){
+    globalErr.textContent = 'Une fiche « '+filename+' » existe déjà.';
+    return;
+  }
+  const btn = ov.querySelector('#acnew-create');
+  btn.disabled = true; btn.textContent = 'Création…';
   try{
+    const content = AC_TEMPLATE
+      .replace('  prenom:\n', '  prenom: ' + yamlStr(prenom) + '\n')
+      .replace('  nom:\n', '  nom: ' + yamlStr(nom) + '\n')
+      .replace('categorie_poste: developpeur', 'categorie_poste: ' + categorie)
+      .replace('localisation: France', 'localisation: ' + localisation);
     const r = await fetch('/api/collaborateurs', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({filename:name, content:AC_TEMPLATE}),
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({filename, content}),
     });
     if(!r.ok) throw new Error(await r.text());
     const d = await r.json();
+    ov.remove();
     await acLoadList();
-    acLoadFile(d.file_id, name);
-  }catch(e){ acStatus('✗ '+e.message,'err'); }
+    acLoadFile(d.file_id, filename);
+  }catch(e){
+    btn.disabled = false; btn.textContent = 'Créer la fiche';
+    globalErr.textContent = '✗ '+e.message;
+  }
 }
 async function acDelete(){
   if(!acFileId) return;
@@ -2537,9 +3101,9 @@ async function acDelete(){
   try{
     const r = await fetch('/api/collaborateurs/'+encodeURIComponent(acFileId), {method:'DELETE'});
     if(!r.ok) throw new Error(await r.text());
-    acFileId=null; acFilename=null; acModel=null; acEditor.setValue(''); acRenderForm();
+    acFileId=null; acFilename=null; acModel=null; acOriginalModel=null; acOriginalRaw=''; acEditor.setValue(''); acRenderForm();
     document.getElementById('ac-filename').textContent='Sélectionne une fiche à gauche';
-    ['ac-save','ac-del','ac-raw-btn','ac-gaps-btn'].forEach(id=>document.getElementById(id).disabled=true);
+    ['ac-save','ac-reset','ac-del','ac-raw-btn','ac-gaps-btn'].forEach(id=>document.getElementById(id).disabled=true);
     document.getElementById('ac-gaps-badge').style.display='none';
     acLoadList();
   }catch(e){ acStatus('✗ '+e.message,'err'); }
@@ -2572,10 +3136,10 @@ function acNormalize(data){
     certifications: (Array.isArray(data.certifications)?data.certifications:[]).map(c=>({
       intitule:acS(c.intitule), organisme:acS(c.organisme), annee:acS(c.annee) })),
     projets: (Array.isArray(data.projets)?data.projets:[]).map(p=>({
-      id:acS(p.id), role:acS(p.role), client:acS(p.client), periode:acS(p.periode),
+      id:acS(p.id), role:acS(p.role), client_custom:acS(p.client_custom), designation:acS(p.designation), periode:acS(p.periode),
       contexte:acS(p.contexte).trim(), competences:(p.competences||[]).map(acS),
       realisations:(p.realisations||[]).map(r=>acS(r).trim()), domaines:(p.domaines||[]).map(acS),
-      secteur:acS(p.secteur)||'public', poids:(p.poids===0||p.poids)?p.poids:2,
+      secteur:acS(p.secteur)||'public', poids:poidsClamp(p.poids),
       client_ref: Array.isArray(p.client_ref) ? p.client_ref.map(acS) : (p.client_ref ? [acS(p.client_ref)] : []),
       sous_entite: acS(p.sous_entite||'') })),
     parcours: (Array.isArray(data.parcours)?data.parcours:[]).map(x=>({
@@ -2598,9 +3162,9 @@ function acToYaml(m){
     competences: m.competences.map(c=>({categorie:c.categorie, domaines:[...c.domaines], items:[...c.items]})),
     certifications: m.certifications.map(c=>{ const o={intitule:c.intitule, organisme:c.organisme}; const a=acNum(c.annee); if(a!=='') o.annee=a; return o; }),
     projets: m.projets.map(p=>{
-      const o = { id:p.id, role:p.role, client:p.client, periode:p.periode, contexte:p.contexte,
+      const o = { id:p.id, role:p.role, client_custom:p.client_custom, designation:p.designation, periode:p.periode, contexte:p.contexte,
         competences:[...p.competences], realisations:[...p.realisations], domaines:[...p.domaines],
-        secteur:p.secteur||'public', poids:(acNum(p.poids)===''?2:acNum(p.poids)) };
+        secteur:p.secteur||'public', poids:poidsClamp(acNum(p.poids)===''?2:acNum(p.poids)) };
       if(p.client_ref && p.client_ref.length) o.client_ref = [...p.client_ref];
       if(p.sous_entite) o.sous_entite = p.sous_entite;
       return o;
@@ -2616,13 +3180,34 @@ function acToYaml(m){
 }
 
 function acAfterChange(){
-  if(acFileId) document.getElementById('ac-save').disabled = false;
+  if(acFileId){ document.getElementById('ac-save').disabled = false; document.getElementById('ac-reset').disabled = false; }
   if(acRawOpen && !acRawEditing) acRefreshRaw();
   acRefreshGapsBadge();
   if(acGapsOpen) acRenderGaps();
 }
 function acRefreshRaw(){ try{ acEditor.setValue(acToYaml(acModel)); }catch(e){} }
-function acCount(ta,id){ const el=document.getElementById(id); if(!el)return; const n=ta.value.length; el.textContent=n+'/300'; el.classList.toggle('over', n>300); }
+
+// ── Bouton « Annuler » — revient au dernier état chargé/enregistré ─────────
+function acReset(){
+  if(!acFileId || !acOriginalModel) return;
+  acModel = JSON.parse(JSON.stringify(acOriginalModel));
+  acRenderForm();
+  acRawEditing = false; acEditor.setOption('readOnly', true);
+  document.getElementById('ac-raw-edit').style.display = '';
+  document.getElementById('ac-raw-apply').style.display = 'none';
+  document.getElementById('ac-raw-hint').textContent = 'lecture seule — régénéré depuis le formulaire';
+  acEditor.setValue(acOriginalRaw); acEditor.clearHistory();
+  document.getElementById('ac-save').disabled = true;
+  document.getElementById('ac-reset').disabled = true;
+  acGapsOpen = false; acRefreshGapsBadge();
+  if(!acStatusIsErr()) acStatus('','');
+}
+function acCount(ta,id,max=300){
+  const el=document.getElementById(id); if(!el)return;
+  const n=ta.value.length;
+  el.textContent = n>=max ? `${n}/${max} — limite atteinte, raccourcis le texte.` : `${n}/${max}`;
+  el.classList.toggle('over', n>=max);
+}
 
 // ── Rendu du formulaire ─────────────────────────────────────────────────────
 const MP_ICON_SVG = '<svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line class="mp-v" x1="12" y1="8" x2="12" y2="16"/></svg>';
@@ -2698,45 +3283,128 @@ function buildProfils(){
 }
 
 function buildComps(){
-  return acModel.competences.map((c,i)=>`<div class="fe-item">
-    <div class="fe-item-head"><span class="fe-item-title">${esc(c.categorie||'Catégorie de compétences')}</span><button class="fe-del" onclick="acDelComp(${i})">Supprimer</button></div>
-    <div class="form-field"><label class="field-label">Catégorie</label><input type="text" value="${esc(c.categorie)}" placeholder="ex : Langages, Backend, SIG & Géomatique…" oninput="acEditComp(${i},'categorie',this.value)"></div>
-    <div class="form-field"><label class="field-label">Domaines</label>${acMsHTML('comp:'+i+':domaines')}</div>
-    <div class="form-field"><label class="field-label">Items (technologies, outils…)</label>${acMsHTML('comp:'+i+':items')}</div>
+  return acModel.competences.map((c,i)=>`<div class="fe-item fe-item-flat">
+    <div class="form-field">
+      <label class="field-label">Catégorie</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" style="flex:1;" value="${esc(c.categorie)}" placeholder="ex : Langages, Backend, SIG & Géomatique…" oninput="acEditComp(${i},'categorie',this.value)">
+        <button class="fe-del" onclick="acDelComp(${i})">Supprimer</button>
+      </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0;">
+      <div class="form-field"><label class="field-label">Domaines</label>${acMsHTML('comp:'+i+':domaines')}</div>
+      <div class="form-field"><label class="field-label">Items (technologies, outils…)</label>${acMsHTML('comp:'+i+':items')}</div>
+    </div>
   </div>`).join('') + `<button class="fe-add" onclick="acAddComp()">+ Ajouter une catégorie de compétences</button>`;
 }
 
 function buildCerts(){
-  return acModel.certifications.map((c,i)=>`<div class="fe-item">
-    <div class="fe-item-head"><span class="fe-item-title">${esc(c.intitule||'Certification / diplôme')}</span><button class="fe-del" onclick="acDelCert(${i})">Supprimer</button></div>
-    <div class="form-field"><label class="field-label">Intitulé</label><input type="text" value="${esc(c.intitule)}" oninput="acEditCert(${i},'intitule',this.value)"></div>
-    <div class="form-row">
+  return acModel.certifications.map((c,i)=>`<div class="fe-item fe-item-flat">
+    <div class="form-field">
+      <label class="field-label">Intitulé</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" style="flex:1;" value="${esc(c.intitule)}" oninput="acEditCert(${i},'intitule',this.value)">
+        <button class="fe-del" onclick="acDelCert(${i})">Supprimer</button>
+      </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0;">
       <div class="form-field"><label class="field-label">Organisme</label><input type="text" value="${esc(c.organisme)}" oninput="acEditCert(${i},'organisme',this.value)"></div>
       <div class="form-field"><label class="field-label">Année (optionnel)</label><input type="text" value="${esc(String(c.annee||''))}" oninput="acEditCert(${i},'annee',this.value)"></div>
     </div>
   </div>`).join('') + `<button class="fe-add" onclick="acAddCert()">+ Ajouter une certification / un diplôme</button>`;
 }
 
+// Période projet : mêmes dropdowns début/fin (2014 → présent) que la déclaration
+// de projet, mais sérialisés dans le champ texte libre `periode` pour rester
+// compatibles avec l'historique (parfois antérieur à 2014, voir acPeriodeMinYear).
+function acPeriodeLabel(v){ return v==='present' ? 'Présent' : v; }
+function acParsePeriode(str){
+  str = (str||'').trim();
+  const years = str.match(/\b(19|20)\d{2}\b/g) || [];
+  const hasPresent = /présent|present|aujourd'?hui/i.test(str);
+  return { debut: years[0]||'', fin: years[1]||(hasPresent?'present':'') };
+}
+function acPeriodeMinYear(debut){ const y=parseInt(debut,10); return (Number.isFinite(y) && y<2014) ? y : 2014; }
+function acPeriodeYearOptions(minYear, selected){
+  const currentYear = new Date().getFullYear();
+  let years='';
+  for(let y=minYear; y<=currentYear; y++) years += `<option value="${y}"${String(y)===selected?' selected':''}>${y}</option>`;
+  years += `<option value="present"${selected==='present'?' selected':''}>Présent</option>`;
+  return years;
+}
+function acProjPeriodeHTML(i,p){
+  const {debut,fin} = acParsePeriode(p.periode);
+  const minYear = acPeriodeMinYear(debut);
+  return `<div class="periode-range">
+    <select onchange="acEditProjetPeriode(${i},'debut',this.value)">
+      <option value="">— Début —</option>${acPeriodeYearOptions(minYear,debut)}
+    </select>
+    <span class="periode-sep">–</span>
+    <select class="periode-fin" onchange="acEditProjetPeriode(${i},'fin',this.value)">
+      <option value="" style="color:#AEB2B5;">Fin</option>${acPeriodeYearOptions(minYear,fin)}
+    </select>
+  </div>`;
+}
+function acEditProjetPeriode(i,which,v){
+  const p = acModel.projets[i];
+  const cur = acParsePeriode(p.periode);
+  cur[which] = v;
+  p.periode = cur.debut ? (cur.fin ? `${acPeriodeLabel(cur.debut)} – ${acPeriodeLabel(cur.fin)}` : acPeriodeLabel(cur.debut)) : '';
+  acAfterChange();
+}
+
+const TRASH_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+function acProjOpen(i, which){
+  const p = acModel.projets[i]; if(!p) return;
+  if(which==='client') p._uiClientOpen = true;
+  else if(which==='sousentite') p._uiSousEntiteOpen = true;
+  acReSec('projets', buildProjets());
+}
+function acProjClose(i, which){
+  const p = acModel.projets[i]; if(!p) return;
+  if(which==='client') p._uiClientOpen = false;
+  else if(which==='sousentite') p._uiSousEntiteOpen = false;
+  acReSec('projets', buildProjets());
+}
 function buildProjets(){
   return acModel.projets.map((p,i)=>{
     const rc = p.realisations.filter(r=>(r||'').trim()).length;
-    return `<div class="fe-item">
-      <div class="fe-item-head"><span class="fe-item-title">${esc(p.client||p.id||'Projet')}</span><button class="fe-del" onclick="acDelProjet(${i})">Supprimer</button></div>
+    const sousEntVisible = (p.client_ref||[]).length === 1;
+    if(p._uiClientOpen===undefined) p._uiClientOpen = false;
+    if(p._uiSousEntiteOpen===undefined) p._uiSousEntiteOpen = !!(p.sous_entite && p.sous_entite.trim());
+    const csScope = 'proj:'+i+':client_ref';
+    const csCid = acMsCid(csScope);
+    const clientBlock = p._uiClientOpen
+      ? `<div style="display:flex;align-items:flex-start;gap:6px;">${acMsHTML(csScope)}<button type="button" class="btn-close-inline" onclick="acProjClose(${i},'client')" title="Réduire">×</button></div>`
+      : `<div class="ms-chips" id="${csCid}-chips">${acMsChipsHTML(csScope)}</div><button type="button" class="btn-add-inline" onclick="acProjOpen(${i},'client')">+ Ajouter un client</button>`;
+    const sousEntBlock = p._uiSousEntiteOpen
+      ? `<div style="display:flex;align-items:center;gap:6px;"><input type="text" placeholder="Sous-entité" value="${esc(p.sous_entite)}" oninput="acEditProjet(${i},'sous_entite',this.value)"><button type="button" class="btn-close-inline" onclick="acProjClose(${i},'sousentite')" title="Réduire">×</button></div>`
+      : `<button type="button" class="btn-add-inline" onclick="acProjOpen(${i},'sousentite')">+ Ajouter une sous-entité</button>`;
+    return `<div class="fe-item fe-item-flat">
+      <div class="proj-focus">
+        <div class="proj-focus-head">
+          <label class="field-label">Client.s</label>
+          <button class="fe-del" onclick="acDelProjet(${i})" title="Supprimer le projet" aria-label="Supprimer le projet">${TRASH_ICON}</button>
+        </div>
+        <div class="proj-focus-fields">
+          ${clientBlock}
+          <div id="proj-sousent-${i}" style="${sousEntVisible?'':'display:none;'}">${sousEntBlock}</div>
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 190px;">
+        <div class="form-field"><label class="field-label">Intitulé custom pour "Client.s" <span class="field-hint-tiny">(ce texte, s'il est renseigné, se substitue au champ "Client.s")</span></label><input type="text" class="proj-client-custom-input" value="${esc(p.client_custom)}" oninput="acEditProjet(${i},'client_custom',this.value)"></div>
+        <div class="form-field"><label class="field-label">Période</label>${acProjPeriodeHTML(i,p)}</div>
+      </div>
       <div class="form-row">
-        <div class="form-field"><label class="field-label">Identifiant (id)</label><input type="text" value="${esc(p.id)}" placeholder="ex : dge-chatbot" oninput="acEditProjet(${i},'id',this.value)"></div>
+        <div class="form-field"><label class="field-label">Désignation du projet</label><input type="text" value="${esc(p.designation)}" oninput="acEditProjet(${i},'designation',this.value)"></div>
         <div class="form-field"><label class="field-label">Rôle</label><input type="text" value="${esc(p.role)}" oninput="acEditProjet(${i},'role',this.value)"></div>
       </div>
-      <div class="form-row">
-        <div class="form-field"><label class="field-label">Client</label><input type="text" value="${esc(p.client)}" oninput="acEditProjet(${i},'client',this.value)"></div>
-        <div class="form-field"><label class="field-label">Période</label><input type="text" value="${esc(p.periode)}" placeholder="ex : 2023 – 2025" oninput="acEditProjet(${i},'periode',this.value)"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-field"><label class="field-label">Client Camptocamp (référentiel)</label>${acMsHTML('proj:'+i+':client_ref')}</div>
-        <div class="form-field"><label class="field-label">Sous-entité</label><input type="text" value="${esc(p.sous_entite)}" oninput="acEditProjet(${i},'sous_entite',this.value)"></div>
-      </div>
       <div class="form-field"><label class="field-label">Contexte</label><textarea rows="3" oninput="acEditProjet(${i},'contexte',this.value)">${esc(p.contexte)}</textarea></div>
-      <div class="form-field"><label class="field-label">Compétences mobilisées</label>${acMsHTML('proj:'+i+':competences')}</div>
-      <div class="form-field"><label class="field-label">Réalisations ${rc!==3?`<span style="color:var(--red);text-transform:none;letter-spacing:0">— ${rc}/3 (standard : exactement 3)</span>`:''}</label>
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Domaines</label>${acMsHTML('proj:'+i+':domaines')}</div>
+        <div class="form-field"><label class="field-label">Compétences mobilisées</label>${acMsHTML('proj:'+i+':competences')}</div>
+      </div>
+      <div class="form-field"><label class="field-label">Réalisations ${rc<1?`<span style="color:var(--red);text-transform:none;letter-spacing:0">— aucune réalisation</span>`:''}</label>
         ${p.realisations.map((r,j)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start"><textarea rows="2" oninput="acEditReal(${i},${j},this.value)">${esc(r)}</textarea><button class="fe-del" onclick="acDelReal(${i},${j})">×</button></div>`).join('')}
         <button class="fe-add" onclick="acAddReal(${i})">+ Ajouter une réalisation</button>
       </div>
@@ -2745,21 +3413,27 @@ function buildProjets(){
           <option value="public" ${p.secteur==='public'?'selected':''}>public</option>
           <option value="prive" ${(p.secteur==='prive'||p.secteur==='privé')?'selected':''}>privé</option>
         </select></div>
-        <div class="form-field"><label class="field-label">Poids (1 à 3)</label><input type="text" value="${esc(String(p.poids))}" oninput="acEditProjet(${i},'poids',this.value)"></div>
+        <div class="form-field"><label class="field-label">Poids</label><select onchange="acEditProjet(${i},'poids',this.value)">
+          ${POIDS_OPTIONS.map(o=>`<option value="${o.value}"${poidsClamp(p.poids)===o.value?' selected':''}>${o.label}</option>`).join('')}
+        </select></div>
       </div>
-      <div class="form-field"><label class="field-label">Domaines</label>${acMsHTML('proj:'+i+':domaines')}</div>
     </div>`;
   }).join('') + `<button class="fe-add" onclick="acAddProjet()">+ Ajouter un projet</button>`;
 }
 
 function buildParcours(){
-  return acModel.parcours.map((x,i)=>`<div class="fe-item">
-    <div class="fe-item-head"><span class="fe-item-title">${esc(x.employeur||'Étape de parcours')}</span><button class="fe-del" onclick="acDelParcours(${i})">Supprimer</button></div>
-    <div class="form-row">
-      <div class="form-field"><label class="field-label">Période</label><input type="text" value="${esc(x.periode)}" placeholder="ex : 2013 – aujourd'hui" oninput="acEditParcours(${i},'periode',this.value)"></div>
-      <div class="form-field"><label class="field-label">Employeur</label><input type="text" value="${esc(x.employeur)}" oninput="acEditParcours(${i},'employeur',this.value)"></div>
+  return acModel.parcours.map((x,i)=>`<div class="fe-item fe-item-flat">
+    <div class="form-field">
+      <label class="field-label">Poste</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" style="flex:1;" value="${esc(x.poste)}" oninput="acEditParcours(${i},'poste',this.value)">
+        <button class="fe-del" onclick="acDelParcours(${i})">Supprimer</button>
+      </div>
     </div>
-    <div class="form-field"><label class="field-label">Poste</label><input type="text" value="${esc(x.poste)}" oninput="acEditParcours(${i},'poste',this.value)"></div>
+    <div class="form-row" style="margin-bottom:0;">
+      <div class="form-field"><label class="field-label">Employeur</label><input type="text" value="${esc(x.employeur)}" oninput="acEditParcours(${i},'employeur',this.value)"></div>
+      <div class="form-field"><label class="field-label">Période</label><input type="text" value="${esc(x.periode)}" placeholder="ex : 2013 – aujourd'hui" oninput="acEditParcours(${i},'periode',this.value)"></div>
+    </div>
   </div>`).join('') + `<button class="fe-add" onclick="acAddParcours()">+ Ajouter une étape de parcours</button>`;
 }
 
@@ -2829,6 +3503,7 @@ function acMsToggle(scope, val, checked){
   const arr=acTagArr(scope), i=arr.indexOf(val);
   if(checked){ if(i<0) arr.push(val); } else if(i>=0){ arr.splice(i,1); }
   acAfterChange(); acMsRenderChips(scope);
+  acSyncSousEntite(scope);
 }
 function acMsRemove(scope, val){
   const arr=acTagArr(scope), i=arr.indexOf(val); if(i>=0) arr.splice(i,1);
@@ -2836,6 +3511,23 @@ function acMsRemove(scope, val){
   const dd=document.getElementById(acMsCid(scope)+'-dropdown');
   if(dd) dd.querySelectorAll('.ms-item').forEach(it=>{ if(it.dataset.val===val){ const cb=it.querySelector('input'); if(cb) cb.checked=false; } });
   acMsRenderChips(scope);
+  acSyncSousEntite(scope);
+}
+// La sous-entité n'a de sens que pour un projet rattaché à un client unique du
+// référentiel : on masque (et on vide) ce champ dès que 0 ou plusieurs clients
+// sont sélectionnés, sans recharger tout le bloc projet (perte du focus/dropdown).
+function acSyncSousEntite(scope){
+  if(!acMsIsClientRef(scope)) return;
+  const idx = +scope.split(':')[1];
+  const p = acModel.projets[idx];
+  const el = document.getElementById('proj-sousent-'+idx);
+  if(!p || !el) return;
+  const single = (p.client_ref||[]).length === 1;
+  el.style.display = single ? '' : 'none';
+  if(!single && p.sous_entite){
+    p.sous_entite = '';
+    const inp = el.querySelector('input'); if(inp) inp.value='';
+  }
 }
 function acMsAddFree(scope){
   const inp=document.getElementById(acMsCid(scope)+'-search'); const v=(inp?inp.value:'').trim(); if(!v) return;
@@ -2862,7 +3554,7 @@ function acEditCert(i,f,v){ acModel.certifications[i][f]=v; acAfterChange(); }
 function acAddCert(){ acModel.certifications.push({intitule:'',organisme:'',annee:''}); acReSec('certs',buildCerts()); acAfterChange(); }
 function acDelCert(i){ acModel.certifications.splice(i,1); acReSec('certs',buildCerts()); acAfterChange(); }
 function acEditProjet(i,f,v){ acModel.projets[i][f]=v; acAfterChange(); }
-function acAddProjet(){ acModel.projets.push({id:'',role:'',client:'',periode:'',contexte:'',competences:[],realisations:['','',''],domaines:[],secteur:'public',poids:2,client_ref:[],sous_entite:''}); acReSec('projets',buildProjets()); acAfterChange(); }
+function acAddProjet(){ acModel.projets.push({id:'',role:'',client_custom:'',designation:'',periode:'',contexte:'',competences:[],realisations:['','',''],domaines:[],secteur:'public',poids:2,client_ref:[],sous_entite:''}); acReSec('projets',buildProjets()); acAfterChange(); }
 function acDelProjet(i){ acModel.projets.splice(i,1); acReSec('projets',buildProjets()); acAfterChange(); }
 function acAddReal(i){ acModel.projets[i].realisations.push(''); acReSec('projets',buildProjets()); acAfterChange(); }
 function acEditReal(i,j,v){ acModel.projets[i].realisations[j]=v; acAfterChange(); }
@@ -2925,14 +3617,14 @@ function acComputeGaps(){
   acModel.certifications.forEach((c,i)=>{ if(!acS(c.intitule).trim()) g.push({sec:'certs',cat:'Certifications',msg:`Certification #${i+1} sans intitulé`}); });
   if(!acModel.projets.length) g.push({sec:'projets',cat:'Projets',msg:'Aucun projet'});
   acModel.projets.forEach((p,i)=>{
-    const nm=p.client||p.id||('Projet '+(i+1));
-    [['id','id'],['role','rôle'],['client','client'],['periode','période'],['contexte','contexte']]
+    const nm=p.client_custom||(p.client_ref||[])[0]||p.id||('Projet '+(i+1));
+    [['id','id'],['role','rôle'],['periode','période'],['contexte','contexte']]
       .forEach(([k,l])=>{ if(!acS(p[k]).trim()) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : ${l} manquant`}); });
     if(!p.competences.length) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : aucune compétence`});
     if(!p.domaines.length) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : aucun domaine`});
     if(!p.client_ref.length) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : client_ref manquant (référentiel clients)`});
     const rc=p.realisations.filter(r=>acS(r).trim()).length;
-    if(rc!==3) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : ${rc} réalisation(s) au lieu de 3`});
+    if(rc<1) g.push({sec:'projets',cat:'Projets',msg:`« ${nm} » : aucune réalisation`});
   });
   if(!acModel.parcours.length) g.push({sec:'parcours',cat:'Parcours',msg:'Aucune étape de parcours'});
   acModel.parcours.forEach((x,i)=>{ if(!acS(x.poste).trim()||!acS(x.employeur).trim()||!acS(x.periode).trim()) g.push({sec:'parcours',cat:'Parcours',msg:`Étape #${i+1} incomplète`}); });
@@ -3006,6 +3698,7 @@ function adStatus(m,c){ const el=document.getElementById('ad-status'); el.textCo
 // ══════════════════════════════════════════════════════
 let cliModel = null, cliList = [], cliSelected = -1;
 let cliLoaded = false, cliEditor = null, cliRawOpen = false, cliRawEditing = false;
+let cliOriginalModel = null;
 
 function initAdminClients(){
   if(!cliEditor){
@@ -3013,7 +3706,7 @@ function initAdminClients(){
       mode:'yaml', theme:'neat', lineNumbers:true, indentUnit:2, tabSize:2,
       indentWithTabs:false, lineWrapping:true, readOnly:true,
     });
-    cliEditor.on('change', ()=>{ if(cliRawEditing) document.getElementById('cli-save').disabled=false; });
+    cliEditor.on('change', ()=>{ if(cliRawEditing){ document.getElementById('cli-save').disabled=false; document.getElementById('cli-reset').disabled=false; } });
   }
   if(!cliLoaded){ cliLoad(); cliLoaded=true; }
   setTimeout(()=>cliEditor.refresh(), 50);
@@ -3036,9 +3729,11 @@ async function cliLoad(){
     let data = {};
     try{ data = jsyaml.load(d.content||'') || {}; }catch(e){ data = {}; }
     cliModel = (Array.isArray(data.clients)?data.clients:[]).map(cliNormalizeOne);
+    cliOriginalModel = JSON.parse(JSON.stringify(cliModel));
     cliSelected = cliModel.length ? 0 : -1;
     cliRenderList(); cliRenderForm(); cliRefreshRaw();
     document.getElementById('cli-save').disabled = true;
+    document.getElementById('cli-reset').disabled = true;
     cliStatus('','');
   }catch(e){ cliStatus('Erreur : '+e.message,'err'); }
 }
@@ -3050,8 +3745,15 @@ function cliRenderList(){
   if(!items.length){ el.innerHTML='<div class="loading-placeholder" style="padding:12px;">Aucun résultat</div>'; return; }
   const groups = {};
   items.forEach(({c,i}) => { const g = c.pays || 'Autres'; (groups[g] = groups[g] || []).push({c,i}); });
-  el.innerHTML = Object.keys(groups).sort().map(pays => {
-    const list = groups[pays];
+  // Ordre des régions : France, Suisse, Allemagne d'abord, puis les autres pays par ordre alphabétique.
+  const PAYS_PRIORITE = ['france', 'suisse', 'allemagne'];
+  const paysRang = p => { const r = PAYS_PRIORITE.indexOf(p.toLowerCase()); return r===-1 ? PAYS_PRIORITE.length : r; };
+  const paysTries = Object.keys(groups).sort((a,b) => {
+    const ra = paysRang(a), rb = paysRang(b);
+    return ra!==rb ? ra-rb : a.localeCompare(b,'fr');
+  });
+  el.innerHTML = paysTries.map(pays => {
+    const list = groups[pays].slice().sort((a,b) => (a.c.nom||'').localeCompare(b.c.nom||'','fr'));
     return `<div class="cat-group" id="clicat-${esc(pays)}">
       <div class="cat-header" onclick="document.getElementById('clicat-${esc(pays)}').classList.toggle('collapsed')">
         <span class="cat-arrow">▾</span><span class="cat-title">${esc(pays)}</span><span class="cat-count">${list.length}</span>
@@ -3074,13 +3776,25 @@ function cliNew(){
   cliSelected = cliModel.length-1;
   cliRenderList(); cliRenderForm(); cliAfterChange();
 }
-function cliDelete(){
+async function cliDelete(){
   if(cliSelected<0 || !cliModel) return;
   const c = cliModel[cliSelected];
-  if(!confirm('Supprimer « '+(c.nom||'ce client')+' » du référentiel ?')) return;
-  cliModel.splice(cliSelected,1);
-  cliSelected = cliModel.length ? Math.min(cliSelected, cliModel.length-1) : -1;
-  cliRenderList(); cliRenderForm(); cliAfterChange();
+  if(!confirm('Mettre « '+(c.nom||'ce client')+' » à la corbeille ?')) return;
+  const index = cliSelected;
+  cliStatus('Suppression…','');
+  try{
+    const r = await fetch('/api/clients/'+index+'/trash', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({data:c}),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    cliModel.splice(index,1);
+    cliSelected = cliModel.length ? Math.min(index, cliModel.length-1) : -1;
+    cliOriginalModel = JSON.parse(JSON.stringify(cliModel));
+    cliRenderList(); cliRenderForm(); cliRefreshRaw();
+    document.getElementById('cli-save').disabled = true;
+    document.getElementById('cli-reset').disabled = true;
+    cliStatus('✓ Mis à la corbeille','ok');
+  }catch(e){ cliStatus('✗ '+e.message,'err'); }
 }
 function cliEdit(field, value){
   if(cliSelected<0) return;
@@ -3135,6 +3849,7 @@ function cliToYamlString(){
 }
 function cliAfterChange(){
   document.getElementById('cli-save').disabled = false;
+  document.getElementById('cli-reset').disabled = false;
   if(cliRawOpen && !cliRawEditing) cliRefreshRaw();
 }
 function cliRefreshRaw(){ try{ cliEditor.setValue(cliToYamlString()); cliEditor.clearHistory(); }catch(e){} }
@@ -3149,9 +3864,27 @@ async function cliSave(){
     });
     if(!r.ok) throw new Error(await r.text());
     document.getElementById('cli-save').disabled = true;
+    document.getElementById('cli-reset').disabled = true;
+    cliOriginalModel = JSON.parse(JSON.stringify(cliModel));
     cliStatus('✓ Enregistré (admin notifié)','ok');
     if(!cliRawEditing) cliRefreshRaw();
   }catch(e){ cliStatus('✗ '+e.message,'err'); }
+}
+
+// ── Bouton « Annuler » — revient au dernier état chargé/enregistré ─────────
+function cliReset(){
+  if(!cliOriginalModel) return;
+  cliModel = JSON.parse(JSON.stringify(cliOriginalModel));
+  cliSelected = cliModel.length ? Math.min(Math.max(cliSelected,0), cliModel.length-1) : -1;
+  cliRenderList(); cliRenderForm();
+  cliRawEditing = false; cliEditor.setOption('readOnly', true);
+  document.getElementById('cli-raw-edit').style.display = '';
+  document.getElementById('cli-raw-apply').style.display = 'none';
+  document.getElementById('cli-raw-hint').textContent = 'lecture seule — régénéré depuis le formulaire';
+  if(cliRawOpen) cliRefreshRaw();
+  document.getElementById('cli-save').disabled = true;
+  document.getElementById('cli-reset').disabled = true;
+  cliStatus('','');
 }
 function cliStatus(m,c){ const el=document.getElementById('cli-status'); el.textContent=m; el.className='admin-status'+(c?' '+c:''); }
 function cliToggleRaw(){
@@ -3182,7 +3915,258 @@ function cliApplyRaw(){
   document.getElementById('cli-raw-apply').style.display = 'none';
   document.getElementById('cli-raw-hint').textContent = 'lecture seule — régénéré depuis le formulaire';
   document.getElementById('cli-save').disabled = false;
+  document.getElementById('cli-reset').disabled = false;
   cliStatus('✓ Formulaire mis à jour depuis le brut','ok');
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN 4 — CORBEILLE
+// ══════════════════════════════════════════════════════
+let crbItems = [], crbSelected = new Set(), crbEditing = new Set(), crbRawCache = {}, crbLoaded = false;
+
+function crbKey(it){ return it.type+':'+it.id; }
+const CRB_TYPE_LABELS = { collaborateur: 'Collaborateurs', client: 'Clients' };
+const CRB_TYPE_ORDER = ['collaborateur','client'];
+
+function initCorbeille(){
+  if(!crbLoaded){ crbLoad(); crbLoaded = true; }
+}
+
+async function crbLoad(){
+  crbStatus('Chargement…','');
+  try{
+    const r = await fetch('/api/corbeille');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    crbItems = await r.json();
+    crbSelected.clear(); crbEditing.clear();
+    crbRender();
+    crbStatus('','');
+  }catch(e){ crbStatus('Erreur : '+e.message,'err'); }
+}
+
+function crbStatus(m,c){ const el=document.getElementById('crb-status'); if(el){ el.textContent=m; el.className='admin-status'+(c?' '+c:''); } }
+
+function crbFmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function crbSummaryHTML(it){
+  const d = it.data||{};
+  if(it.type==='collaborateur') return `<div>${esc(d.categorie||'—')}</div><div>${esc(d.localisation||'—')}</div>`;
+  if(it.type==='client') return `<div>Secteur : ${esc(d.secteur||'—')}</div><div>Sous-entités : ${esc((d.sous_entites||[]).join(', ')||'—')}</div><div>Alias : ${esc((d.alias||[]).join(', ')||'—')}</div>`;
+  return '';
+}
+
+function crbEditFormHTML(it){
+  const key = crbKey(it);
+  if(it.type==='collaborateur'){
+    return `<textarea class="crb-yaml" id="crb-edit-${key}">${esc(crbRawCache[key]||'')}</textarea>`;
+  }
+  if(it.type==='client'){
+    const d = it.data||{};
+    return `<div class="fe-item fe-item-flat" style="margin:0;padding:10px;">
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Nom</label><input type="text" id="crb-cli-nom-${key}" value="${esc(d.nom)}"></div>
+        <div class="form-field"><label class="field-label">Pays</label><input type="text" id="crb-cli-pays-${key}" value="${esc(d.pays)}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label class="field-label">Secteur</label><input type="text" id="crb-cli-secteur-${key}" value="${esc(d.secteur)}"></div>
+        <div class="form-field"><label class="field-label">Open source</label>
+          <div style="margin-top:8px;"><input type="checkbox" id="crb-cli-os-${key}" ${d.open_source?'checked':''} style="accent-color:var(--orange);width:15px;height:15px;"> oui</div>
+        </div>
+      </div>
+      <div class="form-field"><label class="field-label">Sous-entités <span class="field-hint">— séparées par des virgules</span></label>
+        <input type="text" id="crb-cli-se-${key}" value="${esc((d.sous_entites||[]).join(', '))}"></div>
+      <div class="form-field"><label class="field-label">Alias <span class="field-hint">— séparés par des virgules</span></label>
+        <input type="text" id="crb-cli-alias-${key}" value="${esc((d.alias||[]).join(', '))}"></div>
+    </div>`;
+  }
+  return '';
+}
+
+function crbCardHTML(it){
+  const key = crbKey(it);
+  const sel = crbSelected.has(key);
+  const editing = crbEditing.has(key);
+  return `<div class="crb-card${sel?' selected':''}" id="crbcard-${key}">
+    <div class="crb-card-head">
+      <input type="checkbox" ${sel?'checked':''} onchange="crbToggleSelect('${key}')">
+      <div class="crb-card-titles">
+        <div class="crb-card-title">${esc(it.title||'(sans titre)')}</div>
+        ${it.subtitle?`<div class="crb-card-subtitle">${esc(it.subtitle)}</div>`:''}
+        ${it.deleted_at||it.deleted_by ? `<div class="crb-card-meta">supprimé${it.deleted_at?' le '+esc(crbFmtDate(it.deleted_at)):''}${it.deleted_by?' par '+esc(it.deleted_by):''}</div>` : ''}
+      </div>
+    </div>
+    ${editing ? crbEditFormHTML(it) : `<div class="crb-card-body">${crbSummaryHTML(it)}</div>`}
+    <div class="crb-card-actions">
+      ${editing
+        ? `<button class="fe-del" onclick="crbSave('${it.type}','${it.id}')">Enregistrer</button>
+           <button class="fe-del" onclick="crbCancelEdit('${key}')">Annuler</button>`
+        : `<button class="fe-del" onclick="crbToggleEdit('${key}')">Éditer</button>
+           <button class="fe-del" onclick="crbRestore('${it.type}','${it.id}')">Restaurer</button>
+           <button class="fe-del" onclick="crbPurge('${it.type}','${it.id}')">Supprimer pour de bon</button>`}
+    </div>
+  </div>`;
+}
+
+function crbRender(){
+  const wrap = document.getElementById('crb-wrap');
+  if(!wrap) return;
+  if(!crbItems.length){
+    wrap.innerHTML = '<div class="crb-empty">Corbeille vide.</div>';
+    crbUpdateToolbar();
+    return;
+  }
+  const groups = {};
+  crbItems.forEach(it => { (groups[it.type] = groups[it.type] || []).push(it); });
+  const types = Object.keys(groups).sort((a,b) => {
+    const ra = CRB_TYPE_ORDER.indexOf(a), rb = CRB_TYPE_ORDER.indexOf(b);
+    return (ra===-1?99:ra) - (rb===-1?99:rb);
+  });
+  wrap.innerHTML = types.map(type => `<div class="crb-group">
+      <div class="crb-group-head"><h3>${esc(CRB_TYPE_LABELS[type]||type)}</h3><span class="crb-group-count">${groups[type].length}</span></div>
+      <div class="crb-grid">${groups[type].map(crbCardHTML).join('')}</div>
+    </div>`).join('');
+  crbUpdateToolbar();
+}
+
+function crbUpdateToolbar(){
+  const n = crbSelected.size;
+  const badge = document.getElementById('crb-sel-badge');
+  if(badge) badge.textContent = n+' sélectionné(s)';
+  const rBtn = document.getElementById('crb-restore-sel'), pBtn = document.getElementById('crb-purge-sel');
+  if(rBtn) rBtn.disabled = n===0;
+  if(pBtn) pBtn.disabled = n===0;
+}
+
+function crbToggleSelect(key){
+  if(crbSelected.has(key)) crbSelected.delete(key); else crbSelected.add(key);
+  const card = document.getElementById('crbcard-'+key);
+  if(card) card.classList.toggle('selected', crbSelected.has(key));
+  crbUpdateToolbar();
+}
+function crbSelectAll(){ crbItems.forEach(it => crbSelected.add(crbKey(it))); crbRender(); }
+function crbSelectNone(){ crbSelected.clear(); crbRender(); }
+
+async function crbToggleEdit(key){
+  if(crbEditing.has(key)){ crbEditing.delete(key); crbRender(); return; }
+  const it = crbItems.find(x => crbKey(x)===key);
+  if(!it) return;
+  if(it.type==='collaborateur' && !(key in crbRawCache)){
+    crbStatus('Chargement de la fiche…','');
+    try{
+      const r = await fetch('/api/collaborateurs/'+encodeURIComponent(it.id));
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const d = await r.json();
+      crbRawCache[key] = d.content||'';
+      crbStatus('','');
+    }catch(e){ crbStatus('✗ '+e.message,'err'); return; }
+  }
+  crbEditing.add(key);
+  crbRender();
+}
+function crbCancelEdit(key){ crbEditing.delete(key); crbRender(); }
+
+async function crbSave(type,id){
+  const key = type+':'+id;
+  const it = crbItems.find(x => crbKey(x)===key);
+  if(!it) return;
+  crbStatus('Sauvegarde…','');
+  try{
+    let body;
+    if(type==='collaborateur'){
+      body = { content: document.getElementById('crb-edit-'+key).value };
+    } else if(type==='client'){
+      const data = {
+        nom: document.getElementById('crb-cli-nom-'+key).value.trim(),
+        pays: document.getElementById('crb-cli-pays-'+key).value.trim(),
+        secteur: document.getElementById('crb-cli-secteur-'+key).value.trim() || 'public',
+        open_source: document.getElementById('crb-cli-os-'+key).checked,
+        sous_entites: document.getElementById('crb-cli-se-'+key).value.split(',').map(s=>s.trim()).filter(Boolean),
+        alias: document.getElementById('crb-cli-alias-'+key).value.split(',').map(s=>s.trim()).filter(Boolean),
+      };
+      body = { data };
+      it.data = data; it.title = data.nom || '(sans nom)'; it.subtitle = data.pays || '';
+    } else return;
+    const r = await fetch('/api/corbeille/'+encodeURIComponent(type)+'/'+encodeURIComponent(id), {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    if(type==='collaborateur') delete crbRawCache[key];
+    crbEditing.delete(key);
+    crbStatus('✓ Enregistré','ok');
+    crbRender();
+  }catch(e){ crbStatus('✗ '+e.message,'err'); }
+}
+
+async function crbRestore(type,id){
+  crbStatus('Restauration…','');
+  try{
+    const r = await fetch('/api/corbeille/'+encodeURIComponent(type)+'/'+encodeURIComponent(id)+'/restore', {method:'POST'});
+    if(!r.ok) throw new Error(await r.text());
+    const key = type+':'+id;
+    crbSelected.delete(key); crbEditing.delete(key);
+    crbItems = crbItems.filter(it => crbKey(it)!==key);
+    crbStatus('✓ Restauré','ok');
+    crbRender();
+  }catch(e){ crbStatus('✗ '+e.message,'err'); }
+}
+
+async function crbPurge(type,id){
+  if(!confirm('Supprimer définitivement cet élément ? Cette action est irréversible.')) return;
+  crbStatus('Suppression définitive…','');
+  try{
+    const r = await fetch('/api/corbeille/'+encodeURIComponent(type)+'/'+encodeURIComponent(id), {method:'DELETE'});
+    if(!r.ok) throw new Error(await r.text());
+    const key = type+':'+id;
+    crbSelected.delete(key); crbEditing.delete(key);
+    crbItems = crbItems.filter(it => crbKey(it)!==key);
+    crbStatus('✓ Supprimé définitivement','ok');
+    crbRender();
+  }catch(e){ crbStatus('✗ '+e.message,'err'); }
+}
+
+async function crbBatch(keys, verb){
+  const results = await Promise.all(keys.map(async key => {
+    const [type,id] = key.split(':');
+    try{
+      const r = verb==='restore'
+        ? await fetch('/api/corbeille/'+encodeURIComponent(type)+'/'+encodeURIComponent(id)+'/restore', {method:'POST'})
+        : await fetch('/api/corbeille/'+encodeURIComponent(type)+'/'+encodeURIComponent(id), {method:'DELETE'});
+      return {key, ok:r.ok};
+    }catch(e){ return {key, ok:false}; }
+  }));
+  return results;
+}
+
+async function crbRestoreSelected(){
+  const keys = [...crbSelected];
+  if(!keys.length) return;
+  crbStatus('Restauration de '+keys.length+' élément(s)…','');
+  const results = await crbBatch(keys, 'restore');
+  const okKeys = new Set(results.filter(r=>r.ok).map(r=>r.key));
+  crbItems = crbItems.filter(it => !okKeys.has(crbKey(it)));
+  okKeys.forEach(k => { crbSelected.delete(k); crbEditing.delete(k); });
+  const nFail = results.length - okKeys.size;
+  crbStatus(nFail ? `✓ ${okKeys.size} restauré(s), ✗ ${nFail} échec(s)` : `✓ ${okKeys.size} restauré(s)`, nFail?'err':'ok');
+  crbRender();
+}
+
+async function crbPurgeSelected(){
+  const keys = [...crbSelected];
+  if(!keys.length) return;
+  if(!confirm('Supprimer définitivement '+keys.length+' élément(s) sélectionné(s) ? Cette action est irréversible.')) return;
+  crbStatus('Suppression définitive de '+keys.length+' élément(s)…','');
+  const results = await crbBatch(keys, 'purge');
+  const okKeys = new Set(results.filter(r=>r.ok).map(r=>r.key));
+  crbItems = crbItems.filter(it => !okKeys.has(crbKey(it)));
+  okKeys.forEach(k => { crbSelected.delete(k); crbEditing.delete(k); });
+  const nFail = results.length - okKeys.size;
+  crbStatus(nFail ? `✓ ${okKeys.size} supprimé(s), ✗ ${nFail} échec(s)` : `✓ ${okKeys.size} supprimé(s) définitivement`, nFail?'err':'ok');
+  crbRender();
 }
 
 // Compat : /admin redirige vers #admin-collabs → ouvre directement cette section.

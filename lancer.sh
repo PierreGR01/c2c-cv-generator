@@ -24,9 +24,15 @@ if ! python3 authorize.py; then
     exit 1
 fi
 
-# Libère le port 8002 si un ancien serveur y tourne encore
-lsof -ti tcp:8002 2>/dev/null | xargs kill -9 2>/dev/null || true
+# Détermine le port : PORT= dans .env, sinon argument passé au script, sinon 8002 par défaut
+PORT=8002
+ENV_PORT=$(grep -E '^PORT=' .env | tail -1 | cut -d '=' -f2 | tr -d ' \r')
+if [ -n "$ENV_PORT" ]; then PORT="$ENV_PORT"; fi
+if [ -n "$1" ]; then PORT="$1"; fi
 
-echo "Démarrage de C2C Tenders App..."
-(open "http://localhost:8002" 2>/dev/null || xdg-open "http://localhost:8002" 2>/dev/null || true) &
-python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8002
+# Libère le port si un ancien serveur y tourne encore
+lsof -ti tcp:$PORT 2>/dev/null | xargs kill -9 2>/dev/null || true
+
+echo "Démarrage de C2C Tenders App sur le port $PORT..."
+(open "http://localhost:$PORT" 2>/dev/null || xdg-open "http://localhost:$PORT" 2>/dev/null || true) &
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port $PORT

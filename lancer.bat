@@ -30,9 +30,14 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Libere le port 8002 si un ancien serveur y tourne encore (evite de servir du code perime)
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8002 ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>&1
+:: Determine le port : PORT= dans .env, sinon argument passe au script, sinon 8002 par defaut
+set PORT=8002
+for /f "usebackq tokens=1,* delims==" %%A in (`findstr /b /i "PORT=" ".env" 2^>nul`) do set PORT=%%B
+if not "%~1"=="" set PORT=%~1
 
-echo Demarrage de C2C Tenders App...
-start "" "http://localhost:8002"
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8002
+:: Libere le port si un ancien serveur y tourne encore (evite de servir du code perime)
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :%PORT% ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>&1
+
+echo Demarrage de C2C Tenders App sur le port %PORT%...
+start "" "http://localhost:%PORT%"
+python -m uvicorn app.main:app --host 127.0.0.1 --port %PORT%

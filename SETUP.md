@@ -54,6 +54,11 @@ navigateur pour le **consentement Google** : connecte-toi avec ton compte
 
 Le navigateur s'ouvre sur **http://localhost:8002**.
 
+> **Le port 8002 est déjà utilisé par un autre projet ?** Ajoute `PORT=8010`
+> (ou tout autre numéro libre) dans ton fichier `.env`, ou lance le script
+> avec le port en argument : `./lancer.sh 8010` (Mac) ou `lancer.bat 8010`
+> (Windows, depuis un terminal).
+
 ### Générer un CV
 
 1. **Sélectionne un ou plusieurs collaborateurs** dans la liste de gauche

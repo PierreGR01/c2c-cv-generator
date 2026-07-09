@@ -200,6 +200,7 @@
   for (i, p) in projets.enumerate() {
     let periode = p.at("periode", default: "")
     let role    = p.at("role", default: "")
+    let designation = p.at("designation", default: "")
     let reals   = p.at("realisations", default: ())
     let techs   = p.at("technologies", default: ())
     // marge haute accrue pour distinguer chaque projet (et du titre de section)
@@ -212,6 +213,10 @@
         text(weight: "bold", size: 9.5pt - font_reduction_val, fill: c2c-title)[#p.at("client", default: "")],
         text(fill: c2c-orange-dark, size: 8pt - font_reduction_val, weight: "semibold")[#periode#if periode != "" and role != "" [#h(6pt)·#h(6pt)]#role],
       )
+      #if designation != "" [
+        #v(1pt)
+        #text(size: 8pt - font_reduction_val, fill: c2c-grey, weight: "semibold")[#designation]
+      ]
       #if p.at("contexte", default: none) != none [
         #v(2pt)
         #text(size: 8.5pt - font_reduction_val)[#p.at("contexte")]

@@ -162,14 +162,15 @@ def parse_fiche_cp(
 
             # Entrée projet : les compétences du projet incluent les compétences du
             # référentiel cochées ET les nouvelles compétences déclarées (mobilisées ici).
-            # client/client_ref sont identiques à la création (le CP choisit une entrée
-            # unique du référentiel clients dans le formulaire).
+            # client_custom reste vide à la création (le CP ne choisit que le client_ref,
+            # dans le formulaire) : l'affichage retombe par défaut sur client_ref/sous_entite,
+            # client_custom n'étant qu'une surcharge éditoriale ajoutée plus tard en admin.
             client_ref_val = (projet.get("client_ref") or "").strip()
             new_projet = {
                 "id": projet.get("id") or slug + "-projet",
                 "designation": projet.get("designation") or "",
                 "role": role,
-                "client": client_ref_val,
+                "client_custom": "",
                 "client_ref": [client_ref_val] if client_ref_val else [],
                 "sous_entite": (projet.get("sous_entite") or "").strip(),
                 "periode": projet.get("periode") or "",
@@ -221,8 +222,9 @@ def _render_projet_yaml(projet: dict) -> str:
     """Sérialise l'entrée projet en YAML lisible pour le frontend."""
     lines = [
         f"- id: {projet['id']}",
+        f"  designation: {projet.get('designation', '')}",
         f"  role: {projet['role']}",
-        f"  client: {projet['client']}",
+        f"  client_custom: {projet.get('client_custom', '')}",
         f"  client_ref: [{', '.join(projet.get('client_ref') or [])}]",
     ]
     if projet.get("sous_entite"):

@@ -79,6 +79,7 @@ async def generate_cvs(
     max_projets: Annotated[int, Form()] = 4,
     max_pages: Annotated[int, Form()] = 1,
     inclure_parcours: Annotated[bool, Form()] = True,
+    masquer_designations: Annotated[bool, Form()] = False,
     annee_min: Annotated[int, Form()] = 0,
     secteur: Annotated[str, Form()] = "",
     domaines: Annotated[Optional[List[str]], Form()] = None,
@@ -93,6 +94,7 @@ async def generate_cvs(
     - max_projets      : nombre max de projets par CV (0 = tous, défaut 4)
     - max_pages        : limite de pages (1, 2, ou 0 = sans limite, défaut 1)
     - inclure_parcours : inclure le parcours professionnel antérieur (défaut True)
+    - masquer_designations : n'afficher que le nom du client, sans la désignation de projet (défaut False)
     - annee_min        : exclure les projets antérieurs à cette année (0 = sans limite)
     - secteur          : filtrer par secteur ("public", "prive", ou "" = tous)
     - domaines         : liste de domaines à valoriser (ids canoniques)
@@ -115,6 +117,7 @@ async def generate_cvs(
         "client_refs": client_refs_list,
         "max_projets": max_projets,
         "inclure_parcours": inclure_parcours,
+        "masquer_designations": masquer_designations,
         "annee_min": annee_min,
     }
     if secteur in ("public", "prive"):
@@ -392,6 +395,38 @@ async def api_clients_save(request: Request, background_tasks: BackgroundTasks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/clients/{index}/trash")
+async def api_client_trash(index: int, request: Request, background_tasks: BackgroundTasks):
+    """Retire un client du référentiel et le dépose en corbeille (action immédiate, réversible)."""
+    try:
+        body = await request.json()
+        client_data = body["data"]
+        raw = drive.get_clients_raw()
+        data = (yaml.safe_load(raw) or {}) if raw else {}
+        clients = data.get("clients") or []
+
+        target = clients[index] if 0 <= index < len(clients) else None
+        if not target or target.get("nom") != client_data.get("nom"):
+            target = next((c for c in clients if c.get("nom") == client_data.get("nom")), None)
+        if target is None:
+            raise HTTPException(status_code=404, detail="Client introuvable dans le référentiel")
+
+        clients.remove(target)
+        data["clients"] = clients
+        drive.save_clients(yaml.safe_dump(data, allow_unicode=True, sort_keys=False))
+
+        actor = drive.get_current_user_email()
+        drive.trash_client(target, actor)
+        background_tasks.add_task(
+            gmail_notify.notify, actor, "a mis un client à la corbeille",
+            f"Client : {target.get('nom', '')}")
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ---------------------------------------------------------------------------
 # API — Rôle / identité
 # ---------------------------------------------------------------------------
@@ -537,6 +572,110 @@ async def api_competences_save(request: Request, background_tasks: BackgroundTas
 
 
 # ---------------------------------------------------------------------------
+# API — Corbeille (fiches collaborateurs + clients supprimés, restaurables)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/corbeille")
+async def api_corbeille_list():
+    """Liste unifiée des éléments en corbeille (regroupement par type côté front)."""
+    try:
+        result = []
+        for c in drive.list_trashed_collaborateurs():
+            result.append({
+                "type": "collaborateur",
+                "id": c["id"],
+                "title": c["display"] or c["filename"],
+                "subtitle": c.get("categorie") or c.get("localisation") or "",
+                "data": c,
+                "deleted_at": c.get("deleted_at", ""),
+                "deleted_by": c.get("deleted_by", ""),
+            })
+        for it in drive.get_corbeille_items():
+            if it.get("type") != "client":
+                continue
+            d = it.get("data") or {}
+            result.append({
+                "type": "client",
+                "id": it.get("id", ""),
+                "title": d.get("nom") or "(sans nom)",
+                "subtitle": d.get("pays") or "",
+                "data": d,
+                "deleted_at": it.get("deleted_at", ""),
+                "deleted_by": it.get("deleted_by", ""),
+            })
+        result.sort(key=lambda x: x.get("deleted_at", ""), reverse=True)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/corbeille/{item_type}/{item_id}/restore")
+async def api_corbeille_restore(item_type: str, item_id: str, background_tasks: BackgroundTasks):
+    try:
+        actor = drive.get_current_user_email()
+        if item_type == "collaborateur":
+            drive.restore_fiche(item_id)
+            detail = "Fiche collaborateur restaurée depuis la corbeille"
+        elif item_type == "client":
+            restored = drive.restore_client(item_id)
+            detail = f"Client restauré depuis la corbeille : {restored.get('nom', '')}"
+        else:
+            raise HTTPException(status_code=400, detail="Type inconnu : " + item_type)
+        background_tasks.add_task(
+            gmail_notify.notify, actor, "a restauré un élément depuis la corbeille", detail)
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/corbeille/{item_type}/{item_id}")
+async def api_corbeille_update(item_type: str, item_id: str, request: Request, background_tasks: BackgroundTasks):
+    """Édite le contenu d'un élément pendant qu'il est en corbeille (sans le restaurer)."""
+    try:
+        body = await request.json()
+        actor = drive.get_current_user_email()
+        if item_type == "collaborateur":
+            drive.save_fiche_content(item_id, body["content"])
+            detail = "Fiche collaborateur (en corbeille) modifiée"
+        elif item_type == "client":
+            drive.update_corbeille_item(item_id, body["data"])
+            detail = "Client (en corbeille) modifié"
+        else:
+            raise HTTPException(status_code=400, detail="Type inconnu : " + item_type)
+        background_tasks.add_task(
+            gmail_notify.notify, actor, "a modifié un élément en corbeille", detail)
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/corbeille/{item_type}/{item_id}")
+async def api_corbeille_purge(item_type: str, item_id: str, background_tasks: BackgroundTasks):
+    """Supprime définitivement un élément (irréversible)."""
+    try:
+        actor = drive.get_current_user_email()
+        if item_type == "collaborateur":
+            drive.delete_fiche_forever(item_id)
+            detail = "Fiche collaborateur supprimée définitivement"
+        elif item_type == "client":
+            drive.purge_corbeille_item(item_id)
+            detail = "Client supprimé définitivement (corbeille)"
+        else:
+            raise HTTPException(status_code=400, detail="Type inconnu : " + item_type)
+        background_tasks.add_task(
+            gmail_notify.notify, actor, "a supprimé définitivement un élément", detail)
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
 # Pages & frontend statique
 # ---------------------------------------------------------------------------
 
@@ -546,4 +685,5 @@ async def admin_page():
     return RedirectResponse(url="/#admin-collabs")
 
 
+app.mount("/cv-fonts", StaticFiles(directory=str(renderer.ASSETS)), name="cv-fonts")
 app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
