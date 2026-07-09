@@ -31,13 +31,14 @@ Télécharge et installe Python depuis python.org. Sur Windows, coche
 
 Clone le dépôt ou télécharge-le en ZIP, puis décompresse-le où tu veux.
 
-### 3. Dépose le client OAuth + configure
+### 3. Dépose le client OAuth
 
-- Récupère **`client_secret.json`** dans LastPass et place-le à la racine du
-  dossier `c2c-tenders-app/`.
-- Copie **`.env.example` en `.env`** (les IDs de dossiers Drive sont déjà pré-remplis).
+Récupère **`client_secret.json`** dans LastPass et place-le dans ce dossier
+`codebase/` (à côté de `SETUP-OAUTH.md`). Rien d'autre à configurer : `.env`
+est déjà présent ici et pré-rempli (IDs des dossiers Drive) — tu n'as besoin
+de l'ouvrir que pour changer le port local (voir plus bas).
 
-> ⚠️ Ne committe jamais `.env` ni `client_secret.json` (déjà couverts par `.gitignore`).
+> ⚠️ Ne committe jamais `client_secret.json` (déjà couvert par `.gitignore`).
 
 ---
 
@@ -47,6 +48,13 @@ Clone le dépôt ou télécharge-le en ZIP, puis décompresse-le où tu veux.
 
 - **Windows** — double-clique sur `lancer.bat`
 - **Mac** — double-clique sur `lancer.sh` _(1re fois : clic droit → Ouvrir)_
+
+`lancer.bat`/`lancer.sh` vivent à la racine du dépôt (pas dans `codebase/`) et
+savent retrouver le reste tout seuls. Envie d'une icône personnalisée sur ton
+Bureau plutôt qu'un double-clic dans le dossier ? Clic droit sur `lancer.bat`
+→ *Envoyer vers → Bureau (créer un raccourci)*, puis clic droit sur ce
+raccourci → *Propriétés → Changer d'icône* → parcourir jusqu'à
+`codebase/static/favicon.ico`.
 
 Le premier lancement installe les dépendances (~1-2 min) puis ouvre le
 navigateur pour le **consentement Google** : connecte-toi avec ton compte
