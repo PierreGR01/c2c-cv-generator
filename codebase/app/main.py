@@ -676,6 +676,19 @@ async def api_corbeille_purge(item_type: str, item_id: str, background_tasks: Ba
 
 
 # ---------------------------------------------------------------------------
+# API — Suivi d'activité (historique des révisions Drive : fiches + référentiels)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/activite")
+async def api_activite():
+    """Historique des éditions Drive (fiches collaborateurs + référentiels), le plus récent en premier."""
+    try:
+        return drive.list_activity()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
 # Pages & frontend statique
 # ---------------------------------------------------------------------------
 

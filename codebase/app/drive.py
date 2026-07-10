@@ -20,6 +20,10 @@ _listing_cache = None
 _listing_cache_ts = 0.0
 _CACHE_TTL = 300
 
+_activity_cache = None
+_activity_cache_ts = 0.0
+_ACTIVITY_CACHE_TTL = 180
+
 
 # ---------- Auth -------------------------------------------------------------
 # OAuth utilisateur : une identité par personne, permissions enforced par les
@@ -191,6 +195,85 @@ def list_trashed_collaborateurs():
     return result
 
 
+def _list_revisions(file_id):
+    """Liste toutes les révisions d'un fichier Drive (paginé), triées chronologiquement.
+    Construit son propre service (un service Drive par thread — l'objet http sous-jacent
+    n'est pas thread-safe, même pattern que get_fiche/list_collaborateurs)."""
+    service = _build_service_read()
+    revisions = []
+    page_token = None
+    while True:
+        res = service.revisions().list(
+            fileId=file_id,
+            fields="nextPageToken,revisions(id,modifiedTime,lastModifyingUser(displayName,emailAddress))",
+            pageSize=1000, pageToken=page_token,
+        ).execute()
+        revisions.extend(res.get("revisions", []))
+        page_token = res.get("nextPageToken")
+        if not page_token:
+            break
+    revisions.sort(key=lambda r: r.get("modifiedTime", ""))
+    return revisions
+
+
+def list_activity(limit=300):
+    """Suivi d'activité : historique des révisions Drive des fiches collaborateurs
+    (actives + corbeille) et des référentiels (compétences, clients). Source de vérité
+    unique = Drive lui-même, donc capture aussi les éditions faites hors de l'app."""
+    global _activity_cache, _activity_cache_ts
+    if _activity_cache is not None and (time.time() - _activity_cache_ts) < _ACTIVITY_CACHE_TTL:
+        return _activity_cache
+
+    service = _build_service_read()
+
+    targets = []  # (file_id, type, title, subtitle)
+    for c in list_collaborateurs():
+        targets.append((c["id"], "collaborateur", c["display"] or c["filename"], c.get("categorie") or c.get("localisation") or ""))
+    for c in list_trashed_collaborateurs():
+        targets.append((c["id"], "collaborateur", c["display"] or c["filename"], "en corbeille"))
+    competences_id = _find_competences_file_id(service)
+    if competences_id:
+        targets.append((competences_id, "competences", "Données communes projets", ""))
+    clients_id = _find_clients_file_id(service)
+    if clients_id:
+        targets.append((clients_id, "clients", "Référentiel clients", ""))
+
+    def _fetch(target):
+        file_id, ftype, title, subtitle = target
+        try:
+            revisions = _list_revisions(file_id)
+        except Exception:
+            return []
+        entries = []
+        for i, rev in enumerate(revisions):
+            user = rev.get("lastModifyingUser") or {}
+            entries.append({
+                "id": file_id + ":" + rev.get("id", str(i)),
+                "type": ftype,
+                "file_id": file_id,
+                "title": title,
+                "subtitle": subtitle,
+                "action": "Création" if i == 0 else "Modification",
+                "date": rev.get("modifiedTime", ""),
+                "user_email": user.get("emailAddress", ""),
+                "user_name": user.get("displayName", ""),
+            })
+        return entries
+
+    result = []
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futures = [pool.submit(_fetch, t) for t in targets]
+        for fut in as_completed(futures):
+            result.extend(fut.result())
+
+    result.sort(key=lambda e: e.get("date", ""), reverse=True)
+    result = result[:limit]
+
+    _activity_cache = result
+    _activity_cache_ts = time.time()
+    return result
+
+
 def get_fiche(file_id):
     """Charge et parse une fiche YAML collaborateur depuis Drive."""
     service = _build_service_read()
@@ -221,72 +304,78 @@ def get_collaborateurs_lookup():
     return result
 
 
+def _find_competences_file_id(service):
+    """Cherche le file_id de competences.yaml (dossier racine PUIS dossier collaborateurs)."""
+    competences_file_id = os.environ.get("COMPETENCES_FILE_ID")
+    if competences_file_id:
+        return competences_file_id
+
+    search_folders = []
+    root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
+    collab_id = os.environ.get("COLLABORATEURS_FOLDER_ID")
+    if root_id:
+        search_folders.append(root_id)
+    if collab_id and collab_id != root_id:
+        search_folders.append(collab_id)
+
+    for folder_id in search_folders:
+        # Cherche plusieurs variantes de nom
+        q = (
+            "'" + folder_id + "' in parents"
+            " and (name = 'competences.yaml'"
+            "   or name = '_competence.yaml'"
+            "   or name = '_competences.yaml')"
+            " and trashed = false"
+        )
+        res = service.files().list(q=q, fields="files(id,name)").execute()
+        files = res.get("files", [])
+        if files:
+            return files[0]["id"]
+    return None
+
+
 def get_competences_raw():
     """Retourne le contenu brut de competences.yaml."""
-    competences_file_id = os.environ.get("COMPETENCES_FILE_ID")
     service = _build_service_read()
-
-    if not competences_file_id:
-        # Cherche dans le dossier racine ET le dossier collaborateurs
-        search_folders = []
-        root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
-        collab_id = os.environ.get("COLLABORATEURS_FOLDER_ID")
-        if root_id:
-            search_folders.append(root_id)
-        if collab_id and collab_id != root_id:
-            search_folders.append(collab_id)
-
-        for folder_id in search_folders:
-            # Cherche plusieurs variantes de nom
-            q = (
-                "'" + folder_id + "' in parents"
-                " and (name = 'competences.yaml'"
-                "   or name = '_competence.yaml'"
-                "   or name = '_competences.yaml')"
-                " and trashed = false"
-            )
-            res = service.files().list(q=q, fields="files(id,name)").execute()
-            files = res.get("files", [])
-            if files:
-                competences_file_id = files[0]["id"]
-                break
-
+    competences_file_id = _find_competences_file_id(service)
     if not competences_file_id:
         return ""
-
     return _download_raw(service, competences_file_id)
+
+
+def _find_clients_file_id(service):
+    """Cherche le file_id de _clients.yaml (dossier racine PUIS dossier collaborateurs)."""
+    clients_file_id = os.environ.get("CLIENTS_FILE_ID")
+    if clients_file_id:
+        return clients_file_id
+
+    search_folders = []
+    root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
+    collab_id = os.environ.get("COLLABORATEURS_FOLDER_ID")
+    if root_id:
+        search_folders.append(root_id)
+    if collab_id and collab_id != root_id:
+        search_folders.append(collab_id)
+
+    for folder_id in search_folders:
+        q = (
+            "'" + folder_id + "' in parents"
+            " and (name = 'clients.yaml' or name = '_clients.yaml')"
+            " and trashed = false"
+        )
+        res = service.files().list(q=q, fields="files(id,name)").execute()
+        files = res.get("files", [])
+        if files:
+            return files[0]["id"]
+    return None
 
 
 def get_clients_raw():
     """Retourne le contenu brut de _clients.yaml (référentiel clients)."""
-    clients_file_id = os.environ.get("CLIENTS_FILE_ID")
     service = _build_service_read()
-
-    if not clients_file_id:
-        # Cherche dans le dossier racine ET le dossier collaborateurs
-        search_folders = []
-        root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
-        collab_id = os.environ.get("COLLABORATEURS_FOLDER_ID")
-        if root_id:
-            search_folders.append(root_id)
-        if collab_id and collab_id != root_id:
-            search_folders.append(collab_id)
-
-        for folder_id in search_folders:
-            q = (
-                "'" + folder_id + "' in parents"
-                " and (name = 'clients.yaml' or name = '_clients.yaml')"
-                " and trashed = false"
-            )
-            res = service.files().list(q=q, fields="files(id,name)").execute()
-            files = res.get("files", [])
-            if files:
-                clients_file_id = files[0]["id"]
-                break
-
+    clients_file_id = _find_clients_file_id(service)
     if not clients_file_id:
         return ""
-
     return _download_raw(service, clients_file_id)
 
 
@@ -400,28 +489,8 @@ def save_fiche_content(file_id, yaml_str):
 
 def save_competences(yaml_str):
     """Met à jour competences.yaml sur Drive."""
-    competences_file_id = os.environ.get("COMPETENCES_FILE_ID")
     service = _build_service_write()
-    if not competences_file_id:
-        # Cherche le fichier existant (racine PUIS dossier collaborateurs) pour l'écraser
-        search_folders = []
-        root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
-        collab_id = os.environ.get("COLLABORATEURS_FOLDER_ID")
-        if root_id:
-            search_folders.append(root_id)
-        if collab_id and collab_id != root_id:
-            search_folders.append(collab_id)
-        for folder_id in search_folders:
-            q = (
-                "'" + folder_id + "' in parents"
-                " and (name = 'competences.yaml' or name = '_competences.yaml')"
-                " and trashed = false"
-            )
-            res = service.files().list(q=q, fields="files(id,name)").execute()
-            files = res.get("files", [])
-            if files:
-                competences_file_id = files[0]["id"]
-                break
+    competences_file_id = _find_competences_file_id(service)
     if not competences_file_id:
         raise RuntimeError("Fichier competences.yaml introuvable sur Drive : impossible d'enregistrer.")
     _upload_content(service, competences_file_id, yaml_str)
@@ -429,28 +498,8 @@ def save_competences(yaml_str):
 
 def save_clients(yaml_str):
     """Met à jour _clients.yaml sur Drive."""
-    clients_file_id = os.environ.get("CLIENTS_FILE_ID")
     service = _build_service_write()
-    if not clients_file_id:
-        # Cherche le fichier existant (racine PUIS dossier collaborateurs) pour l'écraser
-        search_folders = []
-        root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
-        collab_id = os.environ.get("COLLABORATEURS_FOLDER_ID")
-        if root_id:
-            search_folders.append(root_id)
-        if collab_id and collab_id != root_id:
-            search_folders.append(collab_id)
-        for folder_id in search_folders:
-            q = (
-                "'" + folder_id + "' in parents"
-                " and (name = 'clients.yaml' or name = '_clients.yaml')"
-                " and trashed = false"
-            )
-            res = service.files().list(q=q, fields="files(id,name)").execute()
-            files = res.get("files", [])
-            if files:
-                clients_file_id = files[0]["id"]
-                break
+    clients_file_id = _find_clients_file_id(service)
     if not clients_file_id:
         raise RuntimeError("Fichier _clients.yaml introuvable sur Drive : impossible d'enregistrer.")
     _upload_content(service, clients_file_id, yaml_str)
@@ -475,9 +524,11 @@ def _upload_content(service, file_id: str, content: str) -> None:
 
 
 def _invalidate_cache():
-    global _listing_cache, _listing_cache_ts
+    global _listing_cache, _listing_cache_ts, _activity_cache, _activity_cache_ts
     _listing_cache = None
     _listing_cache_ts = 0.0
+    _activity_cache = None
+    _activity_cache_ts = 0.0
 
 
 def create_fiche(filename: str, yaml_str: str) -> str:

@@ -466,6 +466,7 @@
         <a onclick="switchTab('admin-donnees')">Éditer les données communes projets</a>
         <a onclick="switchTab('admin-clients')">Éditer les clients Camptocamp</a>
         <a onclick="switchTab('admin-corbeille')">Corbeille</a>
+        <a onclick="switchTab('admin-activite')">Suivi d'activité</a>
       </div>
     </div>
   </nav>
@@ -767,7 +768,8 @@
   #section-admin-collabs.tab-section.active,
   #section-admin-donnees.tab-section.active,
   #section-admin-clients.tab-section.active,
-  #section-admin-corbeille.tab-section.active { display:flex; }
+  #section-admin-corbeille.tab-section.active,
+  #section-admin-activite.tab-section.active { display:flex; }
   .admin-editor { display:flex; width:100%; height:calc(100vh - 53px); }
   .admin-side { width:280px; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; background:var(--white); }
   .admin-side-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
@@ -946,6 +948,11 @@
   .crb-card-actions .fe-del:hover { border-color:var(--red); color:var(--red); }
   .crb-yaml { width:100%; min-height:220px; font-family:'JetBrains Mono','Cascadia Code',monospace; font-size:12px; line-height:1.5; padding:8px; border:1px solid var(--border); resize:vertical; box-sizing:border-box; }
   .crb-empty { padding:40px 0; text-align:center; color:var(--grey); font-size:13px; }
+  .act-hint { font-size:12px; color:var(--grey); line-height:1.5; padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--border); }
+  .act-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .act-table th { text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--grey-dark); padding:8px 10px; border-bottom:2px solid var(--border); }
+  .act-table td { padding:8px 10px; border-bottom:1px solid var(--border); color:var(--ink); vertical-align:middle; }
+  .act-table tbody tr:hover { background:var(--surface-tint); }
   .fe-flash { animation:feflash 1.3s ease; }
   @keyframes feflash { 0%,100%{ outline:2px solid transparent; outline-offset:2px; } 25%{ outline:2px solid var(--orange); outline-offset:2px; } }
 
@@ -1112,24 +1119,47 @@
   </div>
 </div>
 
+<div id="section-admin-activite" class="tab-section">
+  <div class="admin-editor">
+    <div class="admin-main">
+      <div class="admin-toolbar" style="flex-wrap:wrap;">
+        <span class="admin-filename">Suivi d'activité</span>
+        <button class="btn btn-ghost btn-sm" onclick="actLoad()">Rafraîchir</button>
+        <span class="admin-status" id="act-status"></span>
+      </div>
+      <div class="fe-scroll" id="act-scroll">
+        <div class="fe-wrap" id="act-wrap" style="max-width:1100px;">
+          <div class="act-hint">
+            Historique des révisions Google Drive des fiches collaborateurs et des référentiels
+            (compétences, clients) — inclut les éditions faites directement dans Drive, hors app.
+            Pas de détail champ par champ : Drive n'expose pas de diff de contenu pour ce type de fichier.
+          </div>
+          <div class="loading-placeholder" style="padding:20px;">Chargement…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════
 // Navigation principale
 // ══════════════════════════════════════════════════════
 function switchTab(tab) {
-  ['cv','fiche','admin-collabs','admin-donnees','admin-clients','admin-corbeille'].forEach(t => {
+  ['cv','fiche','admin-collabs','admin-donnees','admin-clients','admin-corbeille','admin-activite'].forEach(t => {
     const s = document.getElementById('section-'+t);
     if (s) s.classList.toggle('active', t===tab);
   });
   document.getElementById('tab-cv').classList.toggle('active', tab==='cv');
   document.getElementById('tab-fiche').classList.toggle('active', tab==='fiche');
-  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-clients' || tab==='admin-corbeille');
+  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-clients' || tab==='admin-corbeille' || tab==='admin-activite');
   closeAdminMenu();
   if (tab==='fiche' && !ficheDataLoaded) loadFicheData();
   if (tab==='admin-collabs') initAdminCollabs();
   if (tab==='admin-donnees') initDonnees();
   if (tab==='admin-clients') initAdminClients();
   if (tab==='admin-corbeille') initCorbeille();
+  if (tab==='admin-activite') initActivite();
 }
 function toggleAdminMenu(e){ e.stopPropagation(); document.getElementById('admin-menu').classList.toggle('open'); }
 function closeAdminMenu(){ const m=document.getElementById('admin-menu'); if(m) m.classList.remove('open'); }
@@ -4167,6 +4197,62 @@ async function crbPurgeSelected(){
   const nFail = results.length - okKeys.size;
   crbStatus(nFail ? `✓ ${okKeys.size} supprimé(s), ✗ ${nFail} échec(s)` : `✓ ${okKeys.size} supprimé(s) définitivement`, nFail?'err':'ok');
   crbRender();
+}
+
+// ══════════════════════════════════════════════════════
+// ONGLET ADMIN — SUIVI D'ACTIVITÉ (historique Drive)
+// ══════════════════════════════════════════════════════
+let actItems = [], actLoaded = false;
+const ACT_TYPE_LABELS = {collaborateur:'Fiche collaborateur', competences:'Données communes', clients:'Référentiel clients'};
+
+function initActivite(){ if(!actLoaded){ actLoad(); actLoaded = true; } }
+
+function actStatus(m,c){ const el=document.getElementById('act-status'); if(el){ el.textContent=m; el.className='admin-status'+(c?' '+c:''); } }
+
+async function actLoad(){
+  actStatus('Chargement…','');
+  try{
+    const r = await fetch('/api/activite');
+    if(!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || ('HTTP '+r.status));
+    actItems = await r.json();
+    actRender();
+    actStatus('','');
+  }catch(e){ actStatus('Erreur : '+e.message,'err'); }
+}
+
+function actRender(){
+  const wrap = document.getElementById('act-wrap');
+  if(!wrap) return;
+  const hint = wrap.querySelector('.act-hint');
+  const hintHTML = hint ? hint.outerHTML : '';
+  if(!actItems.length){
+    wrap.innerHTML = hintHTML + '<div class="crb-empty">Aucune activité trouvée.</div>';
+    return;
+  }
+  wrap.innerHTML = hintHTML + `<table class="act-table">
+    <thead><tr><th>Date</th><th>Élément</th><th>Type</th><th>Action</th><th>Utilisateur</th><th></th></tr></thead>
+    <tbody>${actItems.map(actRowHTML).join('')}</tbody>
+  </table>`;
+}
+
+function actRowHTML(it){
+  const who = it.user_name || it.user_email || '—';
+  return `<tr>
+    <td>${esc(crbFmtDate(it.date))}</td>
+    <td>${esc(it.title)}${it.subtitle?` <span class="crb-card-subtitle">(${esc(it.subtitle)})</span>`:''}</td>
+    <td>${esc(ACT_TYPE_LABELS[it.type]||it.type)}</td>
+    <td>${esc(it.action)}</td>
+    <td title="${esc(it.user_email)}">${esc(who)}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="actOpen('${it.file_id}','${it.type}')">Voir</button></td>
+  </tr>`;
+}
+
+function actOpen(fileId, type){
+  if(type==='competences'){ switchTab('admin-donnees'); return; }
+  if(type==='clients'){ switchTab('admin-clients'); return; }
+  switchTab('admin-collabs');
+  const c = acList.find(x=>x.id===fileId);
+  acLoadFile(fileId, c ? c.filename : '');
 }
 
 // Compat : /admin redirige vers #admin-collabs → ouvre directement cette section.
