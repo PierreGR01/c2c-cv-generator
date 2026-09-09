@@ -24,12 +24,29 @@
 #let font_reduction_val = cv.at("font_reduction", default: 0) * 0.5pt
 #let leading_val = 0.55em - cv.at("interligne_reduction", default: 0) * 0.05em
 
+// --- Langue / libelles bilingues -------------------------------------
+#let lang = cv.at("lang", default: "fr")
+#let L = (
+  fr: (
+    profil: "Profil", competences: "Compétences clés",
+    certifications: "Certifications & formations", projets: "Projets de référence",
+    parcours: "Parcours professionnel", experience: "Expérience", ans: "ans",
+    localisation: "Localisation", langues: "Langues", tech: "Tech",
+  ),
+  en: (
+    profil: "Profile", competences: "Key skills",
+    certifications: "Certifications & training", projets: "Reference projects",
+    parcours: "Professional background", experience: "Experience", ans: "years",
+    localisation: "Location", langues: "Languages", tech: "Tech",
+  ),
+).at(lang)
+
 // --- Document --------------------------------------------------------
 #set document(
   title: id.at("prenom") + " " + id.at("nom") + " — CV Camptocamp",
   author: "Camptocamp SA",
 )
-#set text(font: c2c-font, size: 8.5pt - font_reduction_val, fill: c2c-ink, lang: "fr")
+#set text(font: c2c-font, size: 8.5pt - font_reduction_val, fill: c2c-ink, lang: lang)
 #show link: it => text(fill: c2c-ink)[#it.body]  // neutralise la coloration automatique des URLs
 #set par(justify: false, leading: leading_val, spacing: 0.65em)
 
@@ -103,7 +120,7 @@
   } else { none }
 }
 
-#section("Profil")
+#section(L.profil)
 #grid(
   columns: (1fr, 36%),
   column-gutter: 16pt,
@@ -117,9 +134,9 @@
   // colonne droite : cellule orange pleine hauteur, elements cles empiles
   grid.cell(fill: c2c-orange, inset: (x: 9pt, y: 7pt))[
     #set text(fill: white)
-    #info-row("Expérience", str(id.at("experience_ans")) + " ans")
-    #info-row("Localisation", id.at("localisation", default: none))
-    #info-row("Langues", langues-str)
+    #info-row(L.experience, str(id.at("experience_ans")) + " " + L.ans)
+    #info-row(L.localisation, id.at("localisation", default: none))
+    #info-row(L.langues, langues-str)
   ],
 )
 
@@ -128,7 +145,7 @@
 // =====================================================================
 #let competences = cv.at("competences", default: ())
 #if competences.len() > 0 {
-  section("Compétences clés")
+  section(L.competences)
 
   let comp-label-w = 88pt   // largeur colonne libellé catégorie
   let comp-gap     = 2pt    // espace vertical entre les lignes
@@ -184,7 +201,7 @@
 // =====================================================================
 #let certs = cv.at("certifications", default: ())
 #if certs.len() > 0 {
-  section("Certifications & formations")
+  section(L.certifications)
   for c in certs [
     - #text(weight: "semibold", size: 8.5pt - font_reduction_val)[#c.at("intitule")]
       #text(fill: c2c-grey, size: 8.5pt - font_reduction_val)[— #c.at("organisme")#if c.at("annee", default: none) != none [, #str(c.at("annee"))]]
@@ -196,13 +213,17 @@
 // =====================================================================
 #let projets = cv.at("projets", default: ())
 #if projets.len() > 0 {
-  section("Projets de référence")
+  section(L.projets)
   for (i, p) in projets.enumerate() {
     let periode = p.at("periode", default: "")
     let role    = p.at("role", default: "")
     let designation = p.at("designation", default: "")
     let reals   = p.at("realisations", default: ())
-    let techs   = p.at("technologies", default: ())
+    // "competences" a remplacé l'ancien nom de champ "technologies" — sans_meta()
+    // (scorer.py) l'exclut explicitement, donc lire "technologies" ici ne trouvait
+    // plus jamais rien : la colonne "Tech" était vide sur tous les CV. Corrigé au
+    // passage (indépendant du support bilingue).
+    let techs   = p.at("competences", default: ())
     // marge haute accrue pour distinguer chaque projet (et du titre de section)
     block(breakable: false, above: if i == 0 { 6pt } else { 15pt })[
       // titre du projet + date/fonction sur la meme ligne (orange fonce, sans fond)
@@ -231,7 +252,7 @@
         // la hauteur du bloc réalisations (3 puces) en face.
         let col-droite = {
           if techs.len() > 0 {
-            text(size: 7pt - font_reduction_val, fill: c2c-grey, weight: "bold")[Tech]
+            text(size: 7pt - font_reduction_val, fill: c2c-grey, weight: "bold")[#L.tech]
             v(1pt)
             if techs.len() > 5 {
               let mid = calc.ceil(techs.len() / 2)
@@ -285,7 +306,7 @@
 // =====================================================================
 #let parcours = cv.at("parcours", default: ())
 #if parcours.len() > 0 {
-  section("Parcours professionnel")
+  section(L.parcours)
   // Colonne date à 130pt (couvre "Septembre 2006 – Décembre 2009" sans retour à la ligne).
   // Séparateur fin entre chaque entrée : texte · padding 3pt · trait gris · espace 4pt.
   let date-col-w = 100pt  // format MM/YYYY — 130pt n'est plus nécessaire

@@ -64,10 +64,15 @@
     .btn-sm { padding:5px 10px; font-size:12px; }
 
     /* Form controls */
-    input[type="text"], input[type="search"], textarea, select {
+    /* `url` et `email` sont dans la liste : sans eux, ces champs retombent sur
+       l'habillage natif du navigateur (bordure grise 2px, hauteur 19px, sans
+       padding) au milieu d'un formulaire par ailleurs charte — constate sur le
+       lien du projet et les adresses de contact. Leur type est conserve, pour
+       le clavier mobile et la validation native. */
+    input[type="text"], input[type="search"], input[type="url"], input[type="email"], textarea, select {
       width:100%; border:1px solid var(--border); padding:8px 11px; font-size:13px; color:var(--ink); background:var(--white); font-family:'Inter',sans-serif; outline:none; transition:border-color .12s;
     }
-    input[type="text"]:focus, input[type="search"]:focus, textarea:focus, select:focus { border-color:var(--orange); }
+    input[type="text"]:focus, input[type="search"]:focus, input[type="url"]:focus, input[type="email"]:focus, textarea:focus, select:focus { border-color:var(--orange); }
     /* Supprime les décorations natives des champs search (loupe, croix Chrome/Safari) */
     input[type="search"] { -webkit-appearance:none; appearance:none; }
     input[type="search"]::-webkit-search-decoration,
@@ -76,6 +81,14 @@
     textarea { resize:vertical; line-height:1.55; }
     label.field-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--grey-dark); margin-bottom:5px; }
     .field-hint { font-size:11px; color:var(--grey); margin-top:4px; }
+    @keyframes ing-spin { to { transform:rotate(360deg); } }
+    .ing-spinner { display:inline-block; width:13px; height:13px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:ing-spin .7s linear infinite; vertical-align:-2px; margin-right:6px; opacity:.85; }
+    .fp-image-item { display:flex; gap:10px; align-items:flex-start; padding:8px; border:1px solid var(--border); margin-bottom:8px; }
+    .fp-image-item img { width:80px; height:60px; object-fit:cover; border:1px solid var(--border); flex-shrink:0; background:var(--surface-tint); }
+    .fp-image-item .fp-image-legende { flex:1; font-size:12.5px; color:var(--ink); word-break:break-word; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+    .fp-image-item .btn-remove { flex-shrink:0; }
+    .fp-image-chip { display:inline-block; background:var(--surface-tint); color:var(--grey-dark); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; flex-shrink:0; }
+    .fp-image-reassign { width:auto; flex-basis:100%; font-size:11.5px; padding:4px 6px; height:auto; margin-top:2px; }
     .field-hint-tiny { font-size:9.5px; font-weight:400; text-transform:none; letter-spacing:normal; color:var(--grey); }
     .field-error { font-size:11px; color:var(--red); margin-top:4px; display:none; }
     .field-error.visible { display:block; }
@@ -120,6 +133,10 @@
     .collab-tabs-row { display:flex; align-items:stretch; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--border); }
     .collab-country-tabs { display:flex; flex:1; gap:4px; }
     .collab-country-tab { flex:1; padding:7px 4px; font-size:12px; font-weight:600; color:var(--grey); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; font-family:'Inter',sans-serif; transition:color .12s; text-align:center; }
+    /* Colonne "Déclarer un projet" resserrée (320px) : tabs compactés au
+       maximum pour tenir sur une seule ligne malgré les 3 pays. */
+    #fiche-collab-country-tabs { gap:2px; }
+    #fiche-collab-country-tabs .collab-country-tab { padding:6px 1px; font-size:10.5px; letter-spacing:-.01em; }
     .collab-country-tab:hover { color:var(--ink); }
     .collab-country-tab.active { color:var(--orange); border-bottom-color:var(--orange); }
     .collab-country-tab .cct-count { color:var(--grey); font-weight:500; }
@@ -184,6 +201,44 @@
     .result-actions { display:flex; gap:6px; flex-shrink:0; }
     .btn-dl { padding:5px 12px; background:var(--orange); color:white; border:none; font-size:11px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; font-family:'Inter',sans-serif; }
     .btn-dl:hover { opacity:.88; }
+
+    /* ───────────────────────────────────────────────
+       ONGLET 3 — GÉNÉRER UN PORTEFOLIO (décalque de l'onglet CV, cf. plan Lot C)
+    ─────────────────────────────────────────────── */
+    #section-portefolio main { max-width:1446px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px 360px; gap:20px; align-items:start; }
+    #pf-col-staff-wrap { grid-column:1; grid-row:1; min-width:0; }
+    #pf-col-right { grid-column:2; grid-row:1; display:flex; flex-direction:column; gap:16px; }
+    #pf-col-actions { grid-column:3; grid-row:1; display:flex; flex-direction:column; gap:16px; }
+    #pf-grid { max-height:640px; overflow-y:auto; }
+    .pf-item { display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--border); user-select:none; transition:background .12s; }
+    .pf-item:last-child { border-bottom:none; }
+    .pf-item:hover:not(.disabled) { background:var(--surface-tint); }
+    .pf-item.selected { background:var(--surface-tint); border-left:2px solid var(--orange); }
+    .pf-item.disabled { opacity:.5; cursor:not-allowed; }
+    .pf-item input[type="checkbox"] { accent-color:var(--orange); width:14px; height:14px; flex-shrink:0; }
+    .pf-item .pf-item-main { flex:1; min-width:0; }
+    .pf-item .pf-item-title { font-size:13px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pf-item .pf-item-sub { font-size:11.5px; color:var(--grey-dark); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /* Rang du projet dans le document : un champ, pas une pastille — il se
+       modifie pour reordonner. Centre sur deux chiffres, cale sur la hauteur
+       de la pastille voisine.
+       `input.pf-item-rang` et non `.pf-item-rang` seule : specificite (0,1,1)
+       comme input[type="text"] (width:100%), donc placee apres, la cascade
+       gagne — meme piege et meme parade que input.ms-search plus haut. Sans ca
+       le champ prend toute la largeur de la carte et ecrase le titre. */
+    input.pf-item-rang { width:32px; flex-shrink:0; text-align:center; font-family:'Inter',sans-serif;
+      font-size:11px; font-weight:800; color:var(--orange); background:var(--white);
+      border:1px solid var(--orange); padding:3px 0; cursor:text; }
+    input.pf-item-rang:focus { border-color:var(--orange); box-shadow:0 0 0 2px rgba(240,110,20,.25); }
+    .pf-item-badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:2px 7px; flex-shrink:0; white-space:nowrap; }
+    .pf-item-badge.has-content { background:rgba(46,125,79,.14); color:var(--green); }
+    .pf-item-badge.no-content { background:var(--surface-tint); color:var(--grey); }
+    #btn-pf-clear-filters { width:100%; padding:6px; background:none; border:1px solid var(--border); font-size:11px; color:var(--grey); cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; display:none; }
+    #btn-pf-clear-filters:hover { border-color:var(--red); color:var(--red); }
+    #pf-progress-section { display:none; }
+    #pf-results-section { display:none; }
+    .pf-chap-check { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink); cursor:pointer; }
+    .pf-chap-check input { accent-color:var(--orange); width:14px; height:14px; }
 
     /* ───────────────────────────────────────────────
        ONGLET 2 — FICHE FIN DE PROJET
@@ -268,6 +323,10 @@
       transition: color .12s;
       user-select: none;
     }
+    /* Onglets "Infos par membres" (déclaration de projet) uniquement : gap
+       avatar/nom réduit de moitié — ne touche pas les onglets "profil à
+       afficher" de l'onglet Générer des CV, qui partagent la même classe. */
+    #membre-tabs .membre-tab { gap: 3.5px; }
     .membre-tab:hover { color: var(--ink); }
     .membre-tab.active {
       color: var(--orange);
@@ -295,24 +354,17 @@
     .sync-mode-on .tab-sync-check { display: inline-block; }
     .membre-tab.synced .tab-avatar { background: var(--orange); color: white; outline: 2px solid var(--orange); outline-offset: 1px; }
 
-    /* Sync mode toggle button area */
-    .sync-mode-btn-wrap {
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      border-left: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    /* Toggle "Batch edit" — bascule dans le card-header, cf. #fiche-membres-section */
     #btn-sync-mode {
       font-size: 11px;
       padding: 5px 10px;
       white-space: nowrap;
-      transition: border-color .12s, color .12s;
+      transition: border-color .12s, color .12s, background .12s;
     }
     #btn-sync-mode.active {
       border-color: var(--orange);
-      color: var(--orange);
-      background: var(--white);
+      color: white;
+      background: var(--orange);
     }
 
     /* Sync mode banner inside form panel */
@@ -391,6 +443,12 @@
     .comp-chip-selected button { background:none; border:none; cursor:pointer; color:var(--grey); font-size:13px; line-height:1; padding:0; }
     .comp-chip-selected button:hover { color:var(--red); }
 
+    /* Contacts du projet (nom + adresse, 3 lignes au plus) — même gabarit de
+       ligne que .new-comp-row : deux champs et le bouton de retrait. */
+    .contact-list { display:flex; flex-direction:column; gap:8px; }
+    .contact-row { display:grid; grid-template-columns:1fr 1.4fr auto; gap:8px; align-items:center; }
+    .contact-row input { min-width:0; height:var(--field-h); }
+
     /* Nouvelles compétences */
     .new-comp-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
     .new-comp-row { display:grid; grid-template-columns:1fr 2fr auto; gap:8px; align-items:end; }
@@ -402,9 +460,10 @@
     .fiche-errors { background:var(--white); border:1px solid var(--red); padding:12px 16px; color:var(--red); font-size:13px; display:none; }
     .fiche-errors ul { padding-left:18px; }
     .fiche-errors ul li { margin-bottom:3px; }
-    #btn-generate-fiche { width:100%; padding:15px; background:var(--orange); color:white; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .15s; }
-    #btn-generate-fiche:hover:not(:disabled) { opacity:.88; }
-    #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
+    .btn-fiche-action { width:100%; padding:15px; background:var(--orange); color:white; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .15s; }
+    .btn-fiche-action:hover:not(:disabled) { opacity:.88; }
+    .btn-fiche-action:disabled { opacity:.35; cursor:not-allowed; }
+    #btn-save-projet { margin-bottom:8px; }
     .fiche-success { background:var(--white); border:1px solid var(--green); padding:14px 18px; display:none; font-size:13px; color:var(--green); }
 
     /* Toast d'avertissement générique (ex : champ trop long) */
@@ -416,6 +475,7 @@
       #col-staff-wrap, #col-right, #col-actions { grid-column:1; grid-row:auto; }
       .form-row { grid-template-columns:1fr; }
       .new-comp-row { grid-template-columns:1fr 1fr; }
+      .contact-row { grid-template-columns:1fr auto; }
     }
   </style>
 </head>
@@ -450,9 +510,13 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Générer des CV
     </button>
-    <button class="tab-btn" id="tab-fiche" onclick="switchTab('fiche')">
+    <button class="tab-btn" id="tab-fiche" onclick="goToDeclarerProjet()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       Déclarer un projet
+    </button>
+    <button class="tab-btn" id="tab-portefolio" onclick="switchTab('portefolio')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Générer un portefolio
     </button>
     <div class="nav-spacer"></div>
     <div class="nav-admin">
@@ -463,7 +527,8 @@
       </button>
       <div class="admin-menu" id="admin-menu">
         <a onclick="switchTab('admin-collabs')">Éditer les fiches collaborateurs</a>
-        <a onclick="switchTab('admin-donnees')">Éditer les données communes projets</a>
+        <a onclick="switchTab('admin-donnees')">Éditer compétences/domaines</a>
+        <a onclick="switchTab('admin-projets')">Éditer les projets</a>
         <a onclick="switchTab('admin-clients')">Éditer les clients Camptocamp</a>
         <a onclick="switchTab('admin-corbeille')">Corbeille</a>
         <a onclick="switchTab('admin-activite')">Suivi d'activité</a>
@@ -615,7 +680,7 @@
      ONGLET 2 — FICHE FIN DE PROJET
 ══════════════════════════════════════════════════════ -->
 <div id="section-fiche" class="tab-section">
-<div class="fiche-layout">
+<div class="fiche-layout" id="fiche-layout-root">
 
   <!-- COLONNE GAUCHE : collaborateurs + sélection de l'équipe -->
   <div id="fiche-col-left">
@@ -635,28 +700,25 @@
           </label>
         </div>
         <div id="fiche-collab-grid"><div class="loading-placeholder">Chargement des collaborateurs…</div></div>
-        <div class="field-error" id="err-members" style="margin-top:8px;">Sélectionner au moins un membre de l'équipe</div>
       </div>
     </div>
 
     <!-- Sélection de l'équipe : informations par membre -->
     <div id="fiche-membres-section" class="card" style="display:none;margin-top:16px;">
       <div class="card-header">
-        <h2>Sélection de l'équipe — informations par membre</h2>
-        <span id="sync-counter" class="tag-opt"></span>
+        <h2>Infos par membres</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-sync-mode" onclick="toggleSyncMode()" aria-pressed="false">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          Batch edit
+        </button>
       </div>
+      <div class="field-hint" style="padding:8px 20px 0;">Rôle et compétences apparaissent aussi dans la fiche portefolio.</div>
 
       <!-- Tabs bar -->
       <div class="membre-tabs-bar" id="membre-tabs-container">
       <button class="tabs-scroll-btn" id="tabs-scroll-left" onclick="scrollMemberTabs(-1)">&#8249;</button>
       <div class="membre-tabs" id="membre-tabs"></div>
       <button class="tabs-scroll-btn right" id="tabs-scroll-right" onclick="scrollMemberTabs(1)">&#8250;</button>
-      <div class="sync-mode-btn-wrap">
-        <button class="btn btn-ghost btn-sm" id="btn-sync-mode" onclick="toggleSyncMode()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-          Mode commun
-        </button>
-      </div>
     </div>
 
     <!-- Sync banner (visible when sync mode is on) -->
@@ -672,6 +734,11 @@
 
   </div><!-- /#fiche-col-left -->
 
+  <!-- Poignée de redimensionnement colonne 1 ↔ colonne 2 (D3/D5 du plan) -->
+  <div class="fiche-resizer" id="fiche-resizer"
+       role="separator" aria-orientation="vertical" aria-label="Redimensionner les colonnes Collaborateurs / Informations projet"
+       tabindex="0" aria-valuenow="50" aria-valuemin="20" aria-valuemax="80"></div>
+
   <!-- COLONNE CENTRALE : informations projet -->
   <div id="fiche-col-mid">
     <div class="card" id="fiche-s1">
@@ -683,30 +750,48 @@
           <div class="field-error" id="err-fp-nom">Champ obligatoire</div>
         </div>
         <div class="form-field">
-          <label class="field-label" for="fp-contexte">Contexte du projet</label>
+          <label class="field-label" for="fp-contexte">Contexte résumé du projet (pour CV)</label>
           <textarea id="fp-contexte" rows="5" maxlength="180" oninput="updateFicheBtn();acCount(this,'fp-cnt-contexte',180);markFicheDirty()" placeholder="Décrivez le projet : objectif, périmètre technique, résultat livré, impact client."></textarea>
           <div class="fe-counter" id="fp-cnt-contexte">0/180</div>
+          <div class="field-hint">Sert aussi de repli à la fiche portefolio si le contexte complet ci-dessous n'est pas rédigé.</div>
         </div>
         <div class="form-field">
-          <label class="field-label" for="fp-client-ref">Client *</label>
-          <select id="fp-client-ref" onchange="onFpClientChange();markFicheDirty()">
+          <label class="field-label" for="fp-client-ref">Client</label>
+          <select id="fp-client-ref" onchange="onFpClientChange();updateFicheBtn();markFicheDirty()">
             <option value="">— Sélectionner un client —</option>
           </select>
-          <div class="field-error" id="err-fp-client-ref">Champ obligatoire</div>
         </div>
         <div class="form-field">
           <label class="field-label" for="fp-sous-entite">Sous-entité</label>
           <input type="text" id="fp-sous-entite" list="fp-sous-entite-list" oninput="updateFicheBtn();markFicheDirty()" placeholder="Sélectionnez d'abord un client" disabled>
           <datalist id="fp-sous-entite-list"></datalist>
         </div>
+        <!-- Budget : un fait de projet au même titre que le client, la période
+             ou le secteur — pas une donnée de récit noyée dans le chapitre
+             « Environnement ». Montant en nombre nu + unité choisie à part :
+             c'est le rendu qui recompose « 555 000 € » / « 8 M€ » (cf.
+             reference_renderer._budget_label), jamais la saisie. Placé ici,
+             entre le client (et sa sous-entité) et la période, dans l'ordre
+             même où la fiche portefolio l'affiche. -->
         <div class="form-field">
-          <label class="field-label">Période *</label>
+          <label class="field-label" for="fp-budget-montant">Budget</label>
+          <div class="budget-range">
+            <input type="number" id="fp-budget-montant" min="0" step="any" placeholder="Montant" oninput="updateFicheBtn();markFicheDirty()">
+            <select id="fp-budget-unite" onchange="updateFicheBtn();markFicheDirty()">
+              <option value="€">€</option>
+              <option value="K€">K€</option>
+              <option value="M€">M€</option>
+            </select>
+          </div>
+          <div class="field-hint">Optionnel — apparaît dans la fiche portefolio entre le client et la période.</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label">Période</label>
           <div class="periode-range">
             <select id="fp-periode-debut" onchange="updateFicheBtn();markFicheDirty()"></select>
             <span class="periode-sep">–</span>
             <select id="fp-periode-fin" onchange="updateFicheBtn();markFicheDirty()"></select>
           </div>
-          <div class="field-error" id="err-fp-periode">Année de début obligatoire</div>
         </div>
         <div class="form-field">
           <label class="field-label">Secteur</label>
@@ -715,6 +800,87 @@
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="fp-secteur" value="prive" style="accent-color:var(--orange);" onchange="markFicheDirty()"> Privé</label>
           </div>
         </div>
+        <!-- Contacts et lien du projet publié : la SECONDE ligne du bloc
+             d'éléments clés de la fiche portefolio (cf.
+             engine/reference-projets.typ, « Seconde ligne des elements cles »).
+             Saisis ici, avec le budget, et non dans la carte « Fiche
+             portefolio » : ce sont des faits de projet, dans l'ordre même où
+             la fiche les affiche — pas de la rédaction.
+             Un seul lien (« le lien direct est unique »), trois contacts au
+             plus (cf. ingest.MAX_CONTACTS) ; les deux deviennent des liens
+             cliquables dans le PDF. -->
+        <div class="form-field">
+          <label class="field-label">Contacts</label>
+          <div class="contact-list" id="fp-contacts-list"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="fp-contact-add-btn" style="margin-top:8px;" onclick="addFpContact()">+ Ajouter un contact</button>
+          <div class="field-hint">Optionnel — 3 au maximum. L'adresse devient un lien cliquable dans la fiche portefolio.</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-lien-projet">Lien vers le projet publié</label>
+          <input type="url" id="fp-lien-projet" inputmode="url" maxlength="300" placeholder="https://exemple.fr/le-projet" oninput="updateFicheBtn();markFicheDirty()">
+          <div class="field-hint">Optionnel — un seul lien, cliquable dans la fiche portefolio. Le « https:// » est ajouté s'il manque.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fiche portefolio — optionnel : regroupe tout ce qui n'alimente QUE la
+         fiche portefolio (contexte complet + 5 chapitres + images), jamais les
+         CV (cf. plan §2, tableau de répartition des champs). Repliable, mais
+         toujours dans le DOM et soumise avec le reste — le repli est purement
+         visuel (cf. resetFicheForm / enterProjetEditMode qui touchent ces
+         champs que la section soit ouverte ou non). Les images n'ont pas
+         encore d'id de fichier Drive avant le premier enregistrement du
+         projet : voir la file d'attente locale (pendingImages) plus bas. -->
+    <div class="card collapsed" id="fiche-portefolio-card">
+      <div class="card-header fiche-portefolio-head" onclick="togglePortefolioCard()" title="Réduire / agrandir la fiche portefolio">
+        <h2>Fiche portefolio — optionnel</h2>
+        <span class="tag-opt" id="fiche-portefolio-badge">Aucune</span>
+        <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/><line class="mp-v" x1="12" y1="8" x2="12" y2="16"/></svg>
+      </div>
+      <div class="card-body">
+        <p class="field-hint" style="margin-bottom:14px;">Ce contenu produit uniquement le PDF « Références projets » (portefolio) — il n'apparaît jamais sur les CV. Un projet sans rien ici reste parfaitement valide, il n'alimentera simplement pas de fiche portefolio.</p>
+        <div class="form-field">
+          <label class="field-label" for="fp-chap-contexte-complet">Contexte complet du projet</label>
+          <textarea id="fp-chap-contexte-complet" rows="8" maxlength="600" oninput="acCount(this,'fp-cnt-contexte-complet',600);updateFicheBtn();markFicheDirty()" placeholder="Introduction plus détaillée du projet, pour la fiche projet complète (facultatif)."></textarea>
+          <div class="fe-counter" id="fp-cnt-contexte-complet">0/600</div>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-chap-technique">Aspects techniques</label>
+          <textarea id="fp-chap-technique" rows="4" oninput="updateFicheBtn();markFicheDirty()" placeholder="Stack, architecture, défis techniques résolus…"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-chap-visuel">Aspects visuels</label>
+          <textarea id="fp-chap-visuel" rows="4" oninput="updateFicheBtn();markFicheDirty()" placeholder="Identité graphique, maquettes, captures avant/après…"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-chap-ergonomie">Aspects ergonomiques</label>
+          <textarea id="fp-chap-ergonomie" rows="4" oninput="updateFicheBtn();markFicheDirty()" placeholder="Parcours utilisateurs, accessibilité, tests…"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-chap-environnement">Environnement</label>
+          <textarea id="fp-chap-environnement" rows="4" oninput="updateFicheBtn();markFicheDirty()" placeholder="Secteur, contraintes, budget, enjeux…"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="fp-chap-resultats">Résultats / impact</label>
+          <textarea id="fp-chap-resultats" rows="4" oninput="updateFicheBtn();markFicheDirty()" placeholder="Bénéfices mesurés, retour client, suite donnée…"></textarea>
+        </div>
+
+        <div class="form-field" style="margin-bottom:0;">
+          <label class="field-label">Images (au plus 4 de chapitre + 1 libre)</label>
+          <div id="fp-images-list" style="margin-bottom:10px;"></div>
+          <div class="form-row" style="margin-bottom:8px;">
+            <div>
+              <select id="fp-image-chapitre"></select>
+            </div>
+            <div>
+              <input type="text" id="fp-image-legende" maxlength="120" placeholder="Légende (optionnel)">
+            </div>
+          </div>
+          <input type="file" id="fp-image-input" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="onFpImageFileChosen(this.files[0])">
+          <button type="button" class="btn btn-ghost btn-sm" id="fp-image-add-btn" onclick="document.getElementById('fp-image-input').click()">+ Ajouter une image</button>
+          <div class="field-hint" id="fp-image-status"></div>
+          <div class="field-hint" id="fp-image-hint" style="margin-top:6px;"></div>
+        </div>
       </div>
     </div>
   </div><!-- /#fiche-col-mid -->
@@ -722,7 +888,15 @@
   <!-- COLONNE DROITE : champs à compléter + valider (calée sur la hauteur dispo, scroll interne à la liste) -->
   <div id="fiche-col-right">
     <div class="fe-gaps fiche-checklist" id="fiche-checklist">
-      <div class="fe-gaps-head"><strong>Champs à compléter</strong><span class="fe-badge" id="fiche-checklist-badge">0</span></div>
+      <div class="fe-gaps-head"><strong>État de la déclaration</strong></div>
+      <!-- Résultat d'abord (ex-bandeau de destination, recalculé en direct par
+           updateFicheDestinationStatus) — puis le détail « Champs à compléter »
+           juste en dessous : les deux décrivaient déjà la même chose dans deux
+           colonnes séparées (cf. plan §4bis), fusionnés ici pour ne plus se
+           contredire et légender directement les boutons d'action. -->
+      <div class="fiche-destination-status" id="fiche-destination-status"></div>
+      <div class="fiche-checklist-divider"></div>
+      <div class="fe-gaps-subhead"><strong>Champs à compléter</strong><span class="fe-badge" id="fiche-checklist-badge">0</span></div>
       <ul id="fiche-checklist-list"></ul>
       <div class="fc-done-group" id="fc-done-group" style="display:none;">
         <button type="button" class="fc-done-toggle" id="fc-done-toggle" onclick="toggleFicheDoneGroup()">
@@ -739,18 +913,130 @@
       <ul id="fiche-errors-list"></ul>
     </div>
 
+    <button id="btn-annuler-edition" class="btn btn-ghost btn-full" onclick="exitProjetEditMode()" style="display:none;margin-bottom:8px;">Annuler l'édition</button>
     <button id="btn-reset-fiche" class="btn btn-ghost btn-full" onclick="resetFicheForm()" disabled style="margin-bottom:8px;">Réinitialiser</button>
     <button id="btn-preview-fiche" class="btn btn-ghost btn-full" onclick="openFichePreview()" disabled title="Sélectionner au moins un membre de l'équipe" style="margin-bottom:8px;">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:7px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
       Prévisualiser la référence projet
     </button>
-    <button id="btn-generate-fiche" onclick="generateFiche()" disabled>
+    <button id="btn-save-projet" class="btn-fiche-action" onclick="generateFiche(false)" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg>
-      Valider et documenter les fiches
+      Enregistrer le projet
+    </button>
+    <button id="btn-save-projet-cv" class="btn-fiche-action" onclick="generateFiche(true)" disabled title="Sélectionner au moins un collaborateur">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg>
+      Enregistrer + ajouter aux CV
     </button>
   </div><!-- /#fiche-col-right -->
 
 </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ONGLET 3 — GÉNÉRER UN PORTEFOLIO (Lot C du plan)
+══════════════════════════════════════════════════════ -->
+<div id="section-portefolio" class="tab-section">
+<main>
+  <div id="pf-error-banner" class="error-banner"></div>
+
+  <div id="pf-col-staff-wrap">
+    <div id="pf-col-staff" class="card">
+      <div class="card-header"><h2>Projets</h2><div class="badge" id="pf-selected-count">0</div></div>
+      <div class="card-body">
+        <div id="pf-grid"><div class="loading-placeholder">Chargement…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pf-col-right">
+    <div class="card">
+      <div class="card-header"><h2>Filtres</h2></div>
+      <div class="card-body">
+        <div class="filter-field">
+          <label class="filter-label">Recherche</label>
+          <input type="search" id="pf-search" placeholder="Désignation, client…" oninput="renderPortefolioGrid()">
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Client</label>
+          <div class="ms-wrap" id="ms-pfclients-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-pfclients-search" placeholder="Rechercher un client…" oninput="filterMsItems('pfclients',this.value)" onfocus="openMsDropdown('pfclients')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-pfclients-dropdown"></div>
+            <div class="ms-chips" id="ms-pfclients-chips"></div>
+          </div>
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Compétences</label>
+          <div class="ms-wrap" id="ms-pfcomps-wrap">
+            <div style="position:relative;">
+              <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ms-search" id="ms-pfcomps-search" placeholder="Rechercher une compétence…" oninput="filterMsItems('pfcomps',this.value)" onfocus="openMsDropdown('pfcomps')" autocomplete="off">
+            </div>
+            <div class="ms-dropdown" id="ms-pfcomps-dropdown"></div>
+            <div class="ms-chips" id="ms-pfcomps-chips"></div>
+          </div>
+        </div>
+
+        <button id="btn-pf-clear-filters" onclick="pfClearFilters()">✕ Réinitialiser les filtres</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pf-col-actions">
+    <div class="card">
+      <div class="card-header"><h2>Options</h2></div>
+      <div class="card-body">
+        <!-- Titres de couverture. Ils n'ont de sens qu'avec une couverture,
+             donc à partir de deux projets (cf. togglePortefolioProjet) : ce
+             bloc reste masqué pour une fiche isolée, qui n'en porte aucun.
+             Les deux lignes se saisissent ici, l'une sous l'autre — le titre
+             nommait le document sans jamais être modifiable, il l'est
+             désormais comme le sous-titre. -->
+        <div id="pf-titre-field" style="display:none;">
+          <div class="form-field">
+            <label class="field-label" for="pf-titre">Titre</label>
+            <input type="text" id="pf-titre" maxlength="60" value="Références projets">
+            <div class="field-hint">Grand titre de couverture, repris en pied de page de chaque fiche.</div>
+          </div>
+          <div class="form-field">
+            <label class="field-label" for="pf-sous-titre">Sous-titre</label>
+            <input type="text" id="pf-sous-titre" maxlength="80" value="Sélection de projets Camptocamp">
+            <div class="field-hint">Nomme la sélection — sert aussi à composer le nom du fichier.</div>
+          </div>
+        </div>
+        <div class="options-grid">
+          <div class="option-row"><label for="pf-inclure-equipe">Équipe Camptocamp</label>
+            <div><input type="checkbox" id="pf-inclure-equipe" checked></div></div>
+          <div class="option-row"><label for="pf-inclure-competences">Compétences & technologies</label>
+            <div><input type="checkbox" id="pf-inclure-competences" checked></div></div>
+          <div class="option-row"><label for="pf-inclure-images">Images</label>
+            <div><input type="checkbox" id="pf-inclure-images" checked></div></div>
+        </div>
+        <div class="form-field" style="margin-top:14px;margin-bottom:0;">
+          <label class="field-label">Chapitres à inclure</label>
+          <div id="pf-chapitres-checks" style="display:flex;flex-direction:column;gap:7px;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+    <button id="btn-generate-portefolio" onclick="generatePortefolio()" disabled>Générer le portefolio</button>
+    <div id="pf-progress-section" class="card">
+      <div class="card-body">
+        <div class="progress-label" id="pf-progress-label">Génération en cours…</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="pf-progress-bar"></div></div>
+      </div>
+    </div>
+    <div id="pf-results-section" class="card">
+      <div class="card-header"><h2>Résultat</h2></div>
+      <div class="card-body">
+        <div id="pf-result-list" class="result-list"></div>
+      </div>
+    </div>
+  </div>
+</main>
 </div>
 
 <style>
@@ -769,7 +1055,24 @@
   #section-admin-donnees.tab-section.active,
   #section-admin-clients.tab-section.active,
   #section-admin-corbeille.tab-section.active,
+  #section-admin-projets.tab-section.active,
   #section-admin-activite.tab-section.active { display:flex; }
+  /* Formulaire "Déclarer un projet" réutilisé in-place dans Administration >
+     Projets (déplacé par JS, cf. moveFicheFormTo/Home) : la grille 3 colonnes
+     fixe (1446px max) ne rentre pas dans le panneau .admin-main plus étroit —
+     on la fait passer en une colonne unique tant qu'elle y est hébergée. */
+  #adp-form-host .fiche-layout { grid-template-columns:1fr 320px; max-width:100%; margin:0; padding:0; gap:20px; }
+  #adp-form-host #fiche-col-left,
+  #adp-form-host #fiche-col-mid { grid-column:1; }
+  /* Reste une vraie colonne à droite (pas empilée) — et position:static au lieu du
+     sticky/max-height calibrés pour la pleine largeur de page (#fiche-col-right plus
+     bas) : dans ce panneau plus étroit, avec son propre scroll interne, le sticky
+     faisait flotter la case "Champs à compléter" n'importe où pendant le défilement. */
+  #adp-form-host #fiche-col-right { grid-column:2; grid-row:1; position:static; top:auto; max-height:none; }
+  /* Panneau plus étroit que la page : la pleine largeur / poignée de D1-D3 n'y a pas
+     de sens (cf. plan D4) — la poignée est neutralisée, --fiche-c1/--fiche-c2 ignorées
+     puisque ce gabarit ne les référence de toute façon pas. */
+  #adp-form-host .fiche-resizer { display:none; }
   .admin-editor { display:flex; width:100%; height:calc(100vh - 53px); }
   .admin-side { width:280px; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; background:var(--white); }
   .admin-side-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
@@ -786,19 +1089,46 @@
   /* ── Listes collaborateurs : hauteur max pour ne pas gêner le contenu dessous ── */
   #collab-grid, #fiche-collab-grid { max-height:360px; overflow-y:auto; }
 
-  /* ── Déclaration : 2 colonnes comme la génération (wrappers gauche/droite) ── */
-  .fiche-layout { max-width:1446px; margin:32px auto; padding:0 16px 48px; display:grid; grid-template-columns:1fr 360px 360px; gap:20px; align-items:start; background:transparent; }
-  #fiche-col-left { grid-column:1; min-width:0; }
-  #fiche-col-mid { grid-column:2; min-width:0; }
-  /* Colonne "champs à compléter" : jamais plus large que la 1ère colonne (360px fixe
-     face à un 1fr toujours ≥ 360px ici). Sa hauteur reste naturelle (selon le nombre de
-     champs listés) ; seul un plafond (propriété `max-height` posée en JS par
-     syncFicheColRightHeight, cf. <script>) la borne à la hauteur de la colonne voisine
-     "Informations projet" sans jamais dépasser le viewport — le contenu qui dépasse ce
-     plafond ne fait défiler que la liste, le bouton Valider restant toujours visible sans
-     scroll de page. Le max-height CSS ci-dessous ne sert que de garde-fou avant le
-     premier calcul JS. */
-  #fiche-col-right { grid-column:3; min-width:0; display:flex; flex-direction:column; gap:16px; position:sticky; top:32px; max-height:calc(100vh - 64px); }
+  /* ── Déclaration : pleine largeur, colonnes 1/2 à parts égales et ajustables
+     (D1-D3 du plan) — l'app est exclusivement desktop, plus de plafond centré. ── */
+  .fiche-layout {
+    max-width:none; margin:32px auto; padding:0 24px 48px; display:grid;
+    grid-template-columns: minmax(280px, var(--fiche-c1, 1fr)) 14px minmax(420px, var(--fiche-c2, 1fr)) 360px;
+    gap:20px; align-items:start; background:transparent;
+  }
+  #fiche-col-left { grid-column:1; min-width:0; container-type:inline-size; }
+  /* Par défaut (colonne étroite) : une seule colonne de cartes/champs membre.
+     Piloté par la largeur RÉELLE de la colonne (container query), plus par une
+     valeur codée en dur — la colonne est désormais redimensionnable (D3), une
+     règle fixe à 320px serait fausse dès qu'on l'élargit (cf. plan D2). */
+  #fiche-collab-grid .cat-body-inner { grid-template-columns:1fr; }
+  #fiche-col-left .form-row { grid-template-columns:1fr; }
+  @container (min-width: 430px) {
+    #fiche-collab-grid .cat-body-inner { grid-template-columns:1fr 1fr; }
+    #fiche-col-left .form-row { grid-template-columns:1fr 1fr; }
+  }
+  /* Poignée de redimensionnement 1↔2 (D3) : posée sur sa propre piste de
+     grille (14px) plutôt que dans le gap, pour une zone de clic stable. */
+  .fiche-resizer { grid-column:2; grid-row:1 / -1; align-self:stretch; cursor:col-resize; position:relative; }
+  .fiche-resizer::after { content:''; position:absolute; top:0; bottom:0; left:50%; width:2px; margin-left:-1px; background:var(--border); transition:background .12s; }
+  .fiche-resizer:hover::after, .fiche-resizer.dragging::after { background:var(--orange); }
+  #fiche-col-mid {
+    grid-column:3; min-width:0;
+    /* Mesure de texte plafonnée (D1) : sur un très grand écran, la colonne
+       peut dépasser 900px — sans ce plafond les textarea produiraient des
+       lignes bien trop longues à relire. La largeur de mise en page gagnée
+       par D1 profite à l'espacement, pas à la longueur de ligne. */
+  }
+  #fiche-col-mid textarea { max-width:90ch; }
+  /* Colonne "champs à compléter" : jamais plus large que la colonne voisine
+     "Informations projet" (360px fixe face à une colonne 2 toujours ≥ 420px ici). Sa
+     hauteur reste naturelle (selon le nombre de champs listés) ; seul un plafond
+     (propriété `max-height` posée en JS par syncFicheColRightHeight, cf. <script>)
+     la borne à la hauteur de la colonne voisine "Informations projet" sans jamais
+     dépasser le viewport — le contenu qui dépasse ce plafond ne fait défiler que la
+     liste, le bouton Valider restant toujours visible sans scroll de page. Le
+     max-height CSS ci-dessous ne sert que de garde-fou avant le premier calcul JS. */
+  #fiche-col-right { grid-column:4; min-width:0; display:flex; flex-direction:column; gap:16px; position:sticky; top:32px; max-height:calc(100vh - 64px); }
   #fiche-col-right .fiche-checklist { overflow:hidden; }
   /* max-height posé en JS (syncFicheColRightHeight) : un flex-grow ne suffit pas à faire
      grandir la liste jusqu'au plafond dans un conteneur parent en hauteur "auto". */
@@ -814,7 +1144,6 @@
   .fc-done-chips { display:none; flex-wrap:wrap; gap:6px; margin-top:8px; max-height:160px; overflow-y:auto; }
   .fc-done-group.open .fc-done-chips { display:flex; }
   .fc-done-chip { display:inline-flex; align-items:center; padding:3px 9px; background:var(--surface-tint); border:1px solid var(--border); font-size:11px; font-weight:500; color:var(--grey-dark); white-space:nowrap; }
-  #btn-generate-fiche:disabled { opacity:.35; cursor:not-allowed; }
   /* La barre d'onglets ne doit jamais élargir la colonne : elle occupe l'espace dispo et scrolle */
   #fiche-membres-section, .membre-tabs-bar, .membre-tabs { min-width:0; }
   /* Réserver la gouttière de scrollbar → aucun décalage quand le scroll apparaît */
@@ -836,7 +1165,35 @@
   .comp-chips-selected:empty { display:none; }
   .ms-chips:empty { display:none; }
 
+  /* Fiche portefolio — section optionnelle repliable (même mécanisme que #fiche-s2) */
+  .fiche-portefolio-head { cursor:pointer; user-select:none; transition:background .12s; }
+  .fiche-portefolio-head:hover { background:var(--surface-tint); }
+  .fiche-portefolio-head:hover .mp-icon { color:var(--orange); }
+  #fiche-portefolio-card.collapsed .card-body { display:none; }
+  #fiche-portefolio-card.collapsed .card-header { border-bottom:none; }
+  #fiche-portefolio-badge { white-space:nowrap; }
+  #fiche-portefolio-badge.etat-partielle { background:rgba(255,104,10,.14); color:var(--orange); }
+  #fiche-portefolio-badge.etat-complete { background:rgba(46,125,79,.14); color:var(--green); }
+
+  /* Indicateur de destination (CV / portefolio) — section de la card « État de
+     la déclaration » (#fiche-checklist), plus une boîte autonome : cf. plan
+     §4bis (fusion avec « Champs à compléter »). */
+  .fiche-destination-status { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--grey-dark); padding:10px 16px; }
+  .fiche-destination-status .fds-item { display:inline-flex; align-items:center; gap:6px; }
+  .fiche-destination-status .fds-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .fiche-destination-status .fds-dot.on { background:var(--green); }
+  .fiche-destination-status .fds-dot.partial { background:var(--orange); }
+  .fiche-destination-status .fds-dot.off { background:var(--border); }
+  .fiche-checklist-divider { height:1px; background:var(--border); margin:0 16px; }
+  .fe-gaps-subhead { padding:10px 16px 2px; display:flex; align-items:center; gap:10px; }
+  .fe-gaps-subhead strong { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--grey-dark); flex:1; }
+
   /* Période : deux dropdowns côte à côte (début obligatoire / fin optionnelle) */
+  /* Montant + unité : le montant prend la place, l'unité reste une pastille
+     étroite — même gabarit de ligne que .periode-range juste en dessous. */
+  .budget-range { display:flex; align-items:center; gap:8px; }
+  .budget-range input { flex:1; min-width:0; height:var(--field-h); }
+  .budget-range select { flex:0 0 84px; height:var(--field-h); }
   .periode-range { display:flex; align-items:center; gap:8px; }
   .periode-range select { flex:1; min-width:0; height:var(--field-h); }
   .periode-fin:has(option:checked[value=""]) { color:var(--grey); }
@@ -1141,22 +1498,52 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════
+     ADMIN — PROJETS (registre transversal)
+══════════════════════════════════════════════════════ -->
+<div id="section-admin-projets" class="tab-section">
+  <div class="admin-editor">
+    <aside class="admin-side">
+      <div class="admin-side-top">
+        <input class="ms-search" id="adp-search" type="search" placeholder="Filtrer les projets…" oninput="adpRenderList()">
+        <button class="btn btn-ghost btn-sm btn-full" onclick="initAdminProjets()">Rafraîchir la liste</button>
+      </div>
+      <div class="collab-list" id="adp-list"><div class="loading-placeholder" style="padding:12px;">Chargement…</div></div>
+    </aside>
+    <div class="admin-main">
+      <div class="admin-toolbar">
+        <span class="admin-filename" id="adp-filename">Sélectionne un projet à gauche</span>
+        <span class="admin-status" id="adp-status"></span>
+        <button class="btn btn-ghost btn-sm" id="adp-del" onclick="adpDelete()" disabled>Supprimer</button>
+      </div>
+      <div class="fe-scroll" id="adp-form-scroll">
+        <div class="fe-wrap" id="adp-form-host" style="max-width:100%;">
+          <div class="loading-placeholder" id="adp-form-placeholder" style="padding:20px;">Sélectionne un projet à gauche pour corriger ses informations communes ou ajouter/retirer un membre de l'équipe.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════
 // Navigation principale
 // ══════════════════════════════════════════════════════
 function switchTab(tab) {
-  ['cv','fiche','admin-collabs','admin-donnees','admin-clients','admin-corbeille','admin-activite'].forEach(t => {
+  ['cv','fiche','portefolio','admin-collabs','admin-donnees','admin-projets','admin-clients','admin-corbeille','admin-activite'].forEach(t => {
     const s = document.getElementById('section-'+t);
     if (s) s.classList.toggle('active', t===tab);
   });
   document.getElementById('tab-cv').classList.toggle('active', tab==='cv');
   document.getElementById('tab-fiche').classList.toggle('active', tab==='fiche');
-  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-clients' || tab==='admin-corbeille' || tab==='admin-activite');
+  document.getElementById('tab-portefolio').classList.toggle('active', tab==='portefolio');
+  document.getElementById('tab-admin').classList.toggle('active', tab==='admin-collabs' || tab==='admin-donnees' || tab==='admin-projets' || tab==='admin-clients' || tab==='admin-corbeille' || tab==='admin-activite');
   closeAdminMenu();
-  if (tab==='fiche' && !ficheDataLoaded) loadFicheData();
+  if (tab==='fiche') ensureFicheDataLoaded();
+  if (tab==='portefolio') initPortefolioTab();
   if (tab==='admin-collabs') initAdminCollabs();
   if (tab==='admin-donnees') initDonnees();
+  if (tab==='admin-projets') initAdminProjets();
   if (tab==='admin-clients') initAdminClients();
   if (tab==='admin-corbeille') initCorbeille();
   if (tab==='admin-activite') initActivite();
@@ -1192,8 +1579,21 @@ let msClients = [];
 let msDomainesSelected = new Set();
 let msCompsSelected = new Set();
 let msClientsSelected = new Set();
-function msItems(type){ return type==='domaines'?msDomaines : type==='comps'?msComps : msClients; }
-function msSelected(type){ return type==='domaines'?msDomainesSelected : type==='comps'?msCompsSelected : msClientsSelected; }
+// Filtres de l'onglet Portefolio (client + compétences) : mêmes listes de
+// données (msComps/msClients, chargées une fois par loadFiltres), état de
+// sélection séparé — indépendant de celui de l'onglet CV.
+let msPfClientsSelected = new Set();
+let msPfCompsSelected = new Set();
+function msItems(type){ return type==='domaines'?msDomaines : (type==='comps'||type==='pfcomps')?msComps : msClients; }
+function msSelected(type){
+  if (type==='domaines') return msDomainesSelected;
+  if (type==='comps') return msCompsSelected;
+  if (type==='clients') return msClientsSelected;
+  if (type==='pfcomps') return msPfCompsSelected;
+  return msPfClientsSelected; // 'pfclients'
+}
+function msHandlerName(type){ return (type==='pfclients'||type==='pfcomps') ? 'pfToggleMs' : 'toggleMs'; }
+function msRemoveHandlerName(type){ return (type==='pfclients'||type==='pfcomps') ? 'pfRemoveMs' : 'removeMs'; }
 
 async function loadCollaborateurs() {
   try {
@@ -1224,6 +1624,8 @@ async function loadFiltres() {
     renderMsDropdown('domaines');
     renderMsDropdown('comps');
     renderMsDropdown('clients');
+    renderMsDropdown('pfcomps');
+    renderMsDropdown('pfclients');
     // Rafraîchir les panels membres créés avant que les filtres soient disponibles
     document.querySelectorAll('[id$="-domaines"].domaines-grid').forEach(grid => {
       if (!grid.querySelector('.ms-wrap')) {
@@ -1363,7 +1765,7 @@ function renderMsDropdown(type) {
       const val = msValOf(type, it);
       const chk = selected.has(val) ? 'checked' : '';
       return `<label class="ms-item" data-val="${esc(val)}">
-        <input type="checkbox" ${chk} onchange="toggleMs('${type}','${escJs(val)}',this)">
+        <input type="checkbox" ${chk} onchange="${msHandlerName(type)}('${type}','${escJs(val)}',this)">
         ${esc(it.label)}
       </label>`;
     }).join('')
@@ -1405,7 +1807,7 @@ function renderMsChips(type) {
   el.innerHTML = [...selected].map(val => {
     const found = items.find(i => msValOf(type, i) === val);
     const label = found ? found.label : val;
-    return `<div class="ms-chip"><span>${esc(label)}</span><button onclick="removeMs('${type}','${escJs(val)}')" title="Retirer">×</button></div>`;
+    return `<div class="ms-chip"><span>${esc(label)}</span><button onclick="${msRemoveHandlerName(type)}('${type}','${escJs(val)}')" title="Retirer">×</button></div>`;
   }).join('');
 }
 
@@ -1440,8 +1842,25 @@ function clearFilters() {
   onFilterChange();
 }
 
+// Filtres de l'onglet Portefolio : mêmes composants ms-wrap, mais recalculent
+// la grille de projets plutôt que le tag "Ciblage AO" / bouton CV (cf. plan C3).
+function pfToggleMs(type, val, cb) {
+  const selected = msSelected(type);
+  if (cb.checked) selected.add(val); else selected.delete(val);
+  renderMsChips(type);
+  renderPortefolioGrid();
+}
+
+function pfRemoveMs(type, val) {
+  const selected = msSelected(type);
+  selected.delete(val);
+  document.querySelectorAll(`#ms-${type}-dropdown .ms-item`).forEach(item => { if (item.dataset.val === val) item.querySelector('input').checked = false; });
+  renderMsChips(type);
+  renderPortefolioGrid();
+}
+
 document.addEventListener('click', e => {
-  ['domaines','comps','clients'].forEach(type => {
+  ['domaines','comps','clients','pfcomps','pfclients'].forEach(type => {
     const wrap = document.getElementById(`ms-${type}-wrap`);
     if (wrap && !wrap.contains(e.target)) document.getElementById(`ms-${type}-dropdown`).classList.remove('open');
   });
@@ -1614,12 +2033,284 @@ function updateProfilScrollButtons() {
 document.getElementById('profil-tabs')?.addEventListener('scroll', updateProfilScrollButtons);
 
 // ══════════════════════════════════════════════════════
+// ONGLET 3 — GÉNÉRER UN PORTEFOLIO (Lot C du plan)
+// ══════════════════════════════════════════════════════
+// Chapitres du portefolio, dans l'ordre du moteur (reference_renderer.CHAPITRE_ORDER) —
+// à la différence des images, TOUS les chapitres (dont "technique") peuvent
+// être inclus/exclus du document ici.
+const PF_CHAPITRE_LABELS_ALL = {
+  technique: 'Aspects techniques',
+  visuel: 'Aspects visuels',
+  ergonomie: 'Aspects ergonomiques',
+  environnement: 'Environnement',
+  resultats: 'Résultats & impact',
+};
+const PF_CHAPITRE_ORDER_ALL = Object.keys(PF_CHAPITRE_LABELS_ALL);
+
+let portefolioProjets = [];
+// Selection ORDONNEE, et non un ensemble : l'ordre de cette liste est celui des
+// fiches dans le document produit. La grille, elle, garde son tri alphabetique
+// et ses filtres — deux ordres distincts, que le compteur de chaque carte
+// (cf. pf-item-rang) sert justement a relier.
+//
+// Un Set conservait deja l'ordre d'insertion, donc le document suivait l'ordre
+// de selection ; il n'y avait simplement aucun moyen de le VOIR ni de le
+// changer sans tout deselectionner.
+let portefolioSelected = [];
+let portefolioLoaded = false;
+
+function initPortefolioTab() {
+  if (!document.getElementById('pf-chapitres-checks').children.length) {
+    document.getElementById('pf-chapitres-checks').innerHTML = PF_CHAPITRE_ORDER_ALL.map(k => `
+      <label class="pf-chap-check"><input type="checkbox" value="${k}" checked onchange="updatePortefolioGenerateBtn()"> ${esc(PF_CHAPITRE_LABELS_ALL[k])}</label>
+    `).join('');
+  }
+  if (!portefolioLoaded) loadPortefolioProjets();
+}
+
+async function loadPortefolioProjets() {
+  try {
+    const res = await fetch('/api/projets');
+    if (!res.ok) throw new Error((await res.json()).detail || 'Erreur');
+    portefolioProjets = await res.json();
+    portefolioLoaded = true;
+    renderPortefolioGrid();
+  } catch (e) {
+    document.getElementById('pf-grid').innerHTML = '<div class="loading-placeholder">Impossible de charger les projets : ' + esc(e.message) + '</div>';
+  }
+}
+
+function pfProjetClientLabel(p) {
+  return (p.client_ref || []).join(' / ');
+}
+
+function pfHasPortefolioContent(p) {
+  return (p.n_chapitres || 0) > 0;
+}
+
+function renderPortefolioGrid() {
+  const grid = document.getElementById('pf-grid');
+  if (!grid) return;
+  if (!portefolioProjets.length) {
+    grid.innerHTML = '<div class="loading-placeholder">Aucun projet dans le registre. Déclarez-en un depuis l\'onglet « Déclarer un projet ».</div>';
+    return;
+  }
+  const q = (document.getElementById('pf-search')?.value || '').trim().toLowerCase();
+  const clientsSel = msPfClientsSelected;
+  const compsSel = msPfCompsSelected;
+
+  const filtered = portefolioProjets.filter(p => {
+    if (q) {
+      const hay = (p.designation + ' ' + pfProjetClientLabel(p)).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (clientsSel.size && !(p.client_ref || []).some(c => clientsSel.has(c))) return false;
+    if (compsSel.size && !(p.competences || []).some(c => compsSel.has(c))) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="loading-placeholder">Aucun projet ne correspond aux filtres.</div>';
+  } else {
+    grid.innerHTML = filtered.map(p => {
+      const hasContent = pfHasPortefolioContent(p);
+      const sel = portefolioSelected.includes(p.file_id);
+      const sub = [pfProjetClientLabel(p), p.periode].filter(Boolean).join(' · ');
+      const badge = hasContent
+        ? `<span class="pf-item-badge has-content">${p.n_chapitres}/5 chap. · ${p.n_images || 0} img.</span>`
+        : `<span class="pf-item-badge no-content">Pas de contenu portefolio</span>`;
+      // Le rang ne s'affiche qu'a partir de DEUX projets retenus : seul, un
+      // projet n'a pas d'ordre a porter, et la carte reste telle quelle.
+      // `event.stopPropagation()` sur le clic : sans lui, poser le curseur dans
+      // le champ deselectionnerait le projet (la carte entiere est cliquable).
+      const rang = sel && portefolioSelected.length > 1
+        ? `<input type="text" class="pf-item-rang" data-id="${esc(p.file_id)}" value="${pfRangLabel(p.file_id)}"
+             inputmode="numeric" maxlength="2"
+             aria-label="Position dans le document"
+             title="Position dans le document — changez ce numéro pour réordonner"
+             onclick="event.stopPropagation()"
+             onfocus="this.select()"
+             onblur="pfDeplacerProjet('${esc(p.file_id)}', this.value)"
+             onkeydown="pfRangTouche(event, this, '${esc(p.file_id)}')">`
+        : '';
+      return `<div class="pf-item ${sel ? 'selected' : ''} ${hasContent ? '' : 'disabled'}" title="${hasContent ? '' : 'Ce projet n\'a aucun chapitre rédigé — il ne peut pas alimenter une fiche portefolio.'}" onclick="togglePortefolioProjet('${esc(p.file_id)}')">
+        <input type="checkbox" ${sel ? 'checked' : ''} ${hasContent ? '' : 'disabled'} onclick="event.stopPropagation();togglePortefolioProjet('${esc(p.file_id)}')">
+        <div class="pf-item-main">
+          <div class="pf-item-title">${esc(p.designation || p.id)}</div>
+          <div class="pf-item-sub">${esc(sub)}</div>
+        </div>
+        ${rang}
+        ${badge}
+      </div>`;
+    }).join('');
+  }
+  updatePortefolioSelectedCount();
+  const clearBtn = document.getElementById('btn-pf-clear-filters');
+  if (clearBtn) clearBtn.style.display = pfHasFilters() ? 'block' : 'none';
+}
+
+// Rang affiche : 1..n sur deux chiffres, comme les numeros de fiche du
+// document (cf. le gros chiffre orange de chaque projet).
+function pfRangLabel(fileId) {
+  const rang = portefolioSelected.indexOf(fileId) + 1;
+  return rang < 10 ? '0' + rang : String(rang);
+}
+
+function togglePortefolioProjet(fileId) {
+  const p = portefolioProjets.find(x => x.file_id === fileId);
+  if (!p || !pfHasPortefolioContent(p)) return; // pas de contenu portefolio → sélection empêchée (cf. plan C2)
+  const i = portefolioSelected.indexOf(fileId);
+  // Retirer un projet resserre les rangs de ceux qui suivent — retirer le n°2
+  // fait passer le n°3 en 2, sans rien avoir a recalculer : c'est la position
+  // dans la liste qui fait foi, jamais un numero stocke.
+  if (i >= 0) portefolioSelected.splice(i, 1);
+  else portefolioSelected.push(fileId);
+  renderPortefolioGrid();
+  document.getElementById('pf-titre-field').style.display = portefolioSelected.length > 1 ? 'block' : 'none';
+  updatePortefolioGenerateBtn();
+}
+
+// Entree / Echap dans le champ de rang. Entree valide en rendant le focus (le
+// deplacement se joue au `blur`), Echap repose le numero reel avant de sortir,
+// ce qui annule la saisie.
+function pfRangTouche(event, champ, fileId) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    champ.blur();
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    champ.value = pfRangLabel(fileId);
+    champ.blur();
+  }
+}
+
+// Deplacement par saisie du rang : le projet est retire de sa place et
+// reinsere a celle demandee, les autres se decalant d'un cran — semantique
+// « aller a la position N », la seule qui evite les doublons de numero.
+// Une valeur illisible ou hors bornes ne fait rien de destructeur : elle est
+// bornee a [1, n], et l'affichage remet de toute façon le numero reel.
+//
+// Declenche au `blur` et non au `change` : un `change` ne part que si le
+// navigateur juge que l'utilisateur a modifie le champ, et il ne partait pas
+// du tout sur un `blur()` provoque par le code (verifie a l'usage : la touche
+// Entree ne reordonnait rien). Le `blur`, lui, part toujours.
+function pfDeplacerProjet(fileId, valeur) {
+  const depuis = portefolioSelected.indexOf(fileId);
+  if (depuis < 0) return;
+  const n = portefolioSelected.length;
+  const saisi = parseInt(String(valeur).replace(/[^0-9]/g, ''), 10);
+  const vers = Number.isFinite(saisi) ? Math.min(Math.max(saisi, 1), n) - 1 : depuis;
+
+  if (vers === depuis) {
+    // Rien a deplacer : on repose juste le numero affiche, SANS reconstruire
+    // la grille. Un re-rendu pendant un `blur` escamote le clic qui l'a
+    // provoque — la carte visee disparait entre le mousedown et le click, et
+    // cliquer une autre carte pour la selectionner ne faisait plus rien.
+    const champ = document.querySelector(`.pf-item-rang[data-id="${fileId}"]`);
+    if (champ) champ.value = pfRangLabel(fileId);
+    return;
+  }
+
+  portefolioSelected.splice(depuis, 1);
+  portefolioSelected.splice(vers, 0, fileId);
+  // Re-rendu differe, pour la meme raison : le clic qui a fait sortir du champ
+  // doit d'abord atteindre sa cible (selectionner une autre carte, par
+  // exemple). Les deux actions s'appliquent alors, au lieu d'une seule.
+  setTimeout(renderPortefolioGrid, 0);
+}
+
+function updatePortefolioSelectedCount() {
+  const el = document.getElementById('pf-selected-count');
+  if (el) el.textContent = portefolioSelected.length;
+}
+
+function updatePortefolioGenerateBtn() {
+  const btn = document.getElementById('btn-generate-portefolio');
+  if (!btn) return;
+  const n = portefolioSelected.length;
+  const anyChapitre = [...document.querySelectorAll('#pf-chapitres-checks input:checked')].length > 0;
+  btn.disabled = n === 0 || !anyChapitre;
+  btn.textContent = n === 0 ? 'Générer le portefolio' : `Générer ${n > 1 ? 'le portefolio (' + n + ' projets)' : 'la fiche projet'}`;
+}
+
+function pfHasFilters() {
+  return msPfClientsSelected.size > 0 || msPfCompsSelected.size > 0 || !!(document.getElementById('pf-search')?.value || '').trim();
+}
+
+function pfClearFilters() {
+  document.getElementById('pf-search').value = '';
+  msPfClientsSelected.clear(); msPfCompsSelected.clear();
+  renderMsDropdown('pfclients'); renderMsDropdown('pfcomps');
+  renderMsChips('pfclients'); renderMsChips('pfcomps');
+  document.getElementById('btn-pf-clear-filters').style.display = 'none';
+  renderPortefolioGrid();
+}
+
+async function generatePortefolio() {
+  // Copie : la selection peut changer pendant la generation, l'ordre envoye
+  // doit rester celui affiche au moment du clic.
+  const ids = [...portefolioSelected];
+  if (!ids.length) return;
+  const btn = document.getElementById('btn-generate-portefolio');
+  btn.disabled = true;
+  const prog = document.getElementById('pf-progress-section'), bar = document.getElementById('pf-progress-bar'),
+        lbl = document.getElementById('pf-progress-label'), res = document.getElementById('pf-results-section'),
+        rl = document.getElementById('pf-result-list');
+  prog.style.display = 'block'; res.style.display = 'none'; rl.innerHTML = ''; bar.style.width = '20%'; bar.style.background = '';
+  lbl.textContent = ids.length > 1 ? `Génération du portefolio (${ids.length} projets)…` : 'Génération de la fiche projet…';
+  document.getElementById('pf-error-banner').style.display = 'none';
+  prog.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const fd = new FormData();
+  ids.forEach(id => fd.append('projets', id));
+  if (ids.length > 1) {
+    fd.append('titre', document.getElementById('pf-titre').value.trim() || 'Références projets');
+    fd.append('sous_titre', document.getElementById('pf-sous-titre').value.trim() || 'Sélection de projets Camptocamp');
+  }
+  [...document.querySelectorAll('#pf-chapitres-checks input:checked')].forEach(cb => fd.append('chapitres', cb.value));
+  fd.append('inclure_equipe', document.getElementById('pf-inclure-equipe').checked ? 'true' : 'false');
+  fd.append('inclure_competences', document.getElementById('pf-inclure-competences').checked ? 'true' : 'false');
+  fd.append('inclure_images', document.getElementById('pf-inclure-images').checked ? 'true' : 'false');
+  bar.style.width = '50%';
+  try {
+    const r = await fetch('/api/portefolio/generate', { method: 'POST', body: fd });
+    bar.style.width = '90%';
+    if (!r.ok) { const e = await r.json().catch(() => ({ detail: 'Erreur inconnue' })); throw new Error(e.detail); }
+    const disp = r.headers.get('content-disposition') || '';
+    const fn = (disp.match(/filename="(.+?)"/) || [])[1] || 'portefolio.pdf';
+    const blob = await r.blob(), url = URL.createObjectURL(blob);
+    bar.style.width = '100%'; lbl.textContent = 'Terminé !'; res.style.display = 'block';
+    res.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const a = document.createElement('a'); a.href = url; a.download = fn; a.click();
+    rl.innerHTML = `<div class="result-item ok"><div>✅</div><div class="result-info"><div class="result-name">${esc(fn)}</div><div class="result-detail">${ids.length} projet${ids.length > 1 ? 's' : ''} inclus</div></div><div class="result-actions"><a href="${url}" download="${esc(fn)}" class="btn-dl">⬇ Re-télécharger</a></div></div>`;
+  } catch (e) {
+    bar.style.width = '100%'; bar.style.background = 'var(--red)'; lbl.textContent = 'Erreur';
+    const banner = document.getElementById('pf-error-banner');
+    banner.textContent = 'Erreur : ' + e.message;
+    banner.style.display = 'block';
+  } finally {
+    updatePortefolioGenerateBtn();
+  }
+}
+
+// ══════════════════════════════════════════════════════
 // ONGLET 2 — FICHE FIN DE PROJET
 // ══════════════════════════════════════════════════════
 let ficheDataLoaded = false;
 let ficheCollabs = [];
 let ficheCompetences = [];
 let ficheSelectedIds = new Set();
+// Mode édition d'un projet existant (entré depuis Administration > Projets) —
+// null = déclaration d'un nouveau projet. Voir enterProjetEditMode/exitProjetEditMode.
+let editingProjet = null;
+// Passe à true seulement quand enterProjetEditMode a fini de pré-remplir le
+// formulaire. Un pré-remplissage interrompu (erreur réseau, exception à mi-
+// parcours) laisse un formulaire vide alors que editingProjet est déjà posé :
+// enregistrer dans cet état écraserait le projet par du vide (buildFicheYAML
+// envoie toujours les clés chapitres). generateFiche() refuse ce cas.
+let editingProjetHydrated = false;
+let editingProjetOriginalSlugs = new Set();
+let removedMembres = new Set();
 
 // Tab state
 let ficheActiveMemberId = null;
@@ -1707,15 +2398,31 @@ const POIDS_OPTIONS = [
 // hors-plage (fiche pas encore migrée, saisie invalide) dans [1,3].
 function poidsClamp(v){ v = Number(v); if(!Number.isFinite(v)) return 2; return Math.min(3, Math.max(1, Math.round(v))); }
 
+// ficheDataLoaded ne passe à true qu'une fois TOUT effectivement chargé (pas
+// au tout début de loadFicheData) : sinon un appel concurrent (nav rapide vers
+// un autre onglet puis retour, double clic...) voit le drapeau déjà à true
+// pendant que les fetch sont encore en vol, et retrouve une grille de
+// collaborateurs vide / des sélecteurs de période sans options. Tout code qui
+// a besoin de ces données doit passer par ensureFicheDataLoaded(), qui
+// attend la même promesse partagée plutôt que de se fier au seul booléen.
+let ficheDataLoadingPromise = null;
+function ensureFicheDataLoaded() {
+  if (ficheDataLoaded) return Promise.resolve();
+  if (!ficheDataLoadingPromise) ficheDataLoadingPromise = loadFicheData();
+  return ficheDataLoadingPromise;
+}
+
 async function loadFicheData() {
-  ficheDataLoaded = true;
   if (!msDomaines.length) await loadFiltres();
   ficheCollabs = collaborateurs.length ? collaborateurs : await fetch('/api/collaborateurs').then(r=>r.json()).catch(()=>[]);
   ficheCompetences = await fetch('/api/competences').then(r=>r.json()).catch(()=>[]);
   renderFicheCollabGrid(ficheCollabs);
   renderFpClientOptions();
   renderFpPeriodeOptions();
+  if (!fpContactRows().length) setFpContacts([]);
+  renderPendingImages();
   updateFicheBtn();
+  ficheDataLoaded = true;
 }
 
 function renderFpClientOptions() {
@@ -1824,6 +2531,23 @@ function renderFicheCollabGrid(list) {
 function toggleFicheCollab(id, el) {
   const cb = el.querySelector('input[type="checkbox"]');
   const wasSelected = ficheSelectedIds.has(id);
+
+  // Mode édition (Administration > Projets) : décocher un membre qui faisait
+  // déjà partie de l'équipe supprimera son entrée projet à l'enregistrement
+  // (réalisations comprises) — confirmation obligatoire avant d'accepter le
+  // retrait. Recocher ensuite annule le retrait en attente.
+  if (editingProjet) {
+    const collab = ficheCollabs.find(c => c.id === id);
+    const slug = collab?.name;
+    if (wasSelected && slug && editingProjetOriginalSlugs.has(slug) && !removedMembres.has(slug)) {
+      const nom = collab.display || slug;
+      if (!confirm(`Retirer ${nom} supprimera son entrée pour ce projet (réalisations comprises). Confirmer ?`)) return;
+      removedMembres.add(slug);
+    } else if (!wasSelected && slug) {
+      removedMembres.delete(slug);
+    }
+  }
+
   if (wasSelected) {
     ficheSelectedIds.delete(id);
     el.classList.remove('selected');
@@ -1878,24 +2602,106 @@ function warnOnMaxLength(el, max) {
   });
 }
 
-// Bouton « Valider » actif seulement si le minimum est atteint :
-// ≥1 membre (chacun avec rôle + au moins 1 réalisation) + désignation + client + période (début).
+// Bouton « Valider » actif seulement si le minimum est atteint : désignation
+// + (si des membres sont sélectionnés) chacun avec rôle + au moins une
+// réalisation. Client et période sont facultatifs (D3 du plan) — seule la
+// désignation sert d'id de fichier YAML et de titre de fiche.
+// Prédicat unique partagé (cf. PLAN-dissocier-validation.md §4bis) : ce que
+// « Enregistrer + ajouter aux CV » va réellement écrire. Un membre est complet
+// s'il a un rôle et au moins une réalisation ; le CV n'est alimenté que s'il y
+// a au moins un membre sélectionné ET que TOUS le sont (sémantique retenue
+// pour trancher la contradiction historique entre le bandeau et le bouton).
+function ficheCvState() {
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  const membreComplete = id => !!val(`mf-${id}-role`) && getRealisations(id).length >= 1;
+  const ids = [...ficheSelectedIds];
+  const membresIncomplets = ids.filter(id => !membreComplete(id));
+  const hasMembers = ids.length >= 1;
+  const cvOk = !!val('fp-nom') && hasMembers && membresIncomplets.length === 0;
+  return { cvOk, hasMembers, membresIncomplets, membreComplete };
+}
+
 function updateFicheBtn() {
   const val = id => (document.getElementById(id)?.value || '').trim();
-  const membresOk = ficheSelectedIds.size >= 1 && [...ficheSelectedIds].every(id =>
-    val(`mf-${id}-role`) && getRealisations(id).length >= 1
-  );
-  const ok = membresOk && val('fp-nom') && val('fp-client-ref') && val('fp-periode-debut');
-  const btn = document.getElementById('btn-generate-fiche');
-  if (btn) btn.disabled = !ok;
+  // « Enregistrer le projet » n'ajoute jamais le projet au CV de personne : il
+  // n'a donc pas besoin d'une équipe complète, seulement de la désignation.
+  const registreOk = !!val('fp-nom');
+  const btn = document.getElementById('btn-save-projet');
+  if (btn) btn.disabled = !registreOk;
+
+  const { cvOk, hasMembers } = ficheCvState();
+  const btnCv = document.getElementById('btn-save-projet-cv');
+  if (btnCv) {
+    btnCv.disabled = !cvOk;
+    btnCv.title = !hasMembers
+      ? 'Sélectionner au moins un collaborateur'
+      : (cvOk ? '' : 'Compléter le rôle et au moins une réalisation pour chaque membre sélectionné');
+  }
+
   const btnPreview = document.getElementById('btn-preview-fiche');
   if (btnPreview) btnPreview.disabled = ficheSelectedIds.size < 1;
+  // Destination AVANT checklist : les deux vivent maintenant dans la même card
+  // (cf. plan §4bis) et syncFicheColRightHeight (appelé en fin de
+  // updateFicheChecklist) doit mesurer le bandeau de destination déjà à jour —
+  // un seul appel de sync suffit tant que l'ordre est respecté.
+  updateFicheDestinationStatus();
   updateFicheChecklist();
+  updateFicheImageHint();
+}
+
+// Chapitres qui alimentent la fiche portefolio (hors contexte_complet, qui ne
+// sert que de contenu — pas de repère de complétude, cf. plan §2 : "selon le
+// nombre de chapitres rédigés").
+const FICHE_PORTEFOLIO_CHAPITRES = ['fp-chap-technique', 'fp-chap-visuel', 'fp-chap-ergonomie', 'fp-chap-environnement', 'fp-chap-resultats'];
+
+// Recalculée à chaque frappe (via updateFicheBtn) : ce que ce projet va
+// alimenter — CV et/ou fiche portefolio — sans jamais forcer la main
+// (cf. plan §2, "Indicateur de destination").
+function updateFicheDestinationStatus() {
+  const el = document.getElementById('fiche-destination-status');
+  const badge = document.getElementById('fiche-portefolio-badge');
+  if (!el) return;
+  const val = id => (document.getElementById(id)?.value || '').trim();
+
+  const { cvOk } = ficheCvState();
+
+  const nChap = FICHE_PORTEFOLIO_CHAPITRES.filter(id => val(id)).length;
+  const etat = nChap === 0 ? 'aucune' : nChap === FICHE_PORTEFOLIO_CHAPITRES.length ? 'complete' : 'partielle';
+
+  el.innerHTML = `
+    <span class="fds-item"><span class="fds-dot ${cvOk ? 'on' : 'off'}"></span>${cvOk ? 'Alimentera les CV' : 'Aucun CV (désignation + au moins un membre requis)'}</span>
+    <span class="fds-item"><span class="fds-dot ${etat === 'aucune' ? 'off' : etat === 'complete' ? 'on' : 'partial'}"></span>${
+      etat === 'aucune' ? 'Aucune fiche portefolio (aucun chapitre rédigé)'
+      : etat === 'complete' ? `Fiche portefolio complète (${nChap}/${FICHE_PORTEFOLIO_CHAPITRES.length} chapitres)`
+      : `Fiche portefolio partielle (${nChap}/${FICHE_PORTEFOLIO_CHAPITRES.length} chapitres)`
+    }</span>`;
+
+  if (badge) {
+    badge.textContent = etat === 'aucune' ? 'Aucune' : etat === 'complete' ? 'Complète' : 'Partielle';
+    badge.classList.toggle('etat-partielle', etat === 'partielle');
+    badge.classList.toggle('etat-complete', etat === 'complete');
+  }
 }
 
 // ── Bouton « Réinitialiser » — annule toutes les actions faites sur ce formulaire ──
 function markFicheDirty(){ const b=document.getElementById('btn-reset-fiche'); if(b) b.disabled=false; }
 function resetFicheForm(){
+  // Sortir du mode édition AVANT la désélection ci-dessous : sinon la garde de
+  // toggleFicheCollab (confirmation de retrait) se déclencherait pour chaque
+  // membre déjà lié alors qu'on ne fait que réinitialiser/annuler, pas retirer.
+  editingProjet = null;
+  editingProjetOriginalSlugs = new Set();
+  removedMembres = new Set();
+  const btnAnnuler = document.getElementById('btn-annuler-edition');
+  if (btnAnnuler) btnAnnuler.style.display = 'none';
+  ['fp-chap-contexte-complet','fp-chap-technique','fp-chap-visuel','fp-chap-ergonomie','fp-chap-environnement','fp-chap-resultats']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  acCount(document.getElementById('fp-chap-contexte-complet'), 'fp-cnt-contexte-complet', 600);
+  document.getElementById('fp-image-legende').value = '';
+  lastSavedProjetFileId = null;
+  pendingImages.forEach(p => URL.revokeObjectURL(p.previewUrl));
+  pendingImages = [];
+  renderProjetImages([]);
   document.getElementById('fp-nom').value='';
   document.getElementById('fp-contexte').value='';
   acCount(document.getElementById('fp-contexte'),'fp-cnt-contexte',180);
@@ -1903,17 +2709,33 @@ function resetFicheForm(){
   onFpClientChange();
   document.getElementById('fp-periode-debut').value='';
   document.getElementById('fp-periode-fin').value='';
+  const budgetMontantReset = document.getElementById('fp-budget-montant');
+  if (budgetMontantReset) budgetMontantReset.value = '';
+  const budgetUniteReset = document.getElementById('fp-budget-unite');
+  if (budgetUniteReset) budgetUniteReset.value = '€';
   const secteurPublic = document.querySelector('input[name="fp-secteur"][value="public"]');
   if (secteurPublic) secteurPublic.checked = true;
+  const lienReset = document.getElementById('fp-lien-projet');
+  if (lienReset) lienReset.value = '';
+  setFpContacts([]);
   [...ficheSelectedIds].forEach(id => {
     const el = document.querySelector(`#fiche-collab-grid .collab-item[data-id="${id}"]`);
     if (el) toggleFicheCollab(id, el);
   });
   if (ficheSyncMode) toggleSyncMode();
-  ['err-fp-nom','err-fp-client-ref','err-fp-periode','err-members'].forEach(id => document.getElementById(id)?.classList.remove('visible'));
+  document.getElementById('err-fp-nom')?.classList.remove('visible');
   document.getElementById('fiche-errors').style.display = 'none';
+  document.getElementById('fiche-portefolio-card')?.classList.add('collapsed');
   updateFicheBtn();
   document.getElementById('btn-reset-fiche').disabled = true;
+}
+
+// Réduire / agrandir la section « Fiche portefolio — optionnel » (même
+// mécanisme que toggleCollabCard, cf. plan §2 : le repli est purement visuel,
+// tous les champs restent soumis).
+function togglePortefolioCard() {
+  document.getElementById('fiche-portefolio-card').classList.toggle('collapsed');
+  syncFicheColRightHeight();
 }
 
 // Année de référence des dropdowns Période : 2014 → année en cours.
@@ -1929,11 +2751,75 @@ function renderFpPeriodeOptions() {
   debut.dataset.filled = '1';
 }
 
+// ── Contacts du projet ─────────────────────────────────────────────────────
+// Trois points de contact au plus (même plafond que ingest.MAX_CONTACTS et que
+// reference_renderer.MAX_CONTACTS : au-delà, la cellule « Contacts » de la
+// fiche déborderait sa demi-largeur). Une ligne vide reste toujours offerte à
+// la saisie — sans elle, il faudrait deviner le bouton pour découvrir que le
+// champ existe.
+const FP_MAX_CONTACTS = 3;
+
+function fpContactRows() {
+  return [...document.querySelectorAll('#fp-contacts-list .contact-row')];
+}
+
+function addFpContact(contact) {
+  const list = document.getElementById('fp-contacts-list');
+  if (!list || fpContactRows().length >= FP_MAX_CONTACTS) return null;
+  const row = document.createElement('div');
+  row.className = 'contact-row';
+  row.innerHTML = `
+    <input type="text" class="fp-contact-nom" maxlength="80" placeholder="Nom du contact" oninput="markFicheDirty()">
+    <input type="email" class="fp-contact-email" maxlength="120" placeholder="prenom.nom@client.fr" oninput="markFicheDirty()">
+    <button type="button" class="btn-remove" title="Retirer ce contact" onclick="removeFpContact(this)">&times;</button>`;
+  list.appendChild(row);
+  if (contact) {
+    row.querySelector('.fp-contact-nom').value = contact.nom || '';
+    row.querySelector('.fp-contact-email').value = contact.email || '';
+  }
+  updateFpContactsUI();
+  return row;
+}
+
+function removeFpContact(btn) {
+  btn.closest('.contact-row')?.remove();
+  if (!fpContactRows().length) addFpContact();
+  updateFpContactsUI();
+  markFicheDirty();
+}
+
+function updateFpContactsUI() {
+  const btn = document.getElementById('fp-contact-add-btn');
+  if (!btn) return;
+  const plein = fpContactRows().length >= FP_MAX_CONTACTS;
+  btn.disabled = plein;
+  btn.title = plein ? `${FP_MAX_CONTACTS} contacts au maximum` : '';
+}
+
+// Contacts effectivement saisis — une ligne dont les deux champs sont vides
+// n'en est pas un (c'est la ligne offerte par défaut).
+function getFpContacts() {
+  return fpContactRows().map(r => ({
+    nom: (r.querySelector('.fp-contact-nom')?.value || '').trim(),
+    email: (r.querySelector('.fp-contact-email')?.value || '').trim(),
+  })).filter(c => c.nom || c.email).slice(0, FP_MAX_CONTACTS);
+}
+
+function setFpContacts(contacts) {
+  const list = document.getElementById('fp-contacts-list');
+  if (!list) return;
+  list.innerHTML = '';
+  (contacts || []).slice(0, FP_MAX_CONTACTS).forEach(c => addFpContact(c));
+  if (!fpContactRows().length) addFpContact();
+  updateFpContactsUI();
+}
+
 function buildPeriodeStr() {
   const debut = document.getElementById('fp-periode-debut')?.value || '';
   const fin = document.getElementById('fp-periode-fin')?.value || '';
   if (!debut) return '';
-  return fin ? `${debut} – ${fin}` : debut;
+  // Même année aux deux bornes : une seule valeur, sinon "2026 – 2026" à l'affichage.
+  return (fin && fin !== debut) ? `${debut} – ${fin}` : debut;
 }
 
 // Checklist « champs à compléter » : reflète exactement les conditions d'activation du bouton.
@@ -1947,9 +2833,6 @@ function updateFicheChecklist() {
 
   const items = [
     { label: 'Désignation du projet', done: !!val('fp-nom') },
-    { label: 'Client', done: !!val('fp-client-ref') },
-    { label: 'Période — année de début', done: !!val('fp-periode-debut') },
-    { label: 'Au moins un membre de l\'équipe', done: ficheSelectedIds.size >= 1 },
   ];
   ficheSelectedIds.forEach(id => {
     const collab = ficheCollabs.find(c => c.id === id);
@@ -2002,20 +2885,36 @@ function syncFicheColRightHeight() {
   // que le conteneur parent est en hauteur "auto" (il ne se clampe qu'une fois le
   // contenu déjà en dépassement, sans redistribuer l'espace restant à la liste).
   // On calcule donc directement la hauteur max de la <ul> elle-même : le plafond
-  // moins tout ce qui garde une taille fixe autour (en-tête, groupe "Complétés",
-  // bloc d'erreurs, bouton, marges).
+  // moins tout ce qui garde une taille fixe autour (en-tête « État de la
+  // déclaration », bandeau de destination, séparateur, sous-en-tête, groupe
+  // "Complétés", bloc d'erreurs, boutons, marges).
   const h = el => el ? el.getBoundingClientRect().height : 0;
   const head = checklist.querySelector('.fe-gaps-head');
+  const destStatus = document.getElementById('fiche-destination-status');
+  const divider = checklist.querySelector('.fiche-checklist-divider');
+  const subhead = checklist.querySelector('.fe-gaps-subhead');
   const doneGroup = document.getElementById('fc-done-group');
   const errors = document.getElementById('fiche-errors');
-  const btn = document.getElementById('btn-generate-fiche');
-  const gaps = 16 * 2; // gap entre .fiche-checklist / #fiche-errors / bouton
-  const reserved = h(head) + h(doneGroup) + h(errors) + h(btn) + gaps;
+  const btn = document.getElementById('btn-save-projet');
+  const btnCv = document.getElementById('btn-save-projet-cv');
+  const gaps = 16 * 2; // gap entre .fiche-checklist / #fiche-errors / boutons
+  const reserved = h(head) + h(destStatus) + h(divider) + h(subhead) + h(doneGroup) + h(errors) + h(btn) + h(btnCv) + gaps;
   ul.style.maxHeight = Math.max(60, cap - reserved) + 'px';
 }
 window.addEventListener('resize', syncFicheColRightHeight);
 
 // ── Tab management ────────────────────────────────────────────────────────
+
+// "Prénom Nom" → "Prénom N" (initiale du nom) — onglets "Infos par membres"
+// compactés, la colonne "Collaborateurs" resserrée ne laisse plus la place
+// pour le nom complet.
+function abbrevMemberName(display) {
+  const parts = (display || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return display || '';
+  const first = parts[0];
+  const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+  return `${first} ${lastInitial}`;
+}
 
 function addMemberTab(collab) {
   const id = collab.id;
@@ -2031,7 +2930,7 @@ function addMemberTab(collab) {
     <input type="checkbox" class="tab-sync-check" id="tab-sync-${id}"
       onclick="event.stopPropagation();toggleTabSync('${id}',this)">
     <div class="tab-avatar" id="tab-av-${id}">${ini}</div>
-    <span>${esc(collab.display)}</span>
+    <span>${esc(abbrevMemberName(collab.display))}</span>
   `;
   tabsEl.appendChild(tab);
   requestAnimationFrame(updateScrollButtons);
@@ -2108,6 +3007,7 @@ function toggleSyncMode() {
 
   if (ficheSyncMode) {
     btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
     banner.classList.add('visible');
     // Start with no members selected in sync group
     ficheGroupedIds = new Set();
@@ -2119,6 +3019,7 @@ function toggleSyncMode() {
     });
   } else {
     btn.classList.remove('active');
+    btn.setAttribute('aria-pressed', 'false');
     banner.classList.remove('visible');
     ficheGroupedIds.clear();
     document.querySelectorAll('.membre-tab').forEach(tab => tab.classList.remove('synced'));
@@ -2358,6 +3259,665 @@ function addMemberPanel(collab) {
   [1, 2, 3].forEach(n => warnOnMaxLength(document.getElementById(`mf-${id}-real-${n}`), 150));
 }
 
+// ── Mode édition d'un projet existant (depuis Administration > Projets) ────
+// Le formulaire "Déclarer un projet" (#fiche-layout-root) est physiquement
+// déplacé dans le panneau de droite d'Administration > Projets pendant
+// l'édition, puis ramené à sa place d'origine (#section-fiche) en sortant —
+// même formulaire, mêmes ids, aucune duplication de logique ; seul son
+// conteneur DOM change (cf. #adp-form-host .fiche-layout en CSS pour le
+// passage en 1 colonne dans ce panneau plus étroit).
+const ficheLayoutHomeParent = document.getElementById('fiche-layout-root')?.parentElement || null;
+
+function moveFicheFormTo(container) {
+  const root = document.getElementById('fiche-layout-root');
+  if (root && container && root.parentElement !== container) container.appendChild(root);
+}
+function moveFicheFormHome() {
+  if (ficheLayoutHomeParent) moveFicheFormTo(ficheLayoutHomeParent);
+}
+
+let adpLoadingFileId = null; // carte en cours de chargement — retour visuel + anti double-clic
+
+async function enterProjetEditMode(fileId) {
+  if (adpLoadingFileId) return; // un chargement est déjà en cours
+  adpLoadingFileId = fileId;
+  adpRenderList(); // affiche immédiatement le spinner sur la carte cliquée + désactive les autres
+
+  let detail;
+  try {
+    // Sans contrôle de r.ok, une erreur serveur (500) se lisait comme un projet
+    // parfaitement vide : {detail:"..."} n'a ni designation ni chapitres, tous
+    // les `|| ''` retombaient à vide et le formulaire s'ouvrait vierge, sans
+    // rien signaler — puis l'enregistrement écrasait le projet.
+    const r = await fetch(`/api/projets/${fileId}/detail`);
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.detail || ('HTTP ' + r.status));
+    }
+    detail = await r.json();
+    if (!detail || !detail.id) throw new Error('réponse inattendue du serveur (projet sans id)');
+  } catch (e) {
+    adpLoadingFileId = null;
+    adpRenderList();
+    alert("Erreur lors du chargement du projet : " + e.message);
+    return;
+  }
+  await ensureFicheDataLoaded();
+  resetFicheForm(); // formulaire propre — editingProjet n'est pas encore posé, pas de confirmation déclenchée
+
+  const placeholder = document.getElementById('adp-form-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
+  moveFicheFormTo(document.getElementById('adp-form-host'));
+
+  editingProjet = { id: detail.id, file_id: fileId };
+  editingProjetHydrated = false; // repassé à true à la fin du pré-remplissage
+  editingProjetOriginalSlugs = new Set((detail.membres || []).map(m => m.collaborateur));
+  removedMembres = new Set();
+  adpLoadingFileId = null;
+  adpSelectedFileId = fileId;
+  adpRenderList();
+
+  const filename = document.getElementById('adp-filename');
+  if (filename) filename.textContent = detail.designation || detail.id;
+  const delBtn = document.getElementById('adp-del');
+  if (delBtn) delBtn.disabled = false;
+
+  document.getElementById('fp-nom').value = detail.designation || '';
+  document.getElementById('fp-client-ref').value = (detail.client_ref || [])[0] || '';
+  onFpClientChange();
+  document.getElementById('fp-sous-entite').value = detail.sous_entite || '';
+  const budgetMontantEl = document.getElementById('fp-budget-montant');
+  if (budgetMontantEl) budgetMontantEl.value = (detail.budget_montant === 0 || detail.budget_montant) ? detail.budget_montant : '';
+  const budgetUniteEl = document.getElementById('fp-budget-unite');
+  if (budgetUniteEl) budgetUniteEl.value = detail.budget_unite || '€';
+  // String() défensif : le backend renvoie désormais des chaînes (ingest._as_text),
+  // mais un registre écrit par une autre main ne doit plus pouvoir casser tout le
+  // pré-remplissage sur un simple .split().
+  const [debut, fin] = String(detail.periode || '').split('–').map(s => (s || '').trim());
+  document.getElementById('fp-periode-debut').value = debut || '';
+  document.getElementById('fp-periode-fin').value = fin || '';
+  const secteurInput = document.querySelector(`input[name="fp-secteur"][value="${detail.secteur === 'prive' ? 'prive' : 'public'}"]`);
+  if (secteurInput) secteurInput.checked = true;
+  document.getElementById('fp-contexte').value = detail.contexte || '';
+  acCount(document.getElementById('fp-contexte'), 'fp-cnt-contexte', 180);
+  const lienEl = document.getElementById('fp-lien-projet');
+  if (lienEl) lienEl.value = detail.lien_projet || '';
+  setFpContacts(detail.contacts || []);
+
+  const chapitres = detail.chapitres || {};
+  document.getElementById('fp-chap-contexte-complet').value = chapitres.contexte_complet || '';
+  acCount(document.getElementById('fp-chap-contexte-complet'), 'fp-cnt-contexte-complet', 600);
+  document.getElementById('fp-chap-technique').value = chapitres.technique || '';
+  document.getElementById('fp-chap-visuel').value = chapitres.visuel || '';
+  document.getElementById('fp-chap-ergonomie').value = chapitres.ergonomie || '';
+  document.getElementById('fp-chap-environnement').value = chapitres.environnement || '';
+  document.getElementById('fp-chap-resultats').value = chapitres.resultats || '';
+  lastSavedProjetFileId = fileId;
+  renderProjetImages(detail.images || []);
+
+  // Un projet qui a déjà des chapitres ou des images pour la fiche portefolio
+  // : la section s'ouvre d'office (cf. plan A1, "discoverabilité").
+  const hasPortefolioContent = Object.values(chapitres).some(v => (v || '').trim()) || (detail.images || []).length > 0;
+  document.getElementById('fiche-portefolio-card')?.classList.toggle('collapsed', !hasPortefolioContent);
+
+  (detail.membres || []).forEach(m => {
+    const collab = ficheCollabs.find(c => c.name === m.collaborateur || c.id === m.collaborateur);
+    if (!collab) return; // collaborateur introuvable (fiche supprimée depuis) — ignoré
+    ficheSelectedIds.add(collab.id);
+    const el = document.querySelector(`#fiche-collab-grid .collab-item[data-id="${collab.id}"]`);
+    if (el) {
+      el.classList.add('selected');
+      const cb = el.querySelector('input[type="checkbox"]');
+      if (cb) cb.checked = true;
+    }
+    addMemberTab(collab);
+    setMemberPanelValues(collab.id, m);
+  });
+  updateFicheMembersBadge();
+  updateFicheBtn();
+
+  // Faire ressortir l'équipe déjà en place : la surbrillance des cases dans la
+  // grille "Collaborateurs" ne suffit pas si la carte est repliée ou si l'onglet
+  // pays affiché par défaut ne contient aucun membre de l'équipe — on déplie et
+  // on bascule sur un onglet où au moins un membre est visible. Le nom du projet
+  // en édition est déjà visible ailleurs (intitulé de la colonne Administration,
+  // ligne sélectionnée dans la liste) : pas besoin d'une bannière en plus.
+  document.getElementById('fiche-s2')?.classList.remove('collapsed');
+  const countryWithMember = Object.entries(ficheByCountry).find(([, items]) =>
+    items.some(c => ficheSelectedIds.has(c.id))
+  )?.[0];
+  if (countryWithMember && countryWithMember !== ficheActiveCountry) {
+    switchFicheCollabCountry(countryWithMember);
+  }
+
+  const btnAnnuler = document.getElementById('btn-annuler-edition');
+  if (btnAnnuler) btnAnnuler.style.display = '';
+
+  document.getElementById('adp-form-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Tout le pré-remplissage a abouti : l'enregistrement est autorisé. Si une
+  // exception a coupé la fonction avant ici, le drapeau reste à false et
+  // generateFiche() bloque l'écriture plutôt que d'écraser le projet.
+  editingProjetHydrated = true;
+}
+
+function exitProjetEditMode() {
+  resetFicheForm();
+  moveFicheFormHome();
+  adpSelectedFileId = null;
+  adpRenderList();
+  const filename = document.getElementById('adp-filename');
+  if (filename) filename.textContent = 'Sélectionne un projet à gauche';
+  const placeholder = document.getElementById('adp-form-placeholder');
+  if (placeholder) placeholder.style.display = 'block';
+  const delBtn = document.getElementById('adp-del');
+  if (delBtn) delBtn.disabled = true;
+}
+
+// Supprime (corbeille Drive, réversible) le projet actuellement en édition —
+// registre uniquement : les fiches collaborateurs déjà liées ne sont pas
+// modifiées (cf. PLAN-dissocier-validation.md, retrait individuel via le
+// formulaire d'édition si besoin).
+async function adpDelete() {
+  if (!editingProjet || !editingProjet.file_id) return;
+  const nom = document.getElementById('fp-nom')?.value.trim() || editingProjet.id;
+  if (!confirm(
+    `Mettre « ${nom} » à la corbeille ?\n\n` +
+    'Le projet disparaîtra du registre (Administration > Projets, Générer un portefolio). ' +
+    'Les fiches des collaborateurs déjà liés ne sont PAS modifiées — le projet reste visible ' +
+    'dans leurs CV. Action réversible depuis la Corbeille.'
+  )) return;
+  const delBtn = document.getElementById('adp-del');
+  if (delBtn) delBtn.disabled = true;
+  adpStatus('Suppression…', '');
+  try {
+    const r = await fetch('/api/projets/' + encodeURIComponent(editingProjet.file_id), { method: 'DELETE' });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || ('HTTP ' + r.status)); }
+    exitProjetEditMode();
+    await initAdminProjets();
+    adpStatus('✓ Mis à la corbeille', 'ok');
+  } catch (e) {
+    adpStatus('✗ ' + e.message, 'err');
+    if (delBtn) delBtn.disabled = false;
+  }
+}
+
+// Clic sur l'onglet "Déclarer un projet" (nav principale) : si le formulaire
+// est actuellement hébergé dans Administration > Projets (édition en cours ou
+// juste terminée sans avoir cliqué "Annuler l'édition"), le ramener à sa place
+// avant de changer d'onglet — sinon une saisie de nouveau projet en cours
+// serait effacée juste en recliquant l'onglet.
+function goToDeclarerProjet() {
+  if (editingProjet) exitProjetEditMode();
+  switchTab('fiche');
+}
+
+// ── Images d'un projet ───────────────────────────────────────────────────────
+// En édition (editingProjet.file_id connu) : upload immédiat, comme le reste
+// de l'app qui écrit sur Drive à chaque action validée. En déclaration d'un
+// NOUVEAU projet, aucun id de fichier Drive n'existe encore avant le premier
+// "Valider" : les images choisies sont mises en attente localement (aperçu
+// via URL.createObjectURL) puis envoyées automatiquement une fois le projet
+// créé (cf. flushPendingImages, appelé depuis applyIngest après succès).
+//
+// Chaque image porte un `chapitre` (environnement/ergonomie/visuel/resultats,
+// ou "" pour l'image libre) — au plus une par chapitre, au plus une libre
+// (cf. plan §1, reflété côté moteur par reference_renderer.CHAPITRE_IMAGE_KEYS
+// et _reshape_chapitres_pdf).
+let pendingImages = []; // [{file, legende, chapitre, previewUrl}] — déclaration seulement
+let lastSavedProjetFileId = null; // connu après un premier "Valider" réussi en déclaration
+let lastRenderedImages = []; // dernière liste d'images serveur connue (chapitre inclus)
+
+const FP_CHAPITRE_LABELS = {
+  environnement: 'Environnement',
+  ergonomie: 'Aspects ergonomiques',
+  visuel: 'Aspects visuels',
+  resultats: 'Résultats & impact',
+};
+const FP_CHAPITRE_IMAGE_KEYS = Object.keys(FP_CHAPITRE_LABELS);
+// Slots dont le visuel est recadre a un format IMPOSE au rendu PDF (cf.
+// reference-projets.typ, image-recadree) : on exige ce format des l'upload,
+// plutot que de laisser un recadrage surprise se decouvrir sur le PDF final.
+// La cle '' est le slot « image libre » (sans chapitre), rendu en pleine
+// largeur de page. Les autres slots (environnement, resultats) n'imposent
+// rien : leur visuel est rendu a son ratio naturel.
+const FP_FORMATS_IMPOSES = {
+  ergonomie:   { l: 328, h: 246 },   // mise en regard, 4:3
+  visuel:      { l: 328, h: 246 },   // mise en regard, 4:3
+};
+
+// L'image libre, elle, n'impose plus rien : son format est un CONSEIL.
+// Le gabarit sait desormais s'accommoder de n'importe quel fichier —
+//   · page dense (type Rennes) : recadrage centre au format cible, comme avant ;
+//   · page aeree (chapitre « Environnement » non redige) : l'image profite de
+//     la place libre et se montre jusqu'a sa hauteur naturelle, sans rognage.
+// Une image plus haute que le format conseille n'est donc plus un probleme,
+// c'est meme ce qui remplit le mieux une page aeree — la refuser privait la
+// mise en page de sa seule marge de manoeuvre.
+const FP_FORMATS_CONSEILLES = {
+  '':          { l: 911, h: 370 },   // image libre, pleine largeur du document
+};
+
+// --- Resolution d'un visuel -------------------------------------------
+// Ces largeurs sont celles que le visuel OCCUPE dans la page, en points —
+// strictement les memes que cote rendu (reference_renderer.LARGEURS_RENDU_PT,
+// lui-meme derive des constantes du gabarit) : les deux tables doivent evoluer
+// ensemble.
+//
+// Le controle de FORMAT ci-dessus ne portait que sur le RATIO : rien
+// n'empechait d'envoyer une image de 328 px de large pour un emplacement de
+// 246 pt, soit 96 dpi — d'ou des visuels qui « paraissent degrades » une fois
+// dans le PDF (bug signale). On refuse donc en amont ce qui ne pourra pas etre
+// rendu proprement, et on annonce la taille conseillee plutot que de laisser
+// lire les chiffres du ratio comme une consigne d'export.
+const FP_LARGEURS_RENDU_PT = {
+  '':            595.28,   // pleine largeur physique de la page
+  environnement: 481.88,   // pleine mesure de texte
+  ergonomie:     246,      // mise en regard, taille fixe
+  visuel:        246,
+  resultats:     297.64,   // moitie du bloc + debord jusqu'au bord de page
+};
+// Cible : la definition a laquelle le moteur reechantillonne (cf.
+// reference_renderer.RENDER_DPI — les deux valeurs doivent rester egales, la
+// taille conseillee ici n'a de sens que si elle est celle que le rendu vise).
+// Plancher : en deca, le visuel est visiblement mou a l'ecran comme au tirage.
+const FP_RENDER_DPI = 200;
+const FP_DPI_MIN = 150;
+
+function fpLargeurPour(chapitre, dpi) {
+  const pt = FP_LARGEURS_RENDU_PT[chapitre];
+  return pt ? Math.round(pt / 72 * dpi) : 0;
+}
+
+function currentProjetFileId() {
+  return editingProjet?.file_id || lastSavedProjetFileId || null;
+}
+
+// Chapitres (dont "" = libre) déjà occupés par une image, dans la liste
+// actuellement affichée (serveur si fileId connu, file d'attente sinon).
+function fpOccupiedChapitres() {
+  const source = currentProjetFileId() ? lastRenderedImages : pendingImages;
+  return new Set(source.map(im => im.chapitre || ''));
+}
+
+function fpChapitreOptionsHtml(selected) {
+  let html = `<option value="" ${selected === '' ? 'selected' : ''}>Libre</option>`;
+  FP_CHAPITRE_IMAGE_KEYS.forEach(k => {
+    html += `<option value="${k}" ${selected === k ? 'selected' : ''}>${esc(FP_CHAPITRE_LABELS[k])}</option>`;
+  });
+  return html;
+}
+
+// Suffixe de libellé d'un slot d'image : le ratio imposé quand il y en a un,
+// et TOUJOURS la largeur conseillée — c'est elle qui manquait, et son absence
+// laissait exporter au format du ratio (328 px pour un emplacement de 246 pt,
+// soit 96 dpi) puis découvrir le résultat flou sur le PDF.
+function fpSuffixeFormat(chapitre) {
+  const impose = FP_FORMATS_IMPOSES[chapitre];
+  const conseille = FP_FORMATS_CONSEILLES[chapitre];
+  const large = fpLargeurPour(chapitre, FP_RENDER_DPI);
+  const bouts = [];
+  if (impose) bouts.push(`ratio ${impose.l} × ${impose.h}`);
+  else if (conseille) bouts.push(`format conseillé ${conseille.l} × ${conseille.h}`);
+  if (large) bouts.push(`≥ ${large} px de large`);
+  return bouts.length ? ` (${bouts.join(', ')})` : '';
+}
+
+// Rafraîchit le sélecteur "prochaine image" (#fp-image-chapitre) : grise
+// dynamiquement les chapitres déjà illustrés et l'option "libre" si une
+// image libre existe déjà (cf. plan A3).
+function renderFpImageChapitreOptions() {
+  const sel = document.getElementById('fp-image-chapitre');
+  if (!sel) return;
+  const occupied = fpOccupiedChapitres();
+  const prevVal = sel.value;
+  // Le format impose (quand il y en a un) est annonce DANS le libelle du
+  // slot : prevenir avant l'upload plutot que de laisser decouvrir le
+  // recadrage sur le PDF (cf. FP_FORMATS_IMPOSES).
+  let html = `<option value="" ${occupied.has('') ? 'disabled' : ''}>${esc('— Image libre (sans chapitre) —' + fpSuffixeFormat(''))}</option>`;
+  FP_CHAPITRE_IMAGE_KEYS.forEach(k => {
+    html += `<option value="${k}" ${occupied.has(k) ? 'disabled' : ''}>${esc(FP_CHAPITRE_LABELS[k] + fpSuffixeFormat(k))}</option>`;
+  });
+  sel.innerHTML = html;
+  const stillValid = [...sel.options].some(o => o.value === prevVal && !o.disabled);
+  sel.value = stillValid ? prevVal : ([...sel.options].find(o => !o.disabled)?.value ?? '');
+}
+
+function fpImageSlotsFull() {
+  const occupied = fpOccupiedChapitres();
+  return occupied.has('') && FP_CHAPITRE_IMAGE_KEYS.every(k => occupied.has(k));
+}
+
+function updateFpImageAddState() {
+  const btn = document.getElementById('fp-image-add-btn');
+  if (!btn) return;
+  const full = fpImageSlotsFull();
+  btn.disabled = full;
+  btn.title = full ? '5 images maximum (4 chapitres + 1 libre) — retirez-en une avant d’en ajouter une autre.' : '';
+}
+
+// Aide contextuelle (A4) : reflète l'état réel de la règle la moins intuitive
+// du système — l'image libre ne s'affiche que si un chapitre-image manque de
+// texte, en réplique fidèle de reference_renderer._reshape_chapitres_pdf.
+function updateFicheImageHint() {
+  const hintEl = document.getElementById('fp-image-hint');
+  if (!hintEl) return;
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  const source = currentProjetFileId() ? lastRenderedImages : pendingImages;
+  const imagesParChapitre = new Set(source.filter(im => FP_CHAPITRE_IMAGE_KEYS.includes(im.chapitre)).map(im => im.chapitre));
+  const aImageLibre = source.some(im => !im.chapitre);
+
+  const manquants = FP_CHAPITRE_IMAGE_KEYS.filter(k => !val(`fp-chap-${k}`));
+  const nRenseignes = FP_CHAPITRE_IMAGE_KEYS.length - manquants.length;
+
+  let msg = `${nRenseignes} chapitre${nRenseignes > 1 ? 's' : ''} rédigé${nRenseignes > 1 ? 's' : ''} sur ${FP_CHAPITRE_IMAGE_KEYS.length}.`;
+  if (manquants.length) {
+    const label = FP_CHAPITRE_LABELS[manquants[0]];
+    if (aImageLibre) {
+      msg += ` L'image libre prendra la place du chapitre « ${label} » (non rédigé).`;
+    } else {
+      msg += ` Le chapitre « ${label} » n'a pas de texte — une image libre pourrait prendre sa place.`;
+    }
+  } else if (aImageLibre && ficheSelectedIds.size === 0) {
+    msg += ' Aucun collaborateur sélectionné (pas de bloc équipe/compétences) : l\'image libre sera affichée pleine largeur en tête de fiche.';
+  } else if (aImageLibre) {
+    msg += ' Les 4 chapitres sont rédigés et l\'équipe est renseignée : l\'image libre ne sera pas affichée dans la fiche portefolio.';
+  }
+  const chapImgManquants = FP_CHAPITRE_IMAGE_KEYS.filter(k => !imagesParChapitre.has(k));
+  if (chapImgManquants.length && chapImgManquants.length < FP_CHAPITRE_IMAGE_KEYS.length) {
+    msg += ` Sans image : ${chapImgManquants.map(k => FP_CHAPITRE_LABELS[k]).join(', ')}.`;
+  }
+  hintEl.textContent = msg;
+}
+
+function fpImageItemHtml(im, fileId) {
+  const chap = im.chapitre || '';
+  const badgeLabel = chap ? FP_CHAPITRE_LABELS[chap] : 'Libre';
+  return `
+    <div class="fp-image-item">
+      <img src="/api/projets/${esc(fileId)}/images/${esc(im.fichier_drive_id)}" alt="">
+      <div class="fp-image-legende">
+        <span class="fp-image-chip">${esc(badgeLabel)}</span>
+        ${esc(im.legende || im.nom || '')}
+        <select class="fp-image-reassign" onchange="reassignProjetImageChapitre('${esc(im.fichier_drive_id)}', this.value)">${fpChapitreOptionsHtml(chap)}</select>
+      </div>
+      <button type="button" class="btn-remove" title="Retirer" onclick="deleteProjetImage('${esc(im.fichier_drive_id)}')">×</button>
+    </div>`;
+}
+
+function renderProjetImages(images) {
+  const fileId = currentProjetFileId();
+  if (!fileId) { renderPendingImages(); return; }
+  lastRenderedImages = images || [];
+  const list = document.getElementById('fp-images-list');
+  if (list) {
+    list.innerHTML = images.length
+      ? images.map(im => fpImageItemHtml(im, fileId)).join('')
+      : '<div class="field-hint">Aucune image pour ce projet.</div>';
+  }
+  renderFpImageChapitreOptions();
+  updateFpImageAddState();
+  updateFicheImageHint();
+}
+
+function renderPendingImages() {
+  const list = document.getElementById('fp-images-list');
+  if (list) {
+    list.innerHTML = pendingImages.length
+      ? pendingImages.map((p, i) => `
+        <div class="fp-image-item">
+          <img src="${p.previewUrl}" alt="">
+          <div class="fp-image-legende">
+            <span class="fp-image-chip">${esc(p.chapitre ? FP_CHAPITRE_LABELS[p.chapitre] : 'Libre')}</span>
+            ${esc(p.legende || p.file.name || '')} <span class="field-hint-tiny">(envoi après validation)</span>
+          </div>
+          <button type="button" class="btn-remove" title="Retirer" onclick="removePendingImage(${i})">×</button>
+        </div>`).join('')
+      : '<div class="field-hint">Aucune image ajoutée — elles seront envoyées dès la première validation du projet.</div>';
+  }
+  renderFpImageChapitreOptions();
+  updateFpImageAddState();
+  updateFicheImageHint();
+}
+
+function queuePendingImage(file, chapitre, note = '') {
+  const legendeInput = document.getElementById('fp-image-legende');
+  pendingImages.push({ file, legende: legendeInput?.value.trim() || '', chapitre: chapitre || '', previewUrl: URL.createObjectURL(file) });
+  if (legendeInput) legendeInput.value = '';
+  document.getElementById('fp-image-input').value = '';
+  // La note de cadrage doit se lire tout de suite : en déclaration d'un
+  // nouveau projet, l'image n'est encore que dans la file d'attente, aucun
+  // aller-retour serveur ne viendra l'afficher.
+  const statusEl = document.getElementById('fp-image-status');
+  if (statusEl) {
+    statusEl.textContent = note || '';
+    statusEl.style.color = '';
+  }
+  renderPendingImages();
+}
+
+function removePendingImage(index) {
+  const [removed] = pendingImages.splice(index, 1);
+  if (removed) URL.revokeObjectURL(removed.previewUrl);
+  renderPendingImages();
+}
+
+// Point d'entrée du <input type="file"> : lit le chapitre visé dans le
+// sélecteur, confirme un remplacement si le slot est déjà pris (le backend
+// remplace sans broncher — c'est l'UI qui porte le garde-fou, cf. plan A3/D1).
+async function onFpImageFileChosen(file) {
+  if (!file) return;
+  const chapitre = document.getElementById('fp-image-chapitre')?.value || '';
+  if (fpOccupiedChapitres().has(chapitre)) {
+    const label = chapitre ? FP_CHAPITRE_LABELS[chapitre] : 'libre';
+    if (!confirm(`Une image « ${label} » existe déjà pour ce projet. La remplacer ?`)) {
+      document.getElementById('fp-image-input').value = '';
+      return;
+    }
+  }
+  const label = chapitre ? `« ${FP_CHAPITRE_LABELS[chapitre]} »` : 'libre';
+  // Une seule lecture du fichier pour les deux contrôles (cadrage, puis
+  // définition). `null` = fichier illisible comme image : on laisse passer,
+  // l'échec se découvrira avec un message clair à l'upload.
+  const dim = await dimensionsImage(file);
+  const format = FP_FORMATS_IMPOSES[chapitre];
+  if (dim && format && !fpRatioRespecte(dim, format)) {
+    alert(`L'image ${label} doit respecter le ratio ${format.l} × ${format.h} (largeur/hauteur ≈ ${(format.l / format.h).toFixed(3)}) — recadrez-la puis réessayez.`);
+    document.getElementById('fp-image-input').value = '';
+    return;
+  }
+  // Définition : l'emplacement a une largeur fixe dans la page, une image trop
+  // petite y sera agrandie par le lecteur PDF et paraîtra floue. On refuse
+  // sous 150 dpi et on rappelle la taille conseillée (300 dpi).
+  const minimum = fpLargeurPour(chapitre, FP_DPI_MIN);
+  if (dim && minimum && dim.w < minimum) {
+    const conseil = fpLargeurPour(chapitre, FP_RENDER_DPI);
+    alert(`L'image ${label} fait ${dim.w} px de large : trop peu pour l'emplacement qu'elle occupe, elle sortirait floue du PDF.\n\nMinimum ${minimum} px, ${conseil} px conseillés.`);
+    document.getElementById('fp-image-input').value = '';
+    return;
+  }
+  uploadProjetImage(file, chapitre, fpNoteCadrage(chapitre, dim));
+}
+
+// Tolérance 3 % sur le ratio : exports et compressions arrondissent parfois la
+// taille de quelques pixels.
+function fpRatioRespecte(dim, format) {
+  const cible = format.l / format.h;
+  return Math.abs(dim.w / dim.h - cible) / cible <= 0.03;
+}
+
+// Note (jamais bloquante) sur le sort réservé à une image qui s'écarte du
+// format conseillé : dire ce que le rendu va en faire vaut mieux que de la
+// refuser, maintenant que le gabarit sait s'en accommoder — et mieux que de
+// laisser découvrir le recadrage sur le PDF fini.
+function fpNoteCadrage(chapitre, dim) {
+  const conseille = FP_FORMATS_CONSEILLES[chapitre];
+  if (!conseille || !dim || fpRatioRespecte(dim, conseille)) return '';
+  const plusHaute = dim.w / dim.h < conseille.l / conseille.h;
+  return plusHaute
+    ? `Format ${dim.w} × ${dim.h} : plus haut que le ${conseille.l} × ${conseille.h} conseillé. L'image sera recadrée (centrée) sur une fiche dense, et montrée plus grande sur une fiche aérée.`
+    : `Format ${dim.w} × ${dim.h} : plus large que le ${conseille.l} × ${conseille.h} conseillé. L'image sera recadrée (centrée) à gauche et à droite.`;
+}
+
+// Dimensions naturelles du fichier choisi, ou null s'il n'est pas lisible
+// comme image.
+function dimensionsImage(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
+  });
+}
+
+async function uploadProjetImage(file, chapitre, note = '') {
+  if (!file) return;
+  const fileId = currentProjetFileId();
+  if (!fileId) { queuePendingImage(file, chapitre, note); return; }
+
+  const statusEl = document.getElementById('fp-image-status');
+  const legendeInput = document.getElementById('fp-image-legende');
+  const fd = new FormData();
+  fd.append('image', file);
+  fd.append('legende', legendeInput?.value.trim() || '');
+  fd.append('chapitre', chapitre || '');
+  statusEl.textContent = 'Envoi en cours…';
+  statusEl.style.color = '';
+  try {
+    const r = await fetch(`/api/projets/${fileId}/images`, { method: 'POST', body: fd });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.detail || `HTTP ${r.status}`);
+    renderProjetImages(body.images || []);
+    if (legendeInput) legendeInput.value = '';
+    statusEl.textContent = note ? `Image ajoutée ✓ — ${note}` : 'Image ajoutée ✓';
+    statusEl.style.color = note ? '' : 'var(--green)';
+  } catch (e) {
+    statusEl.textContent = "Erreur : " + e.message;
+    statusEl.style.color = 'var(--red)';
+  } finally {
+    document.getElementById('fp-image-input').value = '';
+  }
+}
+
+// Réassignation sans re-upload (PATCH, cf. plan A2) — depuis le petit
+// sélecteur inline sur chaque vignette.
+async function reassignProjetImageChapitre(imageId, newChapitre) {
+  const fileId = currentProjetFileId();
+  if (!fileId) return;
+  const occupant = lastRenderedImages.find(im => (im.chapitre || '') === newChapitre && im.fichier_drive_id !== imageId);
+  if (occupant) {
+    const label = newChapitre ? FP_CHAPITRE_LABELS[newChapitre] : 'libre';
+    if (!confirm(`Une image « ${label} » existe déjà pour ce projet. La remplacer ?`)) {
+      renderProjetImages(lastRenderedImages);
+      return;
+    }
+  }
+  const statusEl = document.getElementById('fp-image-status');
+  const fd = new FormData();
+  fd.append('chapitre', newChapitre || '');
+  try {
+    const r = await fetch(`/api/projets/${fileId}/images/${imageId}`, { method: 'PATCH', body: fd });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.detail || `HTTP ${r.status}`);
+    renderProjetImages(body.images || []);
+  } catch (e) {
+    if (statusEl) { statusEl.textContent = "Erreur : " + e.message; statusEl.style.color = 'var(--red)'; }
+    renderProjetImages(lastRenderedImages);
+  }
+}
+
+async function deleteProjetImage(imageFileId) {
+  const fileId = currentProjetFileId();
+  if (!fileId) return;
+  if (!confirm('Retirer cette image du projet ?')) return;
+  const statusEl = document.getElementById('fp-image-status');
+  try {
+    const r = await fetch(`/api/projets/${fileId}/images/${imageFileId}`, { method: 'DELETE' });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.detail || `HTTP ${r.status}`);
+    renderProjetImages(body.images || []);
+  } catch (e) {
+    statusEl.textContent = "Erreur : " + e.message;
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+// Envoie la file d'attente une fois le projet créé/mis à jour (fileId connu) —
+// appelé depuis applyIngest juste après un enregistrement réussi.
+async function flushPendingImages(fileId) {
+  if (!pendingImages.length) return;
+  const statusEl = document.getElementById('fp-image-status');
+  let lastImages = null;
+  let failCount = 0;
+  for (const pending of pendingImages) {
+    const fd = new FormData();
+    fd.append('image', pending.file);
+    fd.append('legende', pending.legende || '');
+    fd.append('chapitre', pending.chapitre || '');
+    try {
+      const r = await fetch(`/api/projets/${fileId}/images`, { method: 'POST', body: fd });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.detail || `HTTP ${r.status}`);
+      lastImages = body.images || lastImages;
+    } catch (e) {
+      failCount++;
+    }
+    URL.revokeObjectURL(pending.previewUrl);
+  }
+  pendingImages = [];
+  if (lastImages) renderProjetImages(lastImages);
+  if (failCount && statusEl) {
+    statusEl.textContent = `${failCount} image(s) n'ont pas pu être envoyée(s) — à réessayer depuis Administration > Projets.`;
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+// Pousse les champs individuels d'un membre déjà déclaré dans son panneau —
+// aucune fonction équivalente n'existait (les panneaux démarrent toujours
+// vides) : cf. addMemberPanel ci-dessus pour la structure des champs ciblés.
+function setMemberPanelValues(id, membre) {
+  const roleInput = document.getElementById(`mf-${id}-role`);
+  if (roleInput) roleInput.value = membre.role || '';
+  const poidsSelect = document.getElementById(`mf-${id}-poids`);
+  if (poidsSelect) poidsSelect.value = String(poidsClamp(membre.poids));
+
+  (membre.domaines || []).forEach(d => {
+    const cb = document.querySelector(`#mf-${id}-dom-dropdown input[value="${CSS.escape(d)}"]`);
+    if (cb) cb.checked = true;
+  });
+  updateMemberDomChips(id);
+
+  // Compétences hors référentiel (pas de checkbox correspondante) : ré-ajoutées
+  // comme ligne "hors référentiel" à section vide plutôt que silencieusement
+  // perdues — la validation existante impose de choisir une section avant de
+  // pouvoir enregistrer, ce qui force à les traiter au lieu de les faire disparaître.
+  const compReferentiel = new Set(ficheCompetences.flatMap(f => f.items || []));
+  (membre.competences || []).forEach(c => {
+    if (compReferentiel.has(c)) {
+      const cb = document.querySelector(`#mf-${id}-comp-families input[value="${CSS.escape(c)}"]`);
+      if (cb) cb.checked = true;
+    } else {
+      addNewComp(id);
+      const n = newCompCount[id];
+      const nomInput = document.getElementById(`nc-${id}-${n}-nom`);
+      if (nomInput) nomInput.value = c;
+    }
+  });
+  updateCompChips(id);
+
+  const realInputs = [...document.querySelectorAll(`#mf-${id}-realisations input[type="text"]`)];
+  (membre.realisations || []).forEach((r, i) => { if (realInputs[i]) realInputs[i].value = r; });
+
+  markFicheDirty();
+}
+
 // Mapping méta-catégories
 const FAMILY_META_JS = {
   cartographie_web:'Carto & SIG', serveurs_carto:'Carto & SIG',
@@ -2508,8 +4068,15 @@ function addNewComp(memberId) {
 
 // ── Génération YAML ────────────────────────────────────────────────────────
 
-async function generateFiche() {
-  const errors = validateFicheForm();
+async function generateFiche(ecrireCv) {
+  if (editingProjet && !editingProjetHydrated) {
+    alert("Ce projet n'a pas pu être chargé complètement dans le formulaire.\n\n"
+      + "Enregistrement bloqué : il écraserait le projet existant par un formulaire vide "
+      + "(chapitres, équipe, contexte). Recharge la page, rouvre le projet, et signale "
+      + "l'erreur affichée à l'ouverture si elle réapparaît.");
+    return;
+  }
+  const errors = validateFicheForm(ecrireCv);
   const errDiv = document.getElementById('fiche-errors');
   const errList = document.getElementById('fiche-errors-list');
   if (errors.length) {
@@ -2522,22 +4089,43 @@ async function generateFiche() {
 
   // Auto-ingestion : on analyse la fiche côté serveur, on montre un aperçu,
   // puis (après confirmation) on écrit directement dans les fiches maîtres.
+  // L'analyse consulte le registre projet (recherche Drive) en plus des
+  // fiches collaborateurs : peut prendre plusieurs secondes — le bouton doit
+  // donc être verrouillé + montrer un retour visuel, comme pour l'enregistrement.
+  const btn = document.getElementById(ecrireCv ? 'btn-save-projet-cv' : 'btn-save-projet');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="ing-spinner"></span>Analyse en cours…'; }
+
   const yaml = buildFicheYAML();
   try {
     const fd = new FormData();
     fd.append('fiche_yaml', yaml);
+    // Édition d'un projet existant : on transmet son file_id Drive pour que le
+    // backend relise puis réécrive CE fichier, au lieu de re-chercher
+    // « <id>.yaml » par son nom — Drive tolérant les homonymes dans un même
+    // dossier, cette recherche pouvait viser un jumeau ou en créer un nouveau
+    // (cf. ingest._upsert_projet).
+    if (editingProjet?.file_id) fd.append('projet_file_id', editingProjet.file_id);
     const r = await fetch('/api/fiche/parse', { method:'POST', body:fd });
     if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail || ('HTTP '+r.status)); }
     const preview = await r.json();
     if (preview.errors && preview.errors.length) { alert('⚠ ' + preview.errors.join(' · ')); return; }
-    showIngestPreview(preview, yaml);
+    showIngestPreview(preview, yaml, ecrireCv);
   } catch(e) {
     alert("Erreur lors de l'analyse de la fiche : " + e.message);
+  } finally {
+    if (btn) btn.innerHTML = originalHtml;
+    updateFicheBtn(); // restaure l'état disabled/enabled correct (validité du formulaire)
   }
 }
 
 // ── Auto-ingestion : aperçu + confirmation ──────────────────────────────────
 let _ingestPreview = null;
+// true pendant l'appel réseau /api/fiche/apply : bloque la fermeture du modal
+// (backdrop + Annuler) pour empêcher un ré-enregistrement en double si
+// l'écriture Drive est lente et que l'utilisateur, sans retour visuel clair,
+// ferme puis rouvre le formulaire.
+let _applyInFlight = false;
 
 function _ingModal() {
   let ov = document.getElementById('ingest-overlay');
@@ -2546,16 +4134,22 @@ function _ingModal() {
   ov.id = 'ingest-overlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;';
   ov.innerHTML = '<div id="ingest-box" style="background:var(--white);max-width:720px;width:100%;max-height:85vh;overflow:auto;border-top:3px solid var(--orange);padding:22px 24px;font-family:Inter,system-ui,sans-serif;font-size:13.5px;color:var(--ink);"></div>';
-  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.addEventListener('click', e => { if (e.target === ov && !_applyInFlight) ov.remove(); });
   document.body.appendChild(ov);
   return ov;
 }
 
-function showIngestPreview(preview, yamlText) {
+function showIngestPreview(preview, yamlText, ecrireCv) {
+  preview.ecrire_cv = ecrireCv;
   _ingestPreview = preview;
   const projet = preview.projet || {};
   const membres = preview.membres || [];
   const found = membres.filter(m => m.found).length;
+  // Équipe facultative : bloquer seulement si des membres ont été soumis mais
+  // qu'aucun n'a été retrouvé (slug erroné) — pas de membre du tout est un cas
+  // normal (projet déclaré/édité sans équipe pour l'instant). Sans écriture CV,
+  // aucune fiche collaborateur n'est de toute façon touchée : rien à bloquer.
+  const hasUnresolvedMembers = ecrireCv && membres.length > 0 && found === 0;
   const box = _ingModal().querySelector('#ingest-box');
 
   const membresHtml = membres.map(m => {
@@ -2577,31 +4171,45 @@ function showIngestPreview(preview, yamlText) {
     </div>`;
   }).join('');
 
+  // Registre seul : masquer la section « membres » plutôt que d'afficher des
+  // fiches qui ne seront pas touchées (cf. plan §4.3) — le dernier point
+  // d'arrêt avant l'écriture chez autrui ne doit annoncer que ce qui va l'être.
+  const titre = ecrireCv ? 'Aperçu avant enregistrement' : 'Aperçu avant enregistrement du projet';
+  const intro = ecrireCv
+    ? "Ces modifications seront ajoutées aux fiches maîtres sur le Drive, et l'administrateur sera notifié."
+    : "Seul le registre du projet sera écrit sur le Drive — aucune fiche collaborateur ne sera modifiée. L'administrateur sera notifié.";
+
   box.innerHTML = `
-    <h3 style="font-size:16px;font-weight:800;margin-bottom:4px;">Aperçu avant enregistrement</h3>
-    <p style="color:var(--grey-dark);margin-bottom:14px;">Ces modifications seront ajoutées aux fiches maîtres sur le Drive, et l'administrateur sera notifié.</p>
+    <h3 style="font-size:16px;font-weight:800;margin-bottom:4px;">${titre}</h3>
+    <p style="color:var(--grey-dark);margin-bottom:14px;">${intro}</p>
     <div style="padding:10px 12px;background:var(--surface-tint);border:1px solid var(--border);margin-bottom:12px;">
       <strong>${esc(projet.designation||projet.id||'Projet')}</strong> — ${esc(projet.client_ref||'')} · ${esc(projet.periode||'')}
     </div>
-    <div style="font-size:11px;color:var(--grey-dark);margin-bottom:8px;">${found}/${membres.length} collaborateur(s) trouvé(s)</div>
-    ${membresHtml}
+    ${ecrireCv ? `<div style="font-size:11px;color:var(--grey-dark);margin-bottom:8px;">${found}/${membres.length} collaborateur(s) trouvé(s)</div>${membresHtml}` : ''}
     <div id="ingest-result" style="margin-top:6px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
       <button id="ing-cancel" style="padding:8px 14px;border:1px solid var(--grey);background:var(--white);cursor:pointer;font-size:13px;">Annuler</button>
       <button id="ing-dl" style="padding:8px 14px;border:1px solid var(--grey);background:var(--white);cursor:pointer;font-size:13px;">Télécharger le YAML</button>
-      <button id="ing-confirm" style="padding:8px 16px;border:none;background:var(--orange);color:#fff;cursor:pointer;font-weight:600;font-size:13px;" ${found===0?'disabled':''}>Confirmer et enregistrer</button>
+      <button id="ing-confirm" style="padding:8px 16px;border:none;background:var(--orange);color:#fff;cursor:pointer;font-weight:600;font-size:13px;" ${hasUnresolvedMembers?'disabled':''}>Confirmer et enregistrer</button>
     </div>`;
 
-  box.querySelector('#ing-cancel').onclick = () => document.getElementById('ingest-overlay').remove();
+  box.querySelector('#ing-cancel').onclick = () => { if (!_applyInFlight) document.getElementById('ingest-overlay').remove(); };
   box.querySelector('#ing-dl').onclick = () => downloadText(yamlText, 'fiche-fin-projet--' + slugify(projet.designation||projet.id||'projet') + '.yaml');
   const cbtn = box.querySelector('#ing-confirm');
-  if (found > 0) cbtn.onclick = () => applyIngest(cbtn);
+  if (!hasUnresolvedMembers) cbtn.onclick = () => applyIngest(cbtn);
 }
 
 async function applyIngest(btn) {
-  if (!_ingestPreview) return;
-  btn.disabled = true; btn.textContent = 'Enregistrement…';
+  if (!_ingestPreview || _applyInFlight) return;
+  _applyInFlight = true;
+  const cancelBtn = document.getElementById('ing-cancel');
+  const dlBtn = document.getElementById('ing-dl');
+  btn.disabled = true; btn.innerHTML = '<span class="ing-spinner"></span>Enregistrement en cours…';
+  if (cancelBtn) { cancelBtn.disabled = true; cancelBtn.title = 'Enregistrement en cours — merci de patienter'; }
+  if (dlBtn) dlBtn.disabled = true;
   const res = document.getElementById('ingest-result');
+  res.innerHTML = '<div style="color:var(--grey-dark);font-size:12px;"><span class="ing-spinner"></span>'
+    + 'Écriture sur le Drive en cours (peut prendre plusieurs secondes selon le nombre de membres) — ne fermez pas cette fenêtre…</div>';
   try {
     const r = await fetch('/api/fiche/apply', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -2609,38 +4217,70 @@ async function applyIngest(btn) {
     });
     if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail || ('HTTP '+r.status)); }
     const results = await r.json();
+    const registreResult = results.find(x => x.slug === '_registre_');
+    if (registreResult?.file_id) {
+      lastSavedProjetFileId = registreResult.file_id;
+      if (pendingImages.length) await flushPendingImages(registreResult.file_id);
+    }
     res.innerHTML = results.map(x=>`<div style="padding:8px 12px;border:1px solid var(--border);margin-top:6px;color:${x.ok?'var(--green)':'var(--red)'};"><strong>${esc(x.display||x.slug)}</strong> — ${esc(x.message)}</div>`).join('')
       + '<div style="margin-top:10px;color:var(--green);font-weight:600;">✓ Fiche(s) mise(s) à jour sur le Drive. L\'administrateur a été notifié.</div>';
-    btn.textContent = 'Enregistré ✓';
-    document.getElementById('ing-cancel').textContent = 'Fermer';
+    btn.innerHTML = 'Enregistré ✓';
+    if (cancelBtn) { cancelBtn.disabled = false; cancelBtn.title = ''; cancelBtn.textContent = 'Fermer'; }
+    if (dlBtn) dlBtn.disabled = false;
+    // Administration > Projets se recharge à chaque ouverture d'onglet (comme les
+    // autres écrans admin) : pas besoin de rafraîchir quoi que ce soit ici.
   } catch(e) {
     res.innerHTML = `<div style="color:var(--red);margin-top:8px;">Erreur : ${esc(e.message)}</div>`;
     btn.disabled = false; btn.textContent = 'Confirmer et enregistrer';
+    if (cancelBtn) { cancelBtn.disabled = false; cancelBtn.title = ''; }
+    if (dlBtn) dlBtn.disabled = false;
+  } finally {
+    _applyInFlight = false;
   }
 }
 
-function validateFicheForm() {
+function validateFicheForm(ecrireCv) {
   const errors = [];
   const clearErr = id => document.getElementById(id)?.classList.remove('visible');
   const showErr  = id => document.getElementById(id)?.classList.add('visible');
 
   const nom = document.getElementById('fp-nom').value.trim();
   clearErr('err-fp-nom'); if(!nom){showErr('err-fp-nom');errors.push('Nom du projet manquant');}
-  const client = document.getElementById('fp-client-ref').value.trim();
-  clearErr('err-fp-client-ref'); if(!client){showErr('err-fp-client-ref');errors.push('Client manquant');}
-  const periodeDebut = document.getElementById('fp-periode-debut').value.trim();
-  clearErr('err-fp-periode'); if(!periodeDebut){showErr('err-fp-periode');errors.push('Période : année de début manquante');}
+  // Client et période sont facultatifs (D3 du plan) — pas de validation bloquante.
 
-  clearErr('err-members');
-  if(!ficheSelectedIds.size){showErr('err-members');errors.push('Sélectionner au moins un membre de l\'équipe');}
+  // Pas d'obligation d'avoir un membre : un projet peut être déclaré/édité
+  // sans équipe. Rôle + réalisations ne conditionnent que l'écriture CV
+  // (cf. PLAN-dissocier-validation.md §4.3) : « Enregistrer le projet » seul
+  // ne les exige pas, mais la section d'une nouvelle compétence reste
+  // obligatoire dans tous les cas (alimente aussi le référentiel commun).
+  // Lien et contacts : format contrôlé ICI, pas seulement côté registre, qui
+  // écarte silencieusement une adresse illisible (cf. ingest._as_lien_projet /
+  // _as_contacts). Une donnée saisie qui disparaît sans un mot est pire qu'un
+  // formulaire qui refuse de partir.
+  const lienSaisi = document.getElementById('fp-lien-projet')?.value.trim() || '';
+  if (lienSaisi && !/^(https?:\/\/)?[\w-]+(\.[\w-]{2,})+(:\d+)?(\/[^\s]*)?$/i.test(lienSaisi)) {
+    errors.push('Lien vers le projet publié : adresse invalide (ex. https://exemple.fr/le-projet)');
+  }
+  getFpContacts().forEach((c, i) => {
+    const repere = c.nom || `contact ${i + 1}`;
+    if (c.email && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(c.email)) {
+      errors.push(`Contacts — ${repere} : adresse e-mail invalide (« ${c.email} »)`);
+    }
+  });
 
   ficheSelectedIds.forEach(id => {
     const collab = ficheCollabs.find(c=>c.id===id);
     const name = collab?.display || id;
 
-    const role = document.getElementById(`mf-${id}-role`)?.value.trim();
     clearErr(`err-mf-${id}-role`);
-    if(!role){showErr(`err-mf-${id}-role`);errors.push(`${name} : rôle manquant`);}
+    clearErr(`err-mf-${id}-realisations`);
+    if (ecrireCv) {
+      const role = document.getElementById(`mf-${id}-role`)?.value.trim();
+      if(!role){showErr(`err-mf-${id}-role`);errors.push(`${name} : rôle manquant`);}
+
+      const reals = getRealisations(id);
+      if(reals.length<1){showErr(`err-mf-${id}-realisations`);errors.push(`${name} : 1 réalisation minimum`);}
+    }
 
     // Nouvelle compétence hors référentiel : section OBLIGATOIRE (aucun fourre-tout)
     document.querySelectorAll(`#mf-${id}-new-comps .new-comp-row`).forEach(row => {
@@ -2653,10 +4293,6 @@ function validateFicheForm() {
         errors.push(`${name} : choisir une section pour la compétence « ${nomVal} »`);
       }
     });
-
-    const reals = getRealisations(id);
-    clearErr(`err-mf-${id}-realisations`);
-    if(reals.length<1){showErr(`err-mf-${id}-realisations`);errors.push(`${name} : 1 réalisation minimum`);}
   });
 
   return errors;
@@ -2670,7 +4306,34 @@ function buildFicheYAML() {
   const periode = buildPeriodeStr();
   const secteur = document.querySelector('input[name="fp-secteur"]:checked')?.value || 'public';
   const contexte = document.getElementById('fp-contexte').value.trim();
-  const projId = slugify(nom);
+  // Montant NU (nombre) et unité séparée : la mise en forme du libellé
+  // (« 555 000 € ») appartient au rendu, pas au registre — cf.
+  // reference_renderer._budget_label. Un montant vide n'écrit aucune clé,
+  // pour ne pas semer des `budget_montant: ''` dans tout le registre.
+  const budgetMontant = document.getElementById('fp-budget-montant')?.value.trim() || '';
+  const budgetUnite = document.getElementById('fp-budget-unite')?.value || '€';
+  // Lien et contacts : TOUJOURS écrits, même vides. C'est la clé présente qui
+  // fait foi côté backend (cf. ingest.parse_fiche_cp) — sans elle, l'existant
+  // est reporté, et retirer un contact depuis le formulaire n'aurait aucun
+  // effet. Aucune normalisation ici : le schéma manquant d'une URL et le tri
+  // des entrées vides sont faits une seule fois, côté registre
+  // (ingest._as_lien_projet / _as_contacts).
+  const lienProjet = document.getElementById('fp-lien-projet')?.value.trim() || '';
+  const contacts = getFpContacts();
+  // Liste vide écrite « [] » sur la même ligne : c'est ce qui distingue, côté
+  // registre, un retrait volontaire (clé présente et vide) d'un flux qui
+  // n'affiche pas ces champs (clé absente, existant reporté).
+  const contactsYaml = contacts.length
+    ? '\n' + contacts.map(c => `    - nom: ${yamlStr(c.nom)}\n      email: ${yamlStr(c.email)}`).join('\n')
+    : ' []';
+  // En mode édition (entré depuis Administration > Projets), réutiliser l'id
+  // du projet en cours d'édition tel quel (clé du registre projets/<id>.yaml).
+  // Sinon (nouveau projet) composer désignation+client+année de début pour
+  // limiter le risque de collision entre deux projets au nom proche.
+  const debutAnnee = document.getElementById('fp-periode-debut')?.value || '';
+  const projId = editingProjet
+    ? editingProjet.id
+    : [slugify(nom), slugify(client), debutAnnee].filter(Boolean).join('-');
 
   let yaml = `# Fiche fin de projet — Camptocamp
 # Générée le ${today}
@@ -2685,11 +4348,36 @@ projet:
   client_ref: ${yamlStr(client)}${sousEntite ? `
   sous_entite: ${yamlStr(sousEntite)}` : ''}
   periode: ${yamlStr(periode)}
-  secteur: ${secteur}
+  secteur: ${secteur}${budgetMontant ? `
+  budget_montant: ${budgetMontant}
+  budget_unite: ${yamlStr(budgetUnite)}` : ''}
+  lien_projet: ${yamlStr(lienProjet)}
+  contacts:${contactsYaml}
   contexte: >
     ${contexte.replace(/\n/g, '\n    ')}
+`;
 
-membres:\n`;
+  // Chapitres : clé imbriquée sous "projet" (parse_fiche_cp lit
+  // projet.get("chapitres")) — disponibles aussi bien en déclaration qu'en
+  // édition. Toujours envoyés, même vides, pour permettre d'effacer un
+  // chapitre déjà rempli : parse_fiche_cp ne reporte l'existant que si la clé
+  // "chapitres" est absente du YAML soumis. Indentation à 2 espaces (sous
+  // "projet:", pas un nouveau bloc top-level) : sans ça projet.get("chapitres")
+  // reste toujours None côté backend et les chapitres saisis sont ignorés.
+  yaml += `  chapitres:
+    contexte_complet: ${yamlStr(document.getElementById('fp-chap-contexte-complet').value.trim())}
+    technique: ${yamlStr(document.getElementById('fp-chap-technique').value.trim())}
+    visuel: ${yamlStr(document.getElementById('fp-chap-visuel').value.trim())}
+    ergonomie: ${yamlStr(document.getElementById('fp-chap-ergonomie').value.trim())}
+    environnement: ${yamlStr(document.getElementById('fp-chap-environnement').value.trim())}
+    resultats: ${yamlStr(document.getElementById('fp-chap-resultats').value.trim())}
+`;
+
+  if (editingProjet && removedMembres.size) {
+    yaml += `\nmembres_retires: [${[...removedMembres].join(', ')}]\n`;
+  }
+
+  yaml += `\nmembres:\n`;
 
   ficheSelectedIds.forEach(id => {
     const collab = ficheCollabs.find(c=>c.id===id);
@@ -2847,7 +4535,16 @@ function renderFpPreviewCard(id) {
 // ── Utilitaires ────────────────────────────────────────────────────────────
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escJs(s){if(!s)return'';return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
-function yamlStr(s){if(s===null||s===undefined)return'""';s=String(s);if(!s)return'""';if(/[:#,\[\]{}|>&*!'"@%`]/.test(s)||s.startsWith(' ')||s.endsWith(' ')||s.includes('\n'))return'"'+s.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')+'"';return s;}
+function yamlStr(s){if(s===null||s===undefined)return'""';s=String(s);if(!s)return'""';if(/[:#,\[\]{}|>&*!'"@%`]/.test(s)||s.startsWith(' ')||s.endsWith(' ')||s.includes('\n'))return'"'+s.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')+'"';
+  // Chaînes que YAML relirait comme un nombre, un booléen, une date ou null :
+  // il faut les quoter sinon le type change au round-trip. Cas vécu — une
+  // période sur une seule année ("2024", cf. buildPeriodeStr) revenait du
+  // registre en entier 2024, et periode.split() cassait tout le
+  // pré-remplissage du formulaire d'édition (contexte, chapitres, équipe).
+  if (/^[+-]?(\d[\d_]*(\.\d*)?([eE][+-]?\d+)?|\.\d+|0[xXoObB][0-9a-fA-F_]+)$/.test(s)
+      || /^(true|false|yes|no|on|off|null|~)$/i.test(s)
+      || /^\d{4}-\d{2}(-\d{2})?$/.test(s)) return '"' + s + '"';
+  return s;}
 function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
 function downloadText(text, filename){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/yaml'}));a.download=filename;a.click();}
 
@@ -2865,6 +4562,93 @@ if (window.ResizeObserver) {
   if (ficheColMidEl) new ResizeObserver(syncFicheColRightHeight).observe(ficheColMidEl);
 }
 syncFicheColRightHeight();
+
+// ── Poignée de redimensionnement colonne 1 ↔ colonne 2 (D3/D5 du plan) ──────
+// Partage par défaut équitable (1fr/1fr) ; le glissement écrit des `fr`
+// COMPLÉMENTAIRES (somme = 2, comme le défaut) plutôt qu'une largeur en px —
+// ça garde le comportement fluide au redimensionnement de la fenêtre. Les
+// planchers sont déjà portés par les minmax() de la grille (D1) : pas besoin
+// de reclamper en JS, seul le ratio lui-même est borné [0.2, 0.8].
+const FICHE_RATIO_KEY = 'ficheColRatio';
+let _ficheColRatio = 0.5;
+
+function applyFicheColRatio(ratio) {
+  ratio = Math.min(0.8, Math.max(0.2, ratio));
+  const root = document.getElementById('fiche-layout-root');
+  if (root) {
+    root.style.setProperty('--fiche-c1', (ratio * 2).toFixed(3) + 'fr');
+    root.style.setProperty('--fiche-c2', ((1 - ratio) * 2).toFixed(3) + 'fr');
+  }
+  const handle = document.getElementById('fiche-resizer');
+  if (handle) handle.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
+  _ficheColRatio = ratio;
+  return ratio;
+}
+
+function saveFicheColRatio(ratio) {
+  try { localStorage.setItem(FICHE_RATIO_KEY, String(ratio)); } catch (e) { /* stockage indisponible — pas bloquant */ }
+}
+
+(function initFicheResizer() {
+  const handle = document.getElementById('fiche-resizer');
+  const root = document.getElementById('fiche-layout-root');
+  if (!handle || !root) return;
+
+  let stored = NaN;
+  try { stored = parseFloat(localStorage.getItem(FICHE_RATIO_KEY)); } catch (e) { /* ignore */ }
+  applyFicheColRatio(Number.isFinite(stored) ? stored : 0.5);
+
+  function ratioFromClientX(clientX) {
+    const col1 = document.getElementById('fiche-col-left');
+    const col2 = document.getElementById('fiche-col-mid');
+    if (!col1 || !col2) return _ficheColRatio;
+    const left = col1.getBoundingClientRect().left;
+    const right = col2.getBoundingClientRect().right;
+    const span = right - left;
+    return span > 0 ? (clientX - left) / span : _ficheColRatio;
+  }
+
+  function onMove(e) {
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    applyFicheColRatio(ratioFromClientX(clientX));
+  }
+  function onUp() {
+    handle.classList.remove('dragging');
+    document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    saveFicheColRatio(_ficheColRatio);
+    syncFicheColRightHeight();
+  }
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+    handle.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+  // Double-clic = retour au partage équitable par défaut — indispensable :
+  // sans reset, qui se coince dans une répartition absurde n'a aucune issue.
+  handle.addEventListener('dblclick', () => {
+    applyFicheColRatio(0.5);
+    saveFicheColRatio(0.5);
+    syncFicheColRightHeight();
+  });
+  // Flèches gauche/droite : ajustement clavier (D5 — pas de fonctionnalité souris seule).
+  handle.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      applyFicheColRatio(_ficheColRatio + (e.key === 'ArrowLeft' ? -0.02 : 0.02));
+      saveFicheColRatio(_ficheColRatio);
+      syncFicheColRightHeight();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      applyFicheColRatio(0.5);
+      saveFicheColRatio(0.5);
+      syncFicheColRightHeight();
+    }
+  });
+})();
 
 // ══════════════════════════════════════════════════════
 // ADMIN — Éditer les fiches collaborateurs (CodeMirror + CRUD)
@@ -3232,7 +5016,7 @@ function acReset(){
   acGapsOpen = false; acRefreshGapsBadge();
   if(!acStatusIsErr()) acStatus('','');
 }
-function acCount(ta,id,max=300){
+function acCount(ta,id,max=450){
   const el=document.getElementById(id); if(!el)return;
   const n=ta.value.length;
   el.textContent = n>=max ? `${n}/${max} — limite atteinte, raccourcis le texte.` : `${n}/${max}`;
@@ -3293,18 +5077,18 @@ function buildProfils(){
   const p = acModel.profil||'';
   let html = `<div class="form-field">
     <label class="field-label">Profil générique</label>
-    <textarea rows="4" maxlength="300" oninput="acEditProfil(this.value);acCount(this,'ac-cnt-profil')">${esc(p)}</textarea>
-    <div class="fe-counter ${p.length>300?'over':''}" id="ac-cnt-profil">${p.length}/300</div>
+    <textarea rows="4" maxlength="450" oninput="acEditProfil(this.value);acCount(this,'ac-cnt-profil')">${esc(p)}</textarea>
+    <div class="fe-counter ${p.length>450?'over':''}" id="ac-cnt-profil">${p.length}/450</div>
   </div>
   <div class="fe-sub">Profils cibles — paragraphe alternatif (désignation libre + texte) sélectionnable lors du ciblage d'un appel d'offre. La désignation devient la clé YAML.</div>`;
   html += acModel.profils_cibles.map((c,i)=>{
-    const o = (c.texte||'').length>300;
+    const o = (c.texte||'').length>450;
     return `<div class="fe-item">
       <div class="fe-item-head"><span class="fe-item-title">${esc(c.cle||'Profil cible')}</span><button class="fe-del" onclick="acDelCible(${i})">Supprimer</button></div>
       <div class="form-field"><label class="field-label">Désignation (ex : Profil SIG, Profil R&D, Profil geOrchestra…)</label><input type="text" value="${esc(c.cle)}" oninput="acEditCible(${i},'cle',this.value)"></div>
       <div class="form-field"><label class="field-label">Paragraphe</label>
-        <textarea rows="4" maxlength="300" oninput="acEditCible(${i},'texte',this.value);acCount(this,'ac-cnt-cible-${i}')">${esc(c.texte)}</textarea>
-        <div class="fe-counter ${o?'over':''}" id="ac-cnt-cible-${i}">${(c.texte||'').length}/300</div>
+        <textarea rows="4" maxlength="450" oninput="acEditCible(${i},'texte',this.value);acCount(this,'ac-cnt-cible-${i}')">${esc(c.texte)}</textarea>
+        <div class="fe-counter ${o?'over':''}" id="ac-cnt-cible-${i}">${(c.texte||'').length}/450</div>
       </div>
     </div>`;
   }).join('');
@@ -3379,7 +5163,9 @@ function acEditProjetPeriode(i,which,v){
   const p = acModel.projets[i];
   const cur = acParsePeriode(p.periode);
   cur[which] = v;
-  p.periode = cur.debut ? (cur.fin ? `${acPeriodeLabel(cur.debut)} – ${acPeriodeLabel(cur.fin)}` : acPeriodeLabel(cur.debut)) : '';
+  // Même année aux deux bornes : une seule valeur, sinon "2026 – 2026" à l'affichage.
+  const finDistincte = cur.fin && cur.fin !== cur.debut;
+  p.periode = cur.debut ? (finDistincte ? `${acPeriodeLabel(cur.debut)} – ${acPeriodeLabel(cur.fin)}` : acPeriodeLabel(cur.debut)) : '';
   acAfterChange();
 }
 
@@ -3633,11 +5419,11 @@ function acComputeGaps(){
   if(!id.langues.length) g.push({sec:'identite',cat:'Identité',msg:'Aucune langue renseignée'});
   else id.langues.forEach((l,i)=>{ if(!acS(l.langue).trim()||!acS(l.niveau).trim()) g.push({sec:'identite',cat:'Identité',msg:`Langue #${i+1} incomplète`}); });
   if(!acModel.profil.trim()) g.push({sec:'profils',cat:'Profil',msg:'Profil générique vide'});
-  else if(acModel.profil.length>300) g.push({sec:'profils',cat:'Profil',msg:`Profil générique trop long (${acModel.profil.length}/300)`});
+  else if(acModel.profil.length>450) g.push({sec:'profils',cat:'Profil',msg:`Profil générique trop long (${acModel.profil.length}/450)`});
   acModel.profils_cibles.forEach((c,i)=>{
     if(!acS(c.cle).trim()) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible #${i+1} sans désignation`});
     if(!acS(c.texte).trim()) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible « ${c.cle||('#'+(i+1))} » sans texte`});
-    else if(c.texte.length>300) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible « ${c.cle||('#'+(i+1))} » trop long (${c.texte.length}/300)`});
+    else if(c.texte.length>450) g.push({sec:'profils',cat:'Profil cible',msg:`Profil cible « ${c.cle||('#'+(i+1))} » trop long (${c.texte.length}/450)`});
   });
   if(!acModel.competences.length) g.push({sec:'comps',cat:'Compétences',msg:'Aucune compétence'});
   acModel.competences.forEach((c,i)=>{
@@ -3955,8 +5741,12 @@ function cliApplyRaw(){
 let crbItems = [], crbSelected = new Set(), crbEditing = new Set(), crbRawCache = {}, crbLoaded = false;
 
 function crbKey(it){ return it.type+':'+it.id; }
-const CRB_TYPE_LABELS = { collaborateur: 'Collaborateurs', client: 'Clients' };
-const CRB_TYPE_ORDER = ['collaborateur','client'];
+const CRB_TYPE_LABELS = { collaborateur: 'Collaborateurs', client: 'Clients', projet: 'Projets' };
+const CRB_TYPE_ORDER = ['collaborateur','client','projet'];
+// Types dont l'édition en place (dans la corbeille) est câblée — cf. crbEditFormHTML.
+// "projet" n'a pas de formulaire dédié ici : on édite depuis Administration >
+// Projets après restauration plutôt que de dupliquer ce formulaire dans la corbeille.
+const CRB_EDITABLE_TYPES = new Set(['collaborateur','client']);
 
 function initCorbeille(){
   if(!crbLoaded){ crbLoad(); crbLoaded = true; }
@@ -3987,6 +5777,7 @@ function crbSummaryHTML(it){
   const d = it.data||{};
   if(it.type==='collaborateur') return `<div>${esc(d.categorie||'—')}</div><div>${esc(d.localisation||'—')}</div>`;
   if(it.type==='client') return `<div>Secteur : ${esc(d.secteur||'—')}</div><div>Sous-entités : ${esc((d.sous_entites||[]).join(', ')||'—')}</div><div>Alias : ${esc((d.alias||[]).join(', ')||'—')}</div>`;
+  if(it.type==='projet') return `<div>Client : ${esc((d.client_ref||[]).join(', ')||'—')}</div><div>Période : ${esc(d.periode||'—')}</div>`;
   return '';
 }
 
@@ -4035,7 +5826,7 @@ function crbCardHTML(it){
       ${editing
         ? `<button class="fe-del" onclick="crbSave('${it.type}','${it.id}')">Enregistrer</button>
            <button class="fe-del" onclick="crbCancelEdit('${key}')">Annuler</button>`
-        : `<button class="fe-del" onclick="crbToggleEdit('${key}')">Éditer</button>
+        : `${CRB_EDITABLE_TYPES.has(it.type) ? `<button class="fe-del" onclick="crbToggleEdit('${key}')">Éditer</button>` : ''}
            <button class="fe-del" onclick="crbRestore('${it.type}','${it.id}')">Restaurer</button>
            <button class="fe-del" onclick="crbPurge('${it.type}','${it.id}')">Supprimer pour de bon</button>`}
     </div>
@@ -4197,6 +5988,58 @@ async function crbPurgeSelected(){
   const nFail = results.length - okKeys.size;
   crbStatus(nFail ? `✓ ${okKeys.size} supprimé(s), ✗ ${nFail} échec(s)` : `✓ ${okKeys.size} supprimé(s) définitivement`, nFail?'err':'ok');
   crbRender();
+}
+
+// ══════════════════════════════════════════════════════
+// ONGLET ADMIN — PROJETS (registre transversal)
+// ══════════════════════════════════════════════════════
+function adpStatus(m,c){ const el=document.getElementById('adp-status'); if(el){ el.textContent=m; el.className='admin-status'+(c?' '+c:''); } }
+
+let adpProjets = [];
+let adpSelectedFileId = null;
+
+async function initAdminProjets() {
+  adpStatus('Chargement…', '');
+  try {
+    adpProjets = await fetch('/api/projets').then(r => r.json());
+    adpRenderList();
+    adpStatus('', '');
+  } catch (e) {
+    const list = document.getElementById('adp-list');
+    if (list) list.innerHTML = `<div class="loading-placeholder" style="padding:12px;color:var(--red);">Erreur : ${esc(e.message)}</div>`;
+    adpStatus('Erreur', 'err');
+  }
+}
+
+// Même composant .collab-item que les autres listes admin (collaborateurs,
+// clients) — pour une mise en page cohérente entre tous les écrans d'édition.
+function adpRenderList() {
+  const list = document.getElementById('adp-list');
+  if (!list) return;
+  const q = (document.getElementById('adp-search')?.value || '').toLowerCase();
+  const filtered = adpProjets.filter(p => {
+    if (!q) return true;
+    const hay = [p.designation, p.id, ...(p.client_ref || [])].filter(Boolean).join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+  if (!filtered.length) {
+    list.innerHTML = `<div class="loading-placeholder" style="padding:12px;">${adpProjets.length ? 'Aucun résultat.' : 'Aucun projet déclaré pour le moment.'}</div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(p => {
+    const client = (p.client_ref || []).join(', ');
+    const meta = [client, p.periode].filter(Boolean).join(' — ');
+    const sel = p.file_id === adpSelectedFileId;
+    const loading = p.file_id === adpLoadingFileId;
+    const disabled = !!adpLoadingFileId && !loading;
+    const ini = (p.designation || p.id || '?').trim().slice(0, 2).toUpperCase();
+    return `<div class="collab-item${sel ? ' selected' : ''}" data-file-id="${esc(p.file_id)}"
+      style="${disabled ? 'opacity:.45;pointer-events:none;' : ''}"
+      onclick="enterProjetEditMode('${esc(p.file_id)}')">
+      <div class="avatar">${loading ? '<span class="ing-spinner" style="margin:0;"></span>' : esc(ini)}</div>
+      <div class="collab-name">${esc(p.designation || p.id)}${loading ? ' <span style="color:var(--orange);font-weight:600;">Chargement…</span>' : ''}<div class="field-hint-tiny">${esc(meta)}</div></div>
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════════════

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icone montagne Camptocamp, en VECTEUR — extraite telle quelle du logo
+     officiel C2C_2022_RGB_square_logo.svg (groupe pixel-art de fin de
+     fichier, aucune retouche de coordonnee). Le viewBox est cadre exactement
+     sur son etendue (x 361.89 -> 384.76, y 71.20 -> 91.79).
+
+     POURQUOI DU VECTEUR : la version raster (c2c-icon.png, 2500x2247) etait
+     rendue dans une boite de 18.75pt, soit ~25px a l'ecran — un facteur de
+     reduction de 100. Les bords en escalier de l'ADN pixel-art y prenaient un
+     halo gris-brun (alpha non premultiplie moyenne avec du blanc par les
+     visionneuses PDF) : le "glitch gris" signale. En vecteur, plus aucun
+     reechantillonnage : les aretes restent franches a toute echelle. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="361.89 71.2 22.87 20.59">
+  <g fill="#FF680A">
+    <rect x="373.32" y="71.2" width="2.29" height="2.29"/>
+    <rect x="371.04" y="73.49" width="2.29" height="2.29"/>
+    <rect x="368.75" y="75.78" width="2.29" height="2.29"/>
+    <rect x="366.46" y="78.06" width="2.29" height="2.29"/>
+    <rect x="364.18" y="80.35" width="2.29" height="4.57"/>
+    <polygon points="382.47,82.64 382.47,80.35 380.19,80.35 380.19,75.78 377.9,75.78 377.9,73.49 375.61,73.49
+      375.61,78.06 373.32,78.06 373.32,80.35 375.61,80.35 375.61,82.64 373.32,82.64 373.32,80.35 371.04,80.35 371.04,82.64
+      368.75,82.64 368.75,84.93 366.46,84.93 366.46,87.21 364.18,87.21 364.18,84.93 361.89,84.93 361.89,91.79 384.76,91.79
+      384.76,82.64 "/>
+  </g>
+</svg>

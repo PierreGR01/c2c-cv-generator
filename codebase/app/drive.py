@@ -6,6 +6,8 @@ Source de données unique : Google Drive. Aucun mode de secours local.
 """
 import io
 import os
+import re
+import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -23,6 +25,14 @@ _CACHE_TTL = 300
 _activity_cache = None
 _activity_cache_ts = 0.0
 _ACTIVITY_CACHE_TTL = 180
+
+_projets_listing_cache = None
+_projets_listing_cache_ts = 0.0
+
+# Les 5 chapitres de la fiche portefolio (cf. reference_renderer.CHAPITRE_ORDER) —
+# dupliqué ici en constante inerte plutôt qu'importé, pour ne pas faire dépendre
+# ce module bas niveau du moteur de rendu.
+_CHAPITRE_KEYS = ("technique", "visuel", "ergonomie", "environnement", "resultats")
 
 
 # ---------- Auth -------------------------------------------------------------
@@ -74,6 +84,49 @@ def _get_subfolder_id(service, parent_id, name):
     res = service.files().list(q=q, fields="files(id,name)").execute()
     files = res.get("files", [])
     return files[0]["id"] if files else None
+
+
+_projets_folder_id_cache = None  # ID structurel (pas un cache de contenu) — jamais invalidé par _invalidate_cache()
+
+
+def _find_projets_folder_id(service):
+    """Cherche l'ID du dossier 'projets' (registre transversal), sans le créer.
+    Priorité : PROJETS_FOLDER_ID (env), sinon sous-dossier 'projets' du dossier
+    racine. Mémorisé pour la durée du processus — évite de refaire cette recherche à
+    chaque déclaration de projet (find_projet_file_id + create_projet la
+    déclenchaient chacun séparément, doublant la latence au premier essai)."""
+    global _projets_folder_id_cache
+    if _projets_folder_id_cache:
+        return _projets_folder_id_cache
+    folder_id = os.environ.get("PROJETS_FOLDER_ID")
+    if not folder_id:
+        root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
+        if not root_id:
+            return None
+        folder_id = _get_subfolder_id(service, root_id, "projets")
+    if folder_id:
+        _projets_folder_id_cache = folder_id
+    return folder_id
+
+
+def _get_or_create_projets_folder_id(service):
+    """Comme _find_projets_folder_id, mais crée le dossier s'il est absent
+    (utilisé uniquement au moment d'une écriture — jamais en lecture)."""
+    global _projets_folder_id_cache
+    folder_id = _find_projets_folder_id(service)
+    if folder_id:
+        return folder_id
+    root_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
+    if not root_id:
+        raise RuntimeError("GOOGLE_DRIVE_FOLDER_ID manquant : impossible de créer le dossier projets/")
+    metadata = {
+        "name": "projets",
+        "parents": [root_id],
+        "mimeType": "application/vnd.google-apps.folder",
+    }
+    created = service.files().create(body=metadata, fields="id").execute()
+    _projets_folder_id_cache = created["id"]
+    return created["id"]
 
 
 def _collab_entry_from_fiche(file_id, filename, fiche, modified=""):
@@ -274,6 +327,167 @@ def list_activity(limit=300):
     return result
 
 
+def list_projets():
+    """Liste les projets du registre transversal (dossier projets/, un .yaml par projet)."""
+    global _projets_listing_cache, _projets_listing_cache_ts
+
+    if _projets_listing_cache is not None and (time.time() - _projets_listing_cache_ts) < _CACHE_TTL:
+        return _projets_listing_cache
+
+    service = _build_service_read()
+    folder_id = _find_projets_folder_id(service)
+    if not folder_id:
+        return []
+
+    q = "'" + folder_id + "' in parents and name contains '.yaml' and trashed = false"
+    res = service.files().list(q=q, fields="files(id,name,modifiedTime)", orderBy="name").execute()
+    files = res.get("files", [])
+
+    def _fetch(f):
+        try:
+            projet = get_projet(f["id"])
+        except Exception:
+            projet = {}
+        chapitres = projet.get("chapitres") or {}
+        # Les 5 vrais chapitres (cf. reference_renderer.CHAPITRE_ORDER) — pas
+        # contexte_complet, qui vit dans le même dict mais n'en est pas un.
+        n_chapitres = sum(1 for k in _CHAPITRE_KEYS if str(chapitres.get(k) or "").strip())
+        images = [im for im in (projet.get("images") or []) if isinstance(im, dict)]
+        return {
+            "id": projet.get("id") or f["name"].replace(".yaml", ""),
+            "file_id": f["id"],
+            "designation": projet.get("designation", ""),
+            "client_ref": projet.get("client_ref") or [],
+            "sous_entite": projet.get("sous_entite", ""),
+            "periode": projet.get("periode", ""),
+            "secteur": projet.get("secteur", ""),
+            "equipe": projet.get("equipe") or [],
+            "competences": projet.get("competences") or [],
+            "n_chapitres": n_chapitres,
+            "n_images": len(images),
+            "modified": f.get("modifiedTime", ""),
+        }
+
+    result = []
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futures = {pool.submit(_fetch, f): f for f in files}
+        for fut in as_completed(futures):
+            result.append(fut.result())
+
+    result.sort(key=lambda x: (x["designation"] or x["id"]).lower())
+    _projets_listing_cache = result
+    _projets_listing_cache_ts = time.time()
+    return result
+
+
+def get_projet(file_id):
+    """Charge et parse un projet YAML depuis Drive (registre projets/)."""
+    service = _build_service_read()
+    return yaml.safe_load(_download_raw(service, file_id)) or {}
+
+
+def get_projet_raw(file_id):
+    """Charge le contenu YAML brut d'un projet depuis Drive."""
+    service = _build_service_read()
+    return _download_raw(service, file_id)
+
+
+def find_projet_file_id(projet_id):
+    """Cherche le file_id d'un projet par son id (nom de fichier '<id>.yaml').
+
+    Drive autorise plusieurs fichiers homonymes dans un même dossier : en cas de
+    doublon on retourne toujours le plus ancien (orderBy createdTime) pour que
+    deux enregistrements successifs ne visent jamais deux jumeaux différents —
+    et on le signale, le doublon devant être fusionné puis supprimé à la main.
+    """
+    service = _build_service_read()
+    folder_id = _find_projets_folder_id(service)
+    if not folder_id:
+        return None
+    filename = projet_id + ".yaml"
+    q = (
+        "'" + folder_id + "' in parents"
+        " and name = '" + filename + "'"
+        " and trashed = false"
+    )
+    res = service.files().list(
+        q=q, fields="files(id,name,createdTime)", orderBy="createdTime").execute()
+    files = res.get("files", [])
+    if len(files) > 1:
+        print(
+            f"[drive] ATTENTION : {len(files)} fichiers « {filename} » dans le registre "
+            f"projets/ ({', '.join(f['id'] for f in files)}) — le plus ancien est utilisé. "
+            "Fusionner les contenus puis supprimer les doublons.",
+            file=sys.stderr)
+    return files[0]["id"] if files else None
+
+
+def trash_projet(file_id: str) -> None:
+    """Met un projet du registre à la corbeille (Drive trash) — réversible, même
+    mécanisme que delete_fiche pour les collaborateurs. N'affecte pas les fiches
+    collaborateurs déjà liées (portée volontairement limitée au registre)."""
+    service = _build_service_write()
+    service.files().update(fileId=file_id, body={"trashed": True}).execute()
+    _invalidate_cache()
+
+
+def restore_projet(file_id: str) -> None:
+    """Restaure un projet depuis la corbeille Drive."""
+    service = _build_service_write()
+    service.files().update(fileId=file_id, body={"trashed": False}).execute()
+    _invalidate_cache()
+
+
+def delete_projet_forever(file_id: str) -> None:
+    """Purge définitivement un projet (hors corbeille Drive — irréversible)."""
+    service = _build_service_write()
+    service.files().delete(fileId=file_id).execute()
+    _invalidate_cache()
+
+
+def list_trashed_projets():
+    """Liste les projets du registre passés à la corbeille (Drive trashed=true)."""
+    service = _build_service_read()
+    folder_id = _find_projets_folder_id(service)
+    if not folder_id:
+        return []
+
+    q = "'" + folder_id + "' in parents and name contains '.yaml' and trashed = true"
+    raw_files = []
+    page_token = None
+    while True:
+        res = service.files().list(
+            q=q, fields="nextPageToken,files(id,name,modifiedTime,trashedTime,trashingUser)",
+            orderBy="name", pageSize=1000, pageToken=page_token).execute()
+        raw_files.extend(res.get("files", []))
+        page_token = res.get("nextPageToken")
+        if not page_token:
+            break
+
+    def _fetch(f):
+        try:
+            projet = get_projet(f["id"])
+        except Exception:
+            projet = {}
+        return {
+            "id": f["id"],
+            "projet_id": projet.get("id") or f["name"].replace(".yaml", ""),
+            "designation": projet.get("designation", ""),
+            "client_ref": projet.get("client_ref") or [],
+            "periode": projet.get("periode", ""),
+            "deleted_at": f.get("trashedTime", ""),
+            "deleted_by": (f.get("trashingUser") or {}).get("emailAddress", ""),
+        }
+
+    result = []
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futures = {pool.submit(_fetch, f): f for f in raw_files}
+        for fut in as_completed(futures):
+            result.append(fut.result())
+    result.sort(key=lambda x: x.get("deleted_at", ""), reverse=True)
+    return result
+
+
 def get_fiche(file_id):
     """Charge et parse une fiche YAML collaborateur depuis Drive."""
     service = _build_service_read()
@@ -286,21 +500,50 @@ def get_fiche_raw(file_id):
     return _download_raw(service, file_id)
 
 
+def _fetch_lookup_entry(c):
+    try:
+        fiche = get_fiche(c["id"])
+    except Exception:
+        fiche = {}
+    return c["name"], {
+        "file_id": c["id"],
+        "fiche": fiche,
+        "display": c["display"],
+        "filename": c["filename"],
+    }
+
+
 def get_collaborateurs_lookup():
-    """Retourne {slug: {file_id, fiche, display, filename}} pour tous les collabs."""
+    """Retourne {slug: {file_id, fiche, display, filename}} pour tous les collabs
+    (télécharge la fiche complète de chacun, en parallèle). Coûteux si
+    l'organisation compte beaucoup de collaborateurs et que seuls quelques-uns
+    sont réellement concernés — préférer get_collaborateurs_lookup_for(slugs)
+    dans ce cas (déclaration/édition d'un projet, détail d'un projet)."""
     collabs = list_collaborateurs()
     result = {}
-    for c in collabs:
-        try:
-            fiche = get_fiche(c["id"])
-        except Exception:
-            fiche = {}
-        result[c["name"]] = {
-            "file_id": c["id"],
-            "fiche": fiche,
-            "display": c["display"],
-            "filename": c["filename"],
-        }
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futures = [pool.submit(_fetch_lookup_entry, c) for c in collabs]
+        for fut in as_completed(futures):
+            name, entry = fut.result()
+            result[name] = entry
+    return result
+
+
+def get_collaborateurs_lookup_for(slugs) -> dict:
+    """Comme get_collaborateurs_lookup, mais ne télécharge que les fiches des
+    slugs demandés (en parallèle) au lieu de celles de tout le monde — la
+    déclaration/édition d'un projet ou l'affichage de son détail ne concernent
+    jamais qu'une poignée de collaborateurs, pas l'organisation entière."""
+    wanted = {s for s in slugs if s}
+    if not wanted:
+        return {}
+    collabs = [c for c in list_collaborateurs() if c["name"] in wanted]
+    result = {}
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futures = [pool.submit(_fetch_lookup_entry, c) for c in collabs]
+        for fut in as_completed(futures):
+            name, entry = fut.result()
+            result[name] = entry
     return result
 
 
@@ -516,6 +759,17 @@ def _download_raw(service, file_id: str) -> str:
     return buf.getvalue().decode("utf-8")
 
 
+def _download_bytes(service, file_id: str) -> bytes:
+    """Comme _download_raw, mais sans décodage — pour du contenu binaire (images)."""
+    request = service.files().get_media(fileId=file_id)
+    buf = io.BytesIO()
+    downloader = MediaIoBaseDownload(buf, request)
+    done = False
+    while not done:
+        _, done = downloader.next_chunk()
+    return buf.getvalue()
+
+
 def _upload_content(service, file_id: str, content: str) -> None:
     """Met à jour le contenu d'un fichier Drive existant."""
     media = MediaInMemoryUpload(content.encode("utf-8"), mimetype="text/plain", resumable=False)
@@ -525,10 +779,83 @@ def _upload_content(service, file_id: str, content: str) -> None:
 
 def _invalidate_cache():
     global _listing_cache, _listing_cache_ts, _activity_cache, _activity_cache_ts
+    global _projets_listing_cache, _projets_listing_cache_ts
     _listing_cache = None
     _listing_cache_ts = 0.0
     _activity_cache = None
     _activity_cache_ts = 0.0
+    _projets_listing_cache = None
+    _projets_listing_cache_ts = 0.0
+
+
+def create_projet(projet_id: str, yaml_str: str) -> str:
+    """Crée un nouveau fichier projet dans le registre transversal (dossier
+    'projets/', créé si absent). Retourne le file_id."""
+    service = _build_service_write()
+    folder_id = _get_or_create_projets_folder_id(service)
+    filename = projet_id + ".yaml"
+    metadata = {"name": filename, "parents": [folder_id], "mimeType": "application/octet-stream"}
+    media = MediaInMemoryUpload(yaml_str.encode("utf-8"), mimetype="application/octet-stream", resumable=False)
+    created = service.files().create(body=metadata, media_body=media, fields="id").execute()
+    _invalidate_cache()
+    return created["id"]
+
+
+def save_projet_content(file_id: str, yaml_str: str) -> None:
+    """Met à jour un fichier projet existant sur Drive (registre transversal)."""
+    service = _build_service_write()
+    _upload_content(service, file_id, yaml_str)
+
+
+_projet_images_folder_id_cache = None  # structurel, comme _projets_folder_id_cache
+
+
+def _get_or_create_projet_images_folder_id(service):
+    """Dossier plat 'projets/images/' — pas un sous-dossier par projet, inutile
+    à cette échelle. Les fichiers sont préfixés par l'id du projet (cf.
+    upload_projet_image) pour éviter toute collision de nom entre projets."""
+    global _projet_images_folder_id_cache
+    if _projet_images_folder_id_cache:
+        return _projet_images_folder_id_cache
+    projets_folder_id = _get_or_create_projets_folder_id(service)
+    existing = _get_subfolder_id(service, projets_folder_id, "images")
+    if existing:
+        _projet_images_folder_id_cache = existing
+        return existing
+    metadata = {
+        "name": "images",
+        "parents": [projets_folder_id],
+        "mimeType": "application/vnd.google-apps.folder",
+    }
+    created = service.files().create(body=metadata, fields="id").execute()
+    _projet_images_folder_id_cache = created["id"]
+    return created["id"]
+
+
+def upload_projet_image(projet_id: str, filename: str, content: bytes, mimetype: str) -> str:
+    """Dépose une image dans le dossier plat projets/images/. Retourne le file_id."""
+    service = _build_service_write()
+    folder_id = _get_or_create_projet_images_folder_id(service)
+    safe_name = re.sub(r'[^a-zA-Z0-9_.-]+', '-', filename or "image") or "image"
+    drive_filename = f"{projet_id}--{uuid.uuid4().hex[:8]}--{safe_name}"
+    metadata = {"name": drive_filename, "parents": [folder_id], "mimeType": mimetype}
+    media = MediaInMemoryUpload(content, mimetype=mimetype, resumable=False)
+    created = service.files().create(body=metadata, media_body=media, fields="id").execute()
+    return created["id"]
+
+
+def get_projet_image_bytes(file_id: str) -> tuple[bytes, str]:
+    """Retourne (contenu, mimetype) d'une image du registre transversal."""
+    service = _build_service_read()
+    meta = service.files().get(fileId=file_id, fields="mimeType").execute()
+    content = _download_bytes(service, file_id)
+    return content, meta.get("mimeType") or "application/octet-stream"
+
+
+def delete_projet_image(file_id: str) -> None:
+    """Corbeille Drive (réversible), même logique que delete_fiche."""
+    service = _build_service_write()
+    service.files().update(fileId=file_id, body={"trashed": True}).execute()
 
 
 def create_fiche(filename: str, yaml_str: str) -> str:

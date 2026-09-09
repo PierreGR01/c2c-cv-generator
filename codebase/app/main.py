@@ -3,6 +3,8 @@ C2C Tenders App — API FastAPI (génération de CV + ingestion fin de projet + 
 """
 import io
 import json
+import mimetypes
+import re
 import zipfile
 from pathlib import Path
 from typing import Annotated, Optional, List
@@ -12,11 +14,11 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")  # charge le .env de l'app quel que soit le cwd
 
 import yaml
-from fastapi import BackgroundTasks, FastAPI, Form, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import config, drive, gmail_notify, ingest, renderer, scorer
+from app import config, drive, gmail_notify, ingest, reference_renderer, reference_service, renderer, scorer
 
 app = FastAPI(title="C2C Tenders App — Camptocamp")
 
@@ -86,6 +88,7 @@ async def generate_cvs(
     competences: Annotated[Optional[List[str]], Form()] = None,
     client_refs: Annotated[Optional[List[str]], Form()] = None,
     profils: Annotated[Optional[str], Form()] = None,
+    lang: Annotated[str, Form()] = "fr",
 ):
     """
     Génère un ou plusieurs CVs ciblés par filtres (ou génériques si pas de filtre).
@@ -102,7 +105,11 @@ async def generate_cvs(
     - client_refs      : liste de clients (référentiel) dont les projets sont priorisés
     - profils          : JSON {drive_file_id: profil_cle} — force le profil (paragraphe) affiché
                          pour tel ou tel collaborateur, indépendamment du ciblage AO
+    - lang             : langue de rendu du CV ("fr" ou "en", défaut "fr")
     """
+    if lang not in ("fr", "en"):
+        raise HTTPException(status_code=400, detail=f"Langue non supportée : {lang!r} (attendu 'fr' ou 'en')")
+
     domaines_list = domaines or []
     competences_list = competences or []
     client_refs_list = client_refs or []
@@ -135,6 +142,9 @@ async def generate_cvs(
     else:
         ao_stem = "generique"
 
+    if lang == "en":
+        ao_stem += "-en"
+
     pdfs: dict[str, bytes] = {}
     warnings: dict[str, str] = {}
 
@@ -155,7 +165,7 @@ async def generate_cvs(
             cible_collab = {**cible, "profil_cle": profils_map[file_id]}
 
         try:
-            data = scorer.projeter_cible(fiche, cible_collab)
+            data = scorer.projeter_cible(fiche, cible_collab, lang=lang)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Erreur scoring ({collab_stem}) : {e}")
 
@@ -201,31 +211,7 @@ async def generate_cvs(
 # API — Compétences (pour le formulaire CP)
 # ---------------------------------------------------------------------------
 
-_FAMILY_LABELS = {
-    "cartographie_web":         "Cartographie web",
-    "serveurs_carto":           "Serveurs cartographiques",
-    "sig_desktop":              "SIG Desktop",
-    "catalogues_metadonnees":   "Catalogues & Métadonnées",
-    "bases_de_donnees":         "Bases de données",
-    "etl_donnees":              "ETL & Données",
-    "infrastructure":           "Infrastructure",
-    "langages":                 "Langages",
-    "frameworks_backend":       "Frameworks Backend",
-    "frameworks_frontend":      "Frameworks Frontend",
-    "ia_ml":                    "IA & Machine Learning",
-    "mobile":                   "Mobile",
-    "tests":                    "Tests",
-    "outils_dev":               "Outils Dev",
-    "cms":                      "CMS",
-    "3d_visualisation":         "3D & Visualisation",
-    "monitoring_bi":            "Monitoring & BI",
-    "reseau_telecom_securite":  "Réseau, Télécom & Sécurité",
-    "design_systems":           "Design Systems",
-    "design_ui":                "Design UI",
-    "design_ux":                "Design UX",
-    "gestion_conseil":          "Gestion & Conseil",
-    "erp_odoo":                 "ERP & Odoo",
-}
+_FAMILY_LABELS = scorer._FAMILY_LABELS
 
 _FAMILY_META = {
     "cartographie_web":         "Carto & SIG",
@@ -249,6 +235,8 @@ _FAMILY_META = {
     "design_systems":           "Designers & UX",
     "design_ui":                "Designers & UX",
     "design_ux":                "Designers & UX",
+    "methodes_ux":              "Designers & UX",
+    "Product":                  "Designers & UX",
     "gestion_conseil":          "Chefs de projet & Conseil",
     "erp_odoo":                 "Chefs de projet & Conseil",
 }
@@ -492,16 +480,316 @@ async def api_delete_fiche(file_id: str):
 
 
 # ---------------------------------------------------------------------------
+# API — Projets (registre transversal — un fichier par projet, source des
+# champs partagés entre les fiches collaborateurs qui y participent)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/projets")
+async def api_list_projets():
+    """Liste légère des projets du registre (id, désignation, client, période,
+    équipe avec noms résolus), pour la grille de cartes Administration > Projets."""
+    try:
+        projets = drive.list_projets()
+        if projets:
+            # Pas besoin du contenu complet des fiches ici, juste du nom
+            # affiché — list_collaborateurs() est déjà en cache, contrairement
+            # à get_collaborateurs_lookup() qui re-téléchargerait la fiche de
+            # TOUTE l'organisation à chaque chargement de la liste.
+            display_by_slug = {c["name"]: c["display"] for c in drive.list_collaborateurs()}
+            for p in projets:
+                for m in (p.get("equipe") or []):
+                    m["display"] = display_by_slug.get(m.get("collaborateur"), m.get("collaborateur"))
+        return projets
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/projets/{file_id}/detail")
+async def api_get_projet_detail(file_id: str):
+    """Détail hydraté d'un projet (champs communs + membres avec leurs données
+    individuelles lues dans leur propre fiche) — pour pré-remplir le
+    formulaire d'édition depuis Administration > Projets."""
+    try:
+        projet = drive.get_projet(file_id)
+        slugs = [m.get("collaborateur") for m in (projet.get("equipe") or []) if isinstance(m, dict)]
+        collab_lookup = drive.get_collaborateurs_lookup_for(slugs)
+        detail = ingest.hydrate_projet_detail(projet, collab_lookup)
+        detail["file_id"] = file_id
+        return detail
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/projets/{file_id}")
+async def api_delete_projet(file_id: str, background_tasks: BackgroundTasks):
+    """Met un projet du registre à la corbeille Drive (réversible). Ne touche
+    pas aux fiches collaborateurs déjà liées — retrait individuel si besoin via
+    le formulaire d'édition existant (cf. PLAN-dissocier-validation.md)."""
+    try:
+        projet = drive.get_projet(file_id)
+        drive.trash_projet(file_id)
+        actor = drive.get_current_user_email()
+        nom = projet.get("designation") or projet.get("id") or file_id
+        background_tasks.add_task(
+            gmail_notify.notify, actor, "a mis un projet à la corbeille",
+            f"Projet : {nom}")
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/projets/{file_id}")
+async def api_get_projet(file_id: str):
+    try:
+        return JSONResponse({"content": drive.get_projet_raw(file_id)})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/projets/{file_id}")
+async def api_save_projet(file_id: str, request: Request, background_tasks: BackgroundTasks):
+    try:
+        body = await request.json()
+        content = body["content"]
+        drive.save_projet_content(file_id, content)
+        actor = drive.get_current_user_email()
+        background_tasks.add_task(
+            gmail_notify.notify, actor, "a modifié une fiche projet",
+            f"Fichier : {file_id}")
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# API — Images d'un projet (registre transversal) — upload immédiat,
+# indépendant du formulaire de déclaration/édition (pas de brouillon local).
+# ---------------------------------------------------------------------------
+
+ALLOWED_IMAGE_MIMES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
+MAX_IMAGE_BYTES = 8 * 1024 * 1024
+
+
+def _validate_chapitre(chapitre: str) -> str:
+    """Vide = image libre. Sinon doit être un des 4 chapitres illustrables
+    (jamais 'technique', volontairement toujours en texte seul — cf.
+    reference_renderer.CHAPITRE_IMAGE_KEYS)."""
+    chapitre = (chapitre or "").strip()
+    if chapitre and chapitre not in reference_renderer.CHAPITRE_IMAGE_KEYS:
+        raise HTTPException(status_code=400, detail=f"Chapitre invalide : {chapitre!r}")
+    return chapitre
+
+
+def _replace_slot_images(images: list[dict], chapitre: str) -> list[dict]:
+    """Retire, s'il existe, l'image occupant déjà le même slot (le chapitre
+    donné, ou l'image libre si chapitre==""), et la met à la corbeille Drive —
+    au plus une image par chapitre, au plus une image libre (cf. plan §1)."""
+    kept = []
+    for im in images:
+        if (im.get("chapitre") or "") == chapitre:
+            try:
+                drive.delete_projet_image(im["fichier_drive_id"])
+            except Exception:
+                pass
+            continue
+        kept.append(im)
+    return kept
+
+
+@app.post("/api/projets/{file_id}/images")
+async def api_add_projet_image(
+    file_id: str,
+    image: UploadFile = File(...),
+    legende: Annotated[str, Form()] = "",
+    chapitre: Annotated[str, Form()] = "",
+):
+    try:
+        chapitre = _validate_chapitre(chapitre)
+        content = await image.read()
+        if len(content) > MAX_IMAGE_BYTES:
+            raise HTTPException(status_code=413, detail="Image trop volumineuse (max 8 Mo).")
+        mimetype = image.content_type or mimetypes.guess_type(image.filename or "")[0] or ""
+        if mimetype not in ALLOWED_IMAGE_MIMES:
+            raise HTTPException(status_code=400, detail="Format non supporté (png, jpg, webp, gif uniquement).")
+
+        projet = drive.get_projet(file_id)
+        projet_id = projet.get("id") or file_id
+        image_file_id = drive.upload_projet_image(projet_id, image.filename or "image", content, mimetype)
+
+        images = _replace_slot_images(projet.get("images") or [], chapitre)
+        images.append({
+            "fichier_drive_id": image_file_id, "nom": image.filename or "",
+            "legende": legende or "", "chapitre": chapitre,
+        })
+        projet["images"] = images
+        drive.save_projet_content(file_id, yaml.safe_dump(projet, allow_unicode=True, sort_keys=False))
+        return {"ok": True, "images": images}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/projets/{file_id}/images/{image_id}")
+async def api_get_projet_image(file_id: str, image_id: str):
+    try:
+        content, mimetype = drive.get_projet_image_bytes(image_id)
+        return Response(content=content, media_type=mimetype)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.patch("/api/projets/{file_id}/images/{image_id}")
+async def api_patch_projet_image(
+    file_id: str,
+    image_id: str,
+    chapitre: Annotated[Optional[str], Form()] = None,
+    legende: Annotated[Optional[str], Form()] = None,
+):
+    """Réassigne le chapitre (et/ou la légende) d'une image déjà en place, sans
+    re-upload. Mêmes règles de remplacement qu'à l'ajout (D1 — cf. plan §5)."""
+    try:
+        projet = drive.get_projet(file_id)
+        images = projet.get("images") or []
+        target = next((im for im in images if im.get("fichier_drive_id") == image_id), None)
+        if target is None:
+            raise HTTPException(status_code=404, detail="Image introuvable pour ce projet.")
+
+        if chapitre is not None:
+            chapitre = _validate_chapitre(chapitre)
+            images = [im for im in images if im.get("fichier_drive_id") != image_id]
+            images = _replace_slot_images(images, chapitre)
+            target["chapitre"] = chapitre
+            images.append(target)
+        if legende is not None:
+            target["legende"] = legende
+
+        projet["images"] = images
+        drive.save_projet_content(file_id, yaml.safe_dump(projet, allow_unicode=True, sort_keys=False))
+        return {"ok": True, "images": images}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/projets/{file_id}/images/{image_id}")
+async def api_delete_projet_image(file_id: str, image_id: str):
+    try:
+        projet = drive.get_projet(file_id)
+        images = [im for im in (projet.get("images") or []) if im.get("fichier_drive_id") != image_id]
+        projet["images"] = images
+        drive.save_projet_content(file_id, yaml.safe_dump(projet, allow_unicode=True, sort_keys=False))
+        drive.delete_projet_image(image_id)
+        return {"ok": True, "images": images}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# API — Portefolio de références (assemblage de N fiches projet en un PDF)
+# ---------------------------------------------------------------------------
+
+def _slugify(s: str) -> str:
+    s = re.sub(r"[^\w\s-]", "", (s or "").lower()).strip()
+    return re.sub(r"[-\s]+", "-", s) or "portefolio"
+
+
+@app.post("/api/portefolio/generate")
+async def generate_portefolio(
+    background_tasks: BackgroundTasks,
+    projets: Annotated[List[str], Form()],
+    titre: Annotated[str, Form()] = "",
+    sous_titre: Annotated[str, Form()] = "",
+    chapitres: Annotated[Optional[List[str]], Form()] = None,
+    inclure_equipe: Annotated[bool, Form()] = True,
+    inclure_competences: Annotated[bool, Form()] = True,
+    inclure_images: Annotated[bool, Form()] = True,
+):
+    """Génère un PDF « Références projets » à partir de N projets du registre.
+    1 projet → pas de couverture (cf. reference-projets.typ, B3 du plan) ;
+    ≥2 projets → couverture + index, avec ses deux titres personnalisables.
+
+    `titre` nomme le document : grand titre de couverture, et mention du pied
+    de page de chaque fiche. `sous_titre` nomme la sélection (l'appel d'offre,
+    le client…) et compose le nom du fichier. Les deux sont vides par défaut
+    et retombent alors sur les libellés d'origine — le formulaire, lui, les
+    envoie toujours renseignés."""
+    if not projets:
+        raise HTTPException(status_code=400, detail="Aucun projet sélectionné.")
+    try:
+        hydrated = reference_service.build_projets_for_render(projets)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors du chargement des projets : {e}")
+
+    options = {
+        "chapitres": chapitres or reference_renderer.CHAPITRE_ORDER,
+        "inclure_equipe": inclure_equipe,
+        "inclure_competences": inclure_competences,
+        "inclure_images": inclure_images,
+        "titre": titre or "Références projets",
+        "sous_titre": sous_titre or "Sélection de projets Camptocamp",
+    }
+
+    try:
+        projets_data = reference_renderer.build_projets_data(hydrated, options)
+        pdf_bytes = reference_renderer.render_pdf(projets_data, options)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors du rendu du portefolio : {e}")
+
+    if len(projets_data) > 1:
+        # Le nom du fichier suit le SOUS-titre : c'est lui qui désigne la
+        # sélection, quand le titre nomme le type de document.
+        filename = f"portefolio-{_slugify(options['sous_titre'])}.pdf"
+    else:
+        designation = projets_data[0].get("designation") or projets_data[0].get("client") or "projet"
+        filename = f"fiche-projet-{_slugify(designation)}.pdf"
+
+    actor = drive.get_current_user_email()
+    background_tasks.add_task(
+        gmail_notify.notify, actor, "a généré un portefolio de références",
+        f"{len(projets_data)} projet(s) : " + ", ".join(p.get("designation") or p.get("client") or "?" for p in projets_data))
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# ---------------------------------------------------------------------------
 # API — Ingestion fiche fin de projet (auto-ingestion depuis le formulaire CP)
 # ---------------------------------------------------------------------------
 
 @app.post("/api/fiche/parse")
-async def api_fiche_parse(fiche_yaml: Annotated[str, Form()]):
-    """Analyse la fiche fin de projet et retourne l'aperçu des modifications."""
+async def api_fiche_parse(
+    fiche_yaml: Annotated[str, Form()],
+    projet_file_id: Annotated[str, Form()] = "",
+):
+    """Analyse la fiche fin de projet et retourne l'aperçu des modifications.
+
+    projet_file_id : envoyé uniquement en édition d'un projet existant
+    (Administration > Projets) — désigne le fichier du registre à relire puis
+    réécrire, sans repasser par une recherche par nom.
+    """
     try:
-        collab_lookup = drive.get_collaborateurs_lookup()
+        # Seuls les membres soumis dans CE formulaire sont concernés — inutile
+        # de télécharger la fiche de tout le monde (get_collaborateurs_lookup).
+        # YAML invalide : slugs vide, parse_fiche_cp détecte l'erreur avant
+        # même d'utiliser collab_lookup.
+        slugs = []
+        try:
+            parsed = yaml.safe_load(fiche_yaml) or {}
+            slugs = [
+                (m.get("collaborateur") or "").strip()
+                for m in (parsed.get("membres") or []) if isinstance(m, dict)
+            ]
+        except yaml.YAMLError:
+            pass
+        collab_lookup = drive.get_collaborateurs_lookup_for(slugs)
         competences_yaml = drive.get_competences_raw()
-        return ingest.parse_fiche_cp(fiche_yaml, collab_lookup, competences_yaml)
+        return ingest.parse_fiche_cp(
+            fiche_yaml, collab_lookup, competences_yaml, projet_file_id=projet_file_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -511,22 +799,30 @@ async def api_fiche_apply(request: Request, background_tasks: BackgroundTasks):
     """Applique l'aperçu validé : écrit les fiches maîtres sur Drive."""
     try:
         preview = await request.json()
-        collab_lookup = drive.get_collaborateurs_lookup()
+        # Idem : uniquement les membres soumis + l'équipe/les retraits portés
+        # par le registre projet, jamais l'organisation entière.
+        registry = preview.get("registry") or {}
+        slugs = {m.get("slug") for m in (preview.get("membres") or []) if isinstance(m, dict) and m.get("slug")}
+        slugs |= {m.get("collaborateur") for m in (registry.get("equipe") or []) if isinstance(m, dict) and m.get("collaborateur")}
+        slugs |= {s for s in (registry.get("removed_membres") or []) if s}
+        collab_lookup = drive.get_collaborateurs_lookup_for(slugs)
         competences_yaml = drive.get_competences_raw()
-        results, _ = ingest.apply_fiche_cp(preview, collab_lookup, competences_yaml)
+        ecrire_cv = bool(preview.get("ecrire_cv", True))
+        results, _ = ingest.apply_fiche_cp(preview, collab_lookup, competences_yaml, ecrire_cv=ecrire_cv)
 
         actor = drive.get_current_user_email()
         projet = (preview.get("projet") or {})
         projet_nom = projet.get("designation") or projet.get("id") or "projet"
-        touched = [r.get("display") or r.get("slug") for r in results if r.get("ok")]
+        touched = [r.get("display") or r.get("slug") for r in results if r.get("ok") and r.get("slug") != "_cv_ignore_"]
         details = (
             f"Projet : {projet_nom}\n"
             f"Client : {projet.get('client_ref', '')}\n"
             f"Fiches mises à jour : {', '.join(touched) if touched else 'aucune'}"
         )
+        action_label = "a enregistré une fiche projet" if not ecrire_cv else "a créé une fiche de fin de projet (ingestion)"
         background_tasks.add_task(
             gmail_notify.notify, actor,
-            "a créé une fiche de fin de projet (ingestion)", details)
+            action_label, details)
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -603,6 +899,16 @@ async def api_corbeille_list():
                 "deleted_at": it.get("deleted_at", ""),
                 "deleted_by": it.get("deleted_by", ""),
             })
+        for p in drive.list_trashed_projets():
+            result.append({
+                "type": "projet",
+                "id": p["id"],
+                "title": p.get("designation") or p.get("projet_id") or "(sans nom)",
+                "subtitle": " / ".join(p.get("client_ref") or []) or p.get("periode", ""),
+                "data": p,
+                "deleted_at": p.get("deleted_at", ""),
+                "deleted_by": p.get("deleted_by", ""),
+            })
         result.sort(key=lambda x: x.get("deleted_at", ""), reverse=True)
         return result
     except Exception as e:
@@ -619,6 +925,9 @@ async def api_corbeille_restore(item_type: str, item_id: str, background_tasks: 
         elif item_type == "client":
             restored = drive.restore_client(item_id)
             detail = f"Client restauré depuis la corbeille : {restored.get('nom', '')}"
+        elif item_type == "projet":
+            drive.restore_projet(item_id)
+            detail = "Projet restauré depuis la corbeille"
         else:
             raise HTTPException(status_code=400, detail="Type inconnu : " + item_type)
         background_tasks.add_task(
@@ -664,6 +973,9 @@ async def api_corbeille_purge(item_type: str, item_id: str, background_tasks: Ba
         elif item_type == "client":
             drive.purge_corbeille_item(item_id)
             detail = "Client supprimé définitivement (corbeille)"
+        elif item_type == "projet":
+            drive.delete_projet_forever(item_id)
+            detail = "Projet supprimé définitivement (corbeille)"
         else:
             raise HTTPException(status_code=400, detail="Type inconnu : " + item_type)
         background_tasks.add_task(
